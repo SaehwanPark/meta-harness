@@ -1,225 +1,86 @@
 <p align="center">
-  <img src="harness_banner.png" alt="Harness Banner" width="600">
+  <img src="meta_harness_banner.png" alt="Harness Banner" width="600">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-1.0.1-brightgreen.svg" alt="Version">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License"></a>
-  <img src="https://img.shields.io/badge/Claude_Code-Plugin-purple.svg" alt="Claude Code Plugin">
-  <img src="https://img.shields.io/badge/Patterns-6_Architectures-orange.svg" alt="6 Architecture Patterns">
-  <img src="https://img.shields.io/badge/Mode-Agent_Teams-green.svg" alt="Agent Teams">
-  <a href="https://github.com/revfactory/harness/stargazers"><img src="https://img.shields.io/github/stars/revfactory/harness?style=social" alt="GitHub Stars"></a>
+  <img src="https://img.shields.io/badge/Codex-Native-black.svg" alt="Codex Native">
 </p>
 
-# Harness
+# Meta Harness
 
-**Agent Team & Skill Architect** — A Claude Code Plugin
+Meta Harness is a Codex-native meta-skill for designing domain-specific workflows, reusable specialist skills, and deterministic handoff artifacts.
 
-[한국어](README_KO.md)
+Adapted from [the original Harness project](https://github.com/revfactory/harness) and distributed here under the same [Apache 2.0](LICENSE) license.
 
-A meta-skill that designs domain-specific agent teams, defines specialized agents, and generates the skills they use.
+## What This Adds
 
-## Overview
+Compared to the original Claude Code-based Harness, this project adds:
 
-Harness leverages Claude Code's agent team system to decompose complex tasks into coordinated teams of specialized agents. Say "build a harness for this project" and it automatically generates agent definitions (`.claude/agents/`) and skills (`.claude/skills/`) tailored to your domain.
+- a Codex-native repository layout built around `AGENTS.md`, `.agents/skills/`, and `docs/harness/`
+- runtime-neutral artifact contracts based on skills, team specs, and deterministic `_workspace/` handoffs
+- a tighter maintenance loop through repo-local validation and simpler, platform-independent conventions
 
-## Key Features
+## What It Includes
 
-- **Agent Team Design** — 6 architectural patterns: Pipeline, Fan-out/Fan-in, Expert Pool, Producer-Reviewer, Supervisor, and Hierarchical Delegation
-- **Skill Generation** — Auto-generates skills with Progressive Disclosure for efficient context management
-- **Orchestration** — Inter-agent data passing, error handling, and team coordination protocols
-- **Validation** — Trigger verification, dry-run testing, and with-skill vs without-skill comparison tests
+- a 6-phase workflow for analysis, architecture, generation, integration, and validation
+- 6 architecture patterns: Pipeline, Fan-out/Fan-in, Expert Pool, Producer-Reviewer, Supervisor, and Hierarchical Delegation
+- repo-local skills under `.agents/skills/`
+- durable output specs under `docs/harness/`
+- deterministic `_workspace/` handoff conventions
+- a small validation script for repository consistency
 
-## Workflow
+## Repository Layout
 
-```
-Phase 1: Domain Analysis
-    ↓
-Phase 2: Team Architecture Design (Agent Teams vs Subagents)
-    ↓
-Phase 3: Agent Definition Generation (.claude/agents/)
-    ↓
-Phase 4: Skill Generation (.claude/skills/)
-    ↓
-Phase 5: Integration & Orchestration
-    ↓
-Phase 6: Validation & Testing
-```
-
-## Installation
-
-### Via Marketplace
-
-#### Add the marketplace
-```shell
-/plugin marketplace add revfactory/harness
-```
-
-#### Install the plugin
-```shell
-/plugin install harness@harness
-```
-
-### Direct Installation as Global Skill
-
-```shell
-# Copy the skills directory to ~/.claude/skills/harness/
-cp -r skills/harness ~/.claude/skills/harness
-```
-
-## Plugin Structure
-
-```
+```text
 harness/
-├── .claude-plugin/
-│   └── plugin.json                 # Plugin manifest
-├── skills/
-│   └── harness/
-│       ├── SKILL.md                # Main skill definition (6-Phase workflow)
-│       └── references/
-│           ├── agent-design-patterns.md   # 6 architectural patterns
-│           ├── orchestrator-template.md   # Team/subagent orchestrator templates
-│           ├── team-examples.md           # 5 real-world team configurations
-│           ├── skill-writing-guide.md     # Skill authoring guide
-│           ├── skill-testing-guide.md     # Testing & evaluation methodology
-│           └── qa-agent-guide.md          # QA agent integration guide
-└── README.md
+├── AGENTS.md
+├── .agents/skills/harness/
+│   ├── SKILL.md
+│   └── references/
+├── docs/harness/README.md
+├── scripts/validate_codex_port.py
+└── LICENSE
 ```
 
-## Usage
+## Use
 
-Trigger in Claude Code with prompts like:
+1. Read [AGENTS.md](AGENTS.md).
+2. Read the main skill at [.agents/skills/harness/SKILL.md](.agents/skills/harness/SKILL.md).
+3. Generate the smallest durable artifact set that fits the domain:
+   - `.agents/skills/<domain>-orchestrator/SKILL.md`
+   - `.agents/skills/<specialist>/SKILL.md`
+   - `docs/harness/<domain>/team-spec.md`
+   - `_workspace/{phase}_{role}_{artifact}.md`
 
-```
-Build a harness for this project
-Design an agent team for this domain
-Set up a harness
-```
+Good requests for Harness:
 
-### Execution Modes
-
-| Mode | Description | Recommended For |
-|------|-------------|-----------------|
-| **Agent Teams** (default) | TeamCreate + SendMessage + TaskCreate | 2+ agents requiring collaboration |
-| **Subagents** | Direct Agent tool invocation | One-off tasks, no inter-agent communication needed |
-
-<p align="center">
-  <img src="harness_team.png" alt="Harness Agent Team" width="500">
-</p>
-
-### Architecture Patterns
-
-| Pattern | Description |
-|---------|-------------|
-| Pipeline | Sequential dependent tasks |
-| Fan-out/Fan-in | Parallel independent tasks |
-| Expert Pool | Context-dependent selective invocation |
-| Producer-Reviewer | Generation followed by quality review |
-| Supervisor | Central agent with dynamic task distribution |
-| Hierarchical Delegation | Top-down recursive delegation |
-
-## Output
-
-Files generated by Harness:
-
-```
-your-project/
-├── .claude/
-│   ├── agents/          # Agent definition files
-│   │   ├── analyst.md
-│   │   ├── builder.md
-│   │   └── qa.md
-│   └── skills/          # Skill files
-│       ├── analyze/
-│       │   └── skill.md
-│       └── build/
-│           ├── skill.md
-│           └── references/
+```text
+Build a reusable research harness for this repository.
+Design a review workflow with explicit QA handoffs.
+Define specialist skills and a team spec for this domain.
 ```
 
-## Use Cases — Try These Prompts
+## Workflow and Patterns
 
-Copy any prompt below into Claude Code after installing Harness:
+The main skill preserves the 6-phase workflow:
 
-**Deep Research**
-```
-Build a harness for deep research. I need an agent team that can investigate
-any topic from multiple angles — web search, academic sources, community
-sentiment — then cross-validate findings and produce a comprehensive report.
-```
+1. Domain Analysis
+2. Team Architecture Design
+3. Role and Artifact Definition Generation
+4. Skill Generation
+5. Integration and Orchestration
+6. Validation and Testing
 
-**Website Development**
-```
-Build a harness for full-stack website development. The team should handle
-design, frontend (React/Next.js), backend (API), and QA testing in a
-coordinated pipeline from wireframe to deployment.
-```
+Pattern guidance lives in [.agents/skills/harness/references/agent-design-patterns.md](.agents/skills/harness/references/agent-design-patterns.md). Output-spec conventions live in [docs/harness/README.md](docs/harness/README.md).
 
-**Webtoon / Comic Production**
-```
-Build a harness for webtoon episode production. I need agents for story
-writing, character design prompts, panel layout planning, and dialogue
-editing. They should review each other's work for style consistency.
+## Validation
+
+```shell
+python3 scripts/validate_codex_port.py
 ```
 
-**YouTube Content Planning**
-```
-Build a harness for YouTube content creation. The team should research
-trending topics, write scripts, optimize titles/tags for SEO, and plan
-thumbnail concepts — all coordinated by a supervisor agent.
-```
-
-**Code Review & Refactoring**
-```
-Build a harness for comprehensive code review. I want parallel agents
-checking architecture, security vulnerabilities, performance bottlenecks,
-and code style — then merging all findings into a single report.
-```
-
-**Technical Documentation**
-```
-Build a harness that generates API documentation from this codebase.
-Agents should analyze endpoints, write descriptions, generate usage
-examples, and review for completeness.
-```
-
-**Data Pipeline Design**
-```
-Build a harness for designing data pipelines. I need agents for schema
-design, ETL logic, data validation rules, and monitoring setup that
-delegate sub-tasks hierarchically.
-```
-
-**Marketing Campaign**
-```
-Build a harness for marketing campaign creation. The team should research
-the target market, write ad copy, design visual concepts, and set up
-A/B test plans with iterative quality review.
-```
-
-## Built with Harness
-
-### Harness 100
-
-**[revfactory/harness-100](https://github.com/revfactory/harness-100)** — 100 production-ready agent team harnesses across 10 domains, available in both English and Korean (200 packages total). Each harness ships with 4-5 specialist agents, an orchestrator skill, and domain-specific skills — all generated by this plugin. 1,808 markdown files covering content creation, software development, data/AI, business strategy, education, legal, health, and more.
-
-### Research: A/B Testing Harness Effectiveness
-
-**[revfactory/claude-code-harness](https://github.com/revfactory/claude-code-harness)** — A controlled experiment across 15 software engineering tasks measuring the impact of structured pre-configuration on LLM code agent output quality.
-
-| Metric | Without Harness | With Harness | Improvement |
-|--------|:-:|:-:|:-:|
-| Average Quality Score | 49.5 | 79.3 | **+60%** |
-| Win Rate | — | — | **100%** (15/15) |
-| Output Variance | — | — | **-32%** |
-
-Key finding: effectiveness scales with task complexity — the harder the task, the greater the improvement (+23.8 Basic, +29.6 Advanced, +36.2 Expert).
-
-> Full paper: *Hwang, M. (2026). Harness: Structured Pre-Configuration for Enhancing LLM Code Agent Output Quality.*
-
-## Requirements
-
-- [Agent Teams enabled](https://code.claude.com/docs/en/agent-teams): `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`
+This checks required files, README links, main-skill headings, pattern coverage, and the absence of removed runtime-specific paths in the canonical docs.
 
 ## License
 
