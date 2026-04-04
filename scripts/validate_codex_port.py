@@ -19,6 +19,8 @@ REQUIRED_FILES = [
     ROOT / ".agents/skills/harness/references/skill-testing-guide.md",
     ROOT / ".agents/skills/harness/references/qa-agent-guide.md",
     ROOT / "docs/harness/README.md",
+    ROOT / "scripts/install_harness.py",
+    ROOT / "scripts/test_install_harness.py",
     ROOT / "scripts/validate_codex_port.py",
 ]
 
