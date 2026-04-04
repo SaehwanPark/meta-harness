@@ -1,13 +1,18 @@
+---
+name: harness
+description: Design portable, repo-local agent harnesses with reusable skills, team specs, and deterministic handoff artifacts.
+---
+
 # Harness
 
-Harness is a meta-skill for designing domain-specific Codex workflows. Use it to analyze a project, choose a collaboration pattern, generate reusable specialist skills, and define how those skills hand work off through markdown specs and deterministic files.
+Harness is a meta-skill for designing portable, repo-local agent workflows. Use it to analyze a project, choose a collaboration pattern, generate reusable specialist skills, and define how those skills hand work off through markdown specs and deterministic files.
 
 ## When to Use
 
 Use Harness when you need to:
 
 - design a new domain-specific skill stack for a repository
-- adapt an existing workflow into repo-local Codex skills
+- adapt an existing workflow into repo-local shared skills
 - define reusable specialist roles, orchestration rules, and validation steps
 - standardize artifact naming, handoff files, and review loops for complex work
 
@@ -36,10 +41,11 @@ Harness generates only the artifacts needed to make the workflow reusable:
 - `docs/harness/{domain}/team-spec.md` for role topology, handoffs, and failure policy
 - `docs/harness/{domain}/roles/{role}.md` only when a role needs a durable brief but not a full skill
 - `_workspace/{phase}_{role}_{artifact}.md` for intermediate artifacts and review evidence
+- `_workspace/experiments/{run}/results.tsv` when the harness includes an autonomous experiment loop
 
 Default to specialist skills plus a markdown team spec. Add extra role briefs only when the role is stable enough to justify its own file.
 
-## Codex-Native Defaults
+## Portable Defaults
 
 - Prefer repo-local skills first.
 - Use a single main agent by default.
@@ -56,8 +62,9 @@ Default to specialist skills plus a markdown team spec. Add extra role briefs on
 1. Inspect the repository, request, and existing docs.
 2. Identify the domain, core task types, expected outputs, and quality bar.
 3. Note reusable existing materials and current runtime assumptions.
-4. Detect whether the workflow is best expressed as reusable skills, role briefs, or a single orchestrator.
-5. Capture the result in a concise domain summary before generating new artifacts.
+4. Detect whether the workflow is best expressed as reusable skills, role briefs, a single orchestrator, or an autonomous experiment loop on user-controlled compute.
+5. If the request is an autonomous experiment workflow, define the mutable surface, immutable evaluation surface, baseline requirement, and metric before generating artifacts.
+6. Capture the result in a concise domain summary before generating new artifacts.
 
 Output:
 
@@ -70,7 +77,8 @@ Output:
 1. Choose the smallest architecture that can cover the workflow.
 2. Decide whether the work stays single-agent, needs a sequential orchestrator, or benefits from bounded parallel workers.
 3. Select one of the six patterns from `references/agent-design-patterns.md`.
-4. Define how artifacts move between phases through `_workspace/` files and final output paths.
+4. For autonomous experiment loops, choose the matching workflow profile from `references/autonomous-experimentation.md` and decide whether it composes with Pipeline, Supervisor, or Producer-Reviewer.
+5. Define how artifacts move between phases through `_workspace/` files and final output paths.
 
 Output:
 
@@ -113,7 +121,8 @@ Output:
 1. Define the reusable end-to-end workflow in an orchestrator skill or team spec.
 2. Specify phase order, handoff files, ownership, and fallback rules.
 3. Reserve worker delegation for clearly parallel slices such as broad research, multi-surface review, or independent generation branches.
-4. Preserve intermediate artifacts in `_workspace/` for debugging and auditability.
+4. For autonomous experiment loops, preserve the run ledger, baseline artifact, and keep/discard policy under `_workspace/experiments/{run}/`.
+5. Preserve intermediate artifacts in `_workspace/` for debugging and auditability.
 
 Output:
 
@@ -125,8 +134,9 @@ Output:
 
 1. Verify structure, paths, and internal references.
 2. Run scenario tests for normal flow and at least one failure flow.
-3. Compare a specialized-skill run against a no-specialized-skill or manual baseline when useful.
-4. Refine instructions when tests show ambiguity, overfitting, or unnecessary weight.
+3. For autonomous experiment loops, validate the baseline run, immutable evaluation surface, results ledger, and crash/timeout reporting path.
+4. Compare a specialized-skill run against a no-specialized-skill or manual baseline when useful.
+5. Refine instructions when tests show ambiguity, overfitting, or unnecessary weight.
 
 Output:
 
@@ -138,7 +148,7 @@ Output:
 
 Use the smallest pattern that preserves quality and clarity.
 
-| Pattern | Best for | Default Codex-native style |
+| Pattern | Best for | Default portable style |
 | --- | --- | --- |
 | Pipeline | sequential dependent work | sequential orchestrator skill plus `_workspace/` handoffs |
 | Fan-out/Fan-in | parallel independent work with later synthesis | orchestrator skill plus bounded parallel workers and a final synthesis step |
@@ -158,6 +168,18 @@ Short summaries:
 
 Read `references/agent-design-patterns.md` before finalizing the pattern.
 
+## Workflow Profiles
+
+Harness also supports reusable workflow profiles that compose with the six architecture patterns.
+
+### Autonomous Experimentation
+
+- This is not a seventh architecture pattern.
+- Use it when the request explicitly calls for iterative experiments on user-controlled compute with a narrow mutable surface and a fixed evaluation surface.
+- Pair it with Pipeline for a simple baseline -> mutate -> evaluate -> decide loop.
+- Pair it with Supervisor when the experiment backlog changes during execution.
+- Read `references/autonomous-experimentation.md` before finalizing the loop contract.
+
 ## Validation Expectations
 
 Every generated harness should meet these checks:
@@ -173,6 +195,7 @@ Every generated harness should meet these checks:
 ## Reference Pointers
 
 - `references/agent-design-patterns.md` for pattern choice and coordination styles
+- `references/autonomous-experimentation.md` for iterative experiment loops on user-controlled compute
 - `references/orchestrator-template.md` for a reusable orchestrator-spec template
 - `references/team-examples.md` for example artifact trees and handoff patterns
 - `references/skill-writing-guide.md` for authoring specialist skills

@@ -1,6 +1,6 @@
 # Team Examples
 
-These examples show Codex-native artifact trees and handoff patterns. They are intentionally compact: the goal is to demonstrate how a harness should be laid out in a repository, not to prescribe one exact runtime.
+These examples show portable artifact trees and handoff patterns. They are intentionally compact: the goal is to demonstrate how a harness should be laid out in a repository, not to prescribe one exact runtime.
 
 ## Example 1: Deep Research Team
 
@@ -178,3 +178,47 @@ Use these defaults when translating a design into files:
 - reusable coordination becomes an orchestrator skill or a team spec
 - temporary but inspectable artifacts live in `_workspace/`
 - durable role rules that are too narrow for a skill live under `docs/harness/{domain}/roles/`
+
+## Example 5: Autonomous Experiment Loop
+
+### Pattern
+
+- Pipeline
+- Supervisor only when the experiment backlog changes during the run
+
+### Good Fit
+
+- the user explicitly wants autonomous iterative experiments on local or otherwise user-controlled compute
+- one narrow mutable surface is evaluated against a stable, read-only benchmark or rubric
+
+### Generated Artifacts
+
+```text
+AGENTS.md
+.agents/skills/experiment-orchestrator/SKILL.md
+.agents/skills/candidate-editor/SKILL.md
+.agents/skills/evaluator/SKILL.md
+docs/harness/autonomous-experiment/team-spec.md
+_workspace/
+├── 00_input/request-summary.md
+└── experiments/
+    └── {run}/
+        ├── baseline.md
+        ├── results.tsv
+        ├── candidate-01.md
+        ├── eval-01.md
+        └── final-summary.md
+```
+
+### Handoff Pattern
+
+- the orchestrator defines the mutable surface, immutable evaluation surface, metric, and timeout policy before the first run
+- the baseline is recorded before any candidate edit is attempted
+- each candidate writes one proposal artifact and one evaluation artifact
+- the ledger in `results.tsv` records `keep`, `discard`, `crash`, and `timeout` outcomes
+
+### Notes
+
+- keep the mutable surface narrow enough that a discard can cleanly revert to the previous best state
+- do not let the evaluation harness drift during the run
+- keep the loop on user-controlled compute unless the repository defines another trusted execution surface

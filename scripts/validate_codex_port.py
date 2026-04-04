@@ -13,12 +13,20 @@ REQUIRED_FILES = [
     ROOT / "AGENTS.md",
     ROOT / ".agents/skills/harness/SKILL.md",
     ROOT / ".agents/skills/harness/references/agent-design-patterns.md",
+    ROOT / ".agents/skills/harness/references/autonomous-experimentation.md",
     ROOT / ".agents/skills/harness/references/orchestrator-template.md",
     ROOT / ".agents/skills/harness/references/team-examples.md",
     ROOT / ".agents/skills/harness/references/skill-writing-guide.md",
     ROOT / ".agents/skills/harness/references/skill-testing-guide.md",
     ROOT / ".agents/skills/harness/references/qa-agent-guide.md",
+    ROOT / "docs/compatibility/README.md",
+    ROOT / "docs/compatibility/forgecode.md",
+    ROOT / "docs/compatibility/droid.md",
+    ROOT / "docs/compatibility/openhands.md",
+    ROOT / "docs/compatibility/aider.md",
     ROOT / "docs/harness/README.md",
+    ROOT / "scripts/install_harness.py",
+    ROOT / "scripts/test_install_harness.py",
     ROOT / "scripts/validate_codex_port.py",
 ]
 
@@ -26,7 +34,7 @@ MAIN_SKILL_HEADINGS = [
     "## when to use",
     "## required inputs",
     "## generated artifacts",
-    "## codex-native defaults",
+    "## portable defaults",
     "## 6-phase workflow",
     "## architecture selection",
     "## validation expectations",
@@ -60,6 +68,36 @@ def fail(message: str, failures: list[str]) -> None:
 
 def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
+
+
+def parse_frontmatter(path: Path, text: str, failures: list[str]) -> tuple[dict[str, str], str]:
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        fail(f"Main skill is missing YAML frontmatter: {path.relative_to(ROOT)}", failures)
+        return {}, text
+
+    closing = None
+    for index, line in enumerate(lines[1:], start=1):
+        if line.strip() == "---":
+            closing = index
+            break
+
+    if closing is None:
+        fail(f"Main skill frontmatter is not closed: {path.relative_to(ROOT)}", failures)
+        return {}, text
+
+    data: dict[str, str] = {}
+    for line in lines[1:closing]:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if ":" not in stripped:
+            fail(f"Main skill frontmatter contains an invalid line: {line}", failures)
+            continue
+        key, value = stripped.split(":", 1)
+        data[key.strip()] = value.strip().strip('"').strip("'")
+
+    return data, "\n".join(lines[closing + 1 :])
 
 
 def check_required_files(failures: list[str]) -> None:
@@ -105,7 +143,12 @@ def check_readme_links(failures: list[str]) -> None:
 def check_main_skill(failures: list[str]) -> None:
     path = ROOT / ".agents/skills/harness/SKILL.md"
     text = read_text(path)
-    lowered = text.casefold()
+    frontmatter, body = parse_frontmatter(path, text, failures)
+    for required_field in ("name", "description"):
+        if not frontmatter.get(required_field):
+            fail(f"Main skill frontmatter is missing '{required_field}'", failures)
+
+    lowered = body.casefold()
 
     for heading in MAIN_SKILL_HEADINGS:
         if heading not in lowered:
@@ -132,7 +175,7 @@ def check_pattern_reference(failures: list[str]) -> None:
         "### when it fits",
         "### when it does not fit",
         "### minimum generated artifacts",
-        "### recommended codex-native implementation style",
+        "### recommended portable implementation style",
     ]
     for subsection in required_subsections:
         count = text.count(subsection)
@@ -141,6 +184,23 @@ def check_pattern_reference(failures: list[str]) -> None:
                 f"Pattern reference should contain at least 6 occurrences of '{subsection}' but found {count}",
                 failures,
             )
+
+
+def check_autonomous_reference(failures: list[str]) -> None:
+    path = ROOT / ".agents/skills/harness/references/autonomous-experimentation.md"
+    text = read_text(path).casefold()
+    required_tokens = [
+        "mutable surface",
+        "immutable evaluation surface",
+        "baseline",
+        "results.tsv",
+        "keep",
+        "discard",
+        "user-controlled compute",
+    ]
+    for token in required_tokens:
+        if token not in text:
+            fail(f"Autonomous experimentation reference is missing: {token}", failures)
 
 
 def check_for_banned_tokens(failures: list[str]) -> None:
@@ -168,6 +228,7 @@ def main() -> int:
     check_readme_links(failures)
     check_main_skill(failures)
     check_pattern_reference(failures)
+    check_autonomous_reference(failures)
     check_for_banned_tokens(failures)
 
     if failures:

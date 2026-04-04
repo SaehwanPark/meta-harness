@@ -2,7 +2,7 @@
 
 Harness supports six reusable architecture patterns. Choose the smallest pattern that preserves quality, keeps handoffs understandable, and produces durable artifacts that another engineer or agent can reuse later.
 
-## Codex-Native Coordination Styles
+## Portable Coordination Styles
 
 Before choosing a pattern, choose the coordination style that fits the work:
 
@@ -44,7 +44,7 @@ Sequential dependent work where each phase consumes the prior phase's artifact.
 - `_workspace/01_*`, `_workspace/02_*`, and later phase artifacts with deterministic names
 - specialist skills only for phases that are reusable outside the current flow
 
-### Recommended Codex-Native Implementation Style
+### Recommended Portable Implementation Style
 
 - use a sequential orchestrator skill
 - define a file handoff for every phase boundary
@@ -73,7 +73,7 @@ Parallel independent work followed by a synthesis step.
 - one `_workspace/{phase}_{role}_{artifact}.md` per parallel branch
 - one synthesis artifact or final report that cites the branch outputs
 
-### Recommended Codex-Native Implementation Style
+### Recommended Portable Implementation Style
 
 - use bounded parallel workers only for clearly independent branches
 - keep every branch on the same input snapshot
@@ -102,7 +102,7 @@ Selective routing to one or more relevant specialists from a larger set.
 - reusable specialist skills under `.agents/skills/`
 - optional decision table or request-to-skill matrix in `references/`
 
-### Recommended Codex-Native Implementation Style
+### Recommended Portable Implementation Style
 
 - keep routing rules explicit and deterministic
 - document which requests trigger which specialists
@@ -132,7 +132,7 @@ A generation phase followed by explicit quality review and bounded revision.
 - review artifact in `_workspace/`
 - bounded revision policy in the team spec
 
-### Recommended Codex-Native Implementation Style
+### Recommended Portable Implementation Style
 
 - keep the review output structured: pass, fix, or redo
 - cap revision loops at a small number of retries
@@ -162,7 +162,7 @@ A coordinator manages a changing backlog and reallocates work as conditions chan
 - reassignment and escalation policy
 - final integration or audit report
 
-### Recommended Codex-Native Implementation Style
+### Recommended Portable Implementation Style
 
 - keep the supervisor logic in a top-level orchestrator or team spec
 - define the task queue format in markdown or JSON
@@ -191,7 +191,7 @@ A top-level goal breaks into sub-goals that may each need their own coordination
 - subordinate coordination notes or role briefs
 - clear parent-to-child and child-to-parent handoff artifacts
 
-### Recommended Codex-Native Implementation Style
+### Recommended Portable Implementation Style
 
 - keep the hierarchy shallow
 - let the top level own global goals and acceptance criteria
@@ -209,6 +209,37 @@ Real harnesses often blend patterns:
 
 When combining patterns, document the outermost pattern first, then note the local variation inside the relevant phase.
 
+## Workflow Profile: Autonomous Experimentation
+
+Autonomous experimentation is not a seventh architecture pattern. It is a workflow profile for requests that iterate on a narrow mutable surface against an immutable evaluation surface and declared metric.
+
+Use it when:
+
+- the user explicitly wants an iterative experiment loop
+- the evaluation harness can stay read-only for the run
+- every candidate can be logged and either kept or discarded
+
+Recommended pairings:
+
+- Pipeline for baseline -> mutate -> evaluate -> decide loops
+- Supervisor for changing experiment backlogs or branching candidate queues
+- Producer-Reviewer when a reviewer must explicitly approve advancing the best candidate
+
+Minimum extra artifacts:
+
+- `_workspace/experiments/{run}/request-summary.md`
+- `_workspace/experiments/{run}/baseline.md`
+- `_workspace/experiments/{run}/results.tsv`
+- `_workspace/experiments/{run}/final-summary.md`
+
+Core rules:
+
+- declare the mutable surface before the first candidate
+- keep the evaluation surface read-only for the run
+- establish a measured baseline before mutation
+- record every candidate outcome, including crashes and timeouts
+- run on user-controlled compute unless the repository defines another trusted execution surface
+
 ## Artifact Shape Rules
 
 Use these defaults when converting a pattern into files:
@@ -218,3 +249,4 @@ Use these defaults when converting a pattern into files:
 - reusable specialist behavior becomes `.agents/skills/{specialist}/SKILL.md`
 - bulky domain detail moves into `.agents/skills/{specialist}/references/`
 - intermediate work products live in `_workspace/` and keep deterministic names
+- autonomous experiment ledgers live under `_workspace/experiments/{run}/`
