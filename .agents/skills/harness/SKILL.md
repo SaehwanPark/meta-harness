@@ -1,13 +1,18 @@
+---
+name: harness
+description: Design portable, repo-local agent harnesses with reusable skills, team specs, and deterministic handoff artifacts.
+---
+
 # Harness
 
-Harness is a meta-skill for designing domain-specific Codex workflows. Use it to analyze a project, choose a collaboration pattern, generate reusable specialist skills, and define how those skills hand work off through markdown specs and deterministic files.
+Harness is a meta-skill for designing portable, repo-local agent workflows. Use it to analyze a project, choose a collaboration pattern, generate reusable specialist skills, and define how those skills hand work off through markdown specs and deterministic files.
 
 ## When to Use
 
 Use Harness when you need to:
 
 - design a new domain-specific skill stack for a repository
-- adapt an existing workflow into repo-local Codex skills
+- adapt an existing workflow into repo-local shared skills
 - define reusable specialist roles, orchestration rules, and validation steps
 - standardize artifact naming, handoff files, and review loops for complex work
 
@@ -39,7 +44,7 @@ Harness generates only the artifacts needed to make the workflow reusable:
 
 Default to specialist skills plus a markdown team spec. Add extra role briefs only when the role is stable enough to justify its own file.
 
-## Codex-Native Defaults
+## Portable Defaults
 
 - Prefer repo-local skills first.
 - Use a single main agent by default.
@@ -138,7 +143,7 @@ Output:
 
 Use the smallest pattern that preserves quality and clarity.
 
-| Pattern | Best for | Default Codex-native style |
+| Pattern | Best for | Default portable style |
 | --- | --- | --- |
 | Pipeline | sequential dependent work | sequential orchestrator skill plus `_workspace/` handoffs |
 | Fan-out/Fan-in | parallel independent work with later synthesis | orchestrator skill plus bounded parallel workers and a final synthesis step |

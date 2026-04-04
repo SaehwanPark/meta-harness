@@ -1,6 +1,6 @@
 # Repository Agents Guide
 
-The Codex-native canonical source for Harness lives in `.agents/skills/harness/`.
+The canonical source for Harness in this repository lives in `.agents/skills/harness/`.
 
 When changing canonical paths, workflow guidance, or generated artifact contracts, update `README.md` and `docs/harness/README.md` in the same change.
 

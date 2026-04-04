@@ -151,7 +151,7 @@ Use this order:
 
 ## 7. Selection-Boundary Validation
 
-Codex-native skills should still be tested for boundary clarity.
+Portable skills should still be tested for boundary clarity.
 
 Write two small query sets:
 

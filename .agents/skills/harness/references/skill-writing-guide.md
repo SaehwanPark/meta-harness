@@ -1,6 +1,6 @@
 # Skill Writing Guide
 
-This guide explains how to write Codex-native specialist skills that are easy to select, easy to maintain, and cheap to load.
+This guide explains how to write portable specialist skills that are easy to select, easy to maintain, and cheap to load.
 
 ## 1. Start with Selection Clarity
 
