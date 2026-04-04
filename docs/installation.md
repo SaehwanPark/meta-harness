@@ -38,4 +38,5 @@ python3 scripts/install_harness.py --scope user --layout standard
 ## Notes
 
 - The canonical source remains in `.agents/skills/harness/` in this repository.
+- See [Compatibility Guides](compatibility/README.md) for agent-specific path and config details.
 - Use `--mode symlink` if you want the installed skill to point back to this repository during local iteration.

@@ -34,6 +34,7 @@ Compared to the original Claude Code-based Harness, this project adds:
 ## Docs
 
 - [Installation](docs/installation.md)
+- [Compatibility Guides](docs/compatibility/README.md)
 - [Sample Prompts](docs/sample-prompts.md)
 - [Harness Output Specs](docs/harness/README.md)
 
@@ -67,6 +68,7 @@ python3 scripts/install_harness.py --scope user --layout standard
 ```
 
 Use `--layout forgecode`, `--layout droid`, `--layout openhands`, or `--layout aider` when you want a client-specific mirror or follow-up guidance.
+See [Compatibility Guides](docs/compatibility/README.md) for path mappings and agent-specific follow-up.
 
 ## Use
 
