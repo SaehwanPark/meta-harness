@@ -41,16 +41,19 @@ Compared to the original Claude Code-based Harness, this project adds:
 - [Sample Prompts](docs/sample-prompts.md)
 - [Changelog](CHANGELOG.md)
 - [Harness Output Specs](docs/harness/README.md)
+- [Starter Research Example](docs/harness/starter-research/README.md)
+- [Orchestrator Template](.agents/skills/harness/references/orchestrator-template.md)
 
 ## Repository Layout
 
 ```text
-harness/
+meta-harness/
 ├── AGENTS.md
 ├── .agents/skills/harness/
 │   ├── SKILL.md
 │   └── references/
 ├── docs/harness/README.md
+├── docs/harness/starter-research/
 ├── scripts/install_harness.py
 ├── scripts/test_install_harness.py
 ├── scripts/validate_codex_port.py
@@ -105,6 +108,7 @@ The main skill preserves the 6-phase workflow:
 6. Validation and Testing
 
 Pattern guidance lives in [.agents/skills/harness/references/agent-design-patterns.md](.agents/skills/harness/references/agent-design-patterns.md). Output-spec conventions live in [docs/harness/README.md](docs/harness/README.md).
+Start from the [orchestrator template](.agents/skills/harness/references/orchestrator-template.md) when you need a durable workflow spec, or adapt the [starter research example](docs/harness/starter-research/README.md) when you want a concrete minimal package.
 
 ## Validation
 

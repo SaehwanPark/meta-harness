@@ -4,6 +4,8 @@ Generated harness-specific team specs and role briefs belong under `docs/harness
 
 Repo-level version history for the meta-harness project lives in [CHANGELOG.md](../../CHANGELOG.md).
 
+Start from the [orchestrator template](../../.agents/skills/harness/references/orchestrator-template.md) when you need a durable phase-and-handoff spec. See the [starter research example](starter-research/README.md) for a minimal concrete package that includes a team spec, one role brief, and `_workspace/` artifact mapping.
+
 Typical generated files include:
 
 - `docs/harness/{domain}/team-spec.md`
@@ -16,4 +18,4 @@ Autonomous experiment workflows may additionally preserve deterministic run logs
 - `_workspace/experiments/{run}/baseline.md`
 - `_workspace/experiments/{run}/final-summary.md`
 
-This repository keeps the directory as the canonical destination without shipping a full example domain package.
+This repository keeps `docs/harness/` as the canonical destination and now includes one docs-first starter example for reference without shipping example skills in the canonical source tree.
