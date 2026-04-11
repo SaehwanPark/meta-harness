@@ -5,7 +5,7 @@ description: Design portable, repo-local agent harnesses with reusable skills, t
 
 # Harness
 
-Harness is a meta-skill for designing portable, repo-local agent workflows. Use it to analyze a project, choose a collaboration pattern, generate reusable specialist skills, and define how those skills hand work off through markdown specs and deterministic files.
+Harness is a meta-skill for designing portable, repo-local agent workflows. Use it to analyze a project, decide which guidance belongs in `AGENTS.md`, choose a collaboration pattern, generate reusable specialist skills, and define how those skills hand work off through markdown specs and deterministic files.
 
 ## When to Use
 
@@ -34,7 +34,7 @@ If information is missing, inspect the repository first and make the narrowest r
 
 Harness generates only the artifacts needed to make the workflow reusable:
 
-- `AGENTS.md` for repo-wide coordination rules
+- `AGENTS.md` for repo-wide coordination rules only when the target repository needs durable always-loaded guidance
 - `.agents/skills/{domain}-orchestrator/SKILL.md` for reusable top-level orchestration
 - `.agents/skills/{specialist}/SKILL.md` for reusable specialist behavior
 - `.agents/skills/{specialist}/references/*` for progressive-disclosure details
@@ -45,6 +45,22 @@ Harness generates only the artifacts needed to make the workflow reusable:
 
 Default to specialist skills plus a markdown team spec. Add extra role briefs only when the role is stable enough to justify its own file.
 
+## AGENTS.md Guidance
+
+`AGENTS.md` is the highest-leverage repo guide because it is loaded into every session. Only create or revise it when the target repository needs durable repo-wide guidance.
+
+- Keep it short, human-written, and limited to repo-wide `WHAT / WHY / HOW`.
+- Include project purpose, canonical paths or boundaries, and exact build/test/verify commands when they are non-obvious.
+- Use pointers to deeper repo-local docs instead of copying long directory listings or task-specific playbooks into the root file.
+- Do not auto-generate large codebase overviews, style guides already enforced by tooling, or one-off instructions.
+- Read `references/agents-md-guide.md` before writing or revising a repo `AGENTS.md`.
+
+## Harness Design Rules
+
+- Treat prompt engineering as one layer inside harness engineering, not a replacement for clear artifacts and role contracts.
+- Prefer rippable seams. Keep model-specific retries, heuristics, and recovery rules isolated in removable sections or reference docs.
+- Keep coordination shallow. If the harness only works through deep routing or clever runtime recovery, simplify the design before adding more logic.
+
 ## Portable Defaults
 
 - Prefer repo-local skills first.
@@ -52,6 +68,7 @@ Default to specialist skills plus a markdown team spec. Add extra role briefs on
 - Spawn workers only for bounded, clearly parallelizable work.
 - Use file-based handoffs and markdown specs instead of assumed peer-to-peer runtime messaging.
 - Do not require model pins, SDK runtimes, or MCP orchestration unless the repository already depends on them.
+- Keep model-specific retries and recovery logic easy to rip out as models improve.
 - Do not require YAML frontmatter in generated skills.
 - Keep names deterministic and repository-friendly.
 
@@ -61,7 +78,7 @@ Default to specialist skills plus a markdown team spec. Add extra role briefs on
 
 1. Inspect the repository, request, and existing docs.
 2. Identify the domain, core task types, expected outputs, and quality bar.
-3. Note reusable existing materials and current runtime assumptions.
+3. Note reusable existing materials, current runtime assumptions, and any existing repo-wide guidance that already belongs in `AGENTS.md`.
 4. Detect whether the workflow is best expressed as reusable skills, role briefs, a single orchestrator, or an autonomous experiment loop on user-controlled compute.
 5. If the request is an autonomous experiment workflow, define the mutable surface, immutable evaluation surface, baseline requirement, and metric before generating artifacts.
 6. Capture the result in a concise domain summary before generating new artifacts.
@@ -79,6 +96,7 @@ Output:
 3. Select one of the six patterns from `references/agent-design-patterns.md`.
 4. For autonomous experiment loops, choose the matching workflow profile from `references/autonomous-experimentation.md` and decide whether it composes with Pipeline, Supervisor, or Producer-Reviewer.
 5. Define how artifacts move between phases through `_workspace/` files and final output paths.
+6. Decide which recovery or model-specific logic must stay removable as the harness evolves.
 
 Output:
 
@@ -106,7 +124,7 @@ Output:
 ### Phase 4: Skill Generation
 
 1. Generate each reusable skill under `.agents/skills/`.
-2. Keep the main `SKILL.md` lean and move bulky detail into `references/`.
+2. Keep the main `SKILL.md` lean and move bulky detail or evolving heuristics into `references/`.
 3. Include `When to use`, `Required inputs`, workflow steps, expected outputs, and validation notes.
 4. Bundle deterministic helper scripts only when they remove repeated manual setup or repeated validation work.
 
@@ -119,7 +137,7 @@ Output:
 ### Phase 5: Integration and Orchestration
 
 1. Define the reusable end-to-end workflow in an orchestrator skill or team spec.
-2. Specify phase order, handoff files, ownership, and fallback rules.
+2. Specify phase order, handoff files, ownership, fallback rules, and which recovery logic is stable versus removable.
 3. Reserve worker delegation for clearly parallel slices such as broad research, multi-surface review, or independent generation branches.
 4. For autonomous experiment loops, preserve the run ledger, baseline artifact, and keep/discard policy under `_workspace/experiments/{run}/`.
 5. Preserve intermediate artifacts in `_workspace/` for debugging and auditability.
@@ -136,7 +154,7 @@ Output:
 2. Run scenario tests for normal flow and at least one failure flow.
 3. For autonomous experiment loops, validate the baseline run, immutable evaluation surface, results ledger, and crash/timeout reporting path.
 4. Compare a specialized-skill run against a no-specialized-skill or manual baseline when useful.
-5. Refine instructions when tests show ambiguity, overfitting, or unnecessary weight.
+5. Refine instructions when tests show ambiguity, overfitting, unnecessary weight, or stale heuristics that should be ripped out.
 
 Output:
 
@@ -190,10 +208,13 @@ Every generated harness should meet these checks:
 - reviewer or QA steps are explicit when quality risk is high
 - `When to use` and `Required inputs` sections are concrete enough to prevent overlap
 - `_workspace/` handoffs are deterministic and preserved for inspection
+- any repo `AGENTS.md` stays short, repo-wide, and pointer-heavy
+- model-specific recovery logic is isolated enough to remove without rewriting the whole harness
 - no platform-specific runtime assumptions are required unless the repository already depends on them
 
 ## Reference Pointers
 
+- `references/agents-md-guide.md` for writing short, durable repo-level `AGENTS.md` files
 - `references/agent-design-patterns.md` for pattern choice and coordination styles
 - `references/autonomous-experimentation.md` for iterative experiment loops on user-controlled compute
 - `references/orchestrator-template.md` for a reusable orchestrator-spec template

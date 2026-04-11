@@ -22,6 +22,12 @@ Decision guide:
 - Upgrade to supervisor-led delegation when tasks cannot be fully assigned up front.
 - Keep hierarchical delegation shallow. If the tree grows deeper than two coordination layers, flatten it.
 
+## Rippable Harness Rule
+
+- Keep the core workflow in durable artifacts and push model-specific retries or recovery heuristics into clearly removable sections or reference docs.
+- Prefer shallow coordination. If a pattern needs many special cases or more than two coordination layers, simplify it before adding more harness logic.
+- Explicit handoffs beat hidden runtime magic. Another engineer should be able to delete a recovery rule without losing the main workflow contract.
+
 ## 1. Pipeline
 
 Sequential dependent work where each phase consumes the prior phase's artifact.
@@ -248,5 +254,6 @@ Use these defaults when converting a pattern into files:
 - durable role topology becomes `docs/harness/{domain}/team-spec.md`
 - reusable specialist behavior becomes `.agents/skills/{specialist}/SKILL.md`
 - bulky domain detail moves into `.agents/skills/{specialist}/references/`
+- model-specific recovery notes belong in linked references or clearly named removable sections
 - intermediate work products live in `_workspace/` and keep deterministic names
 - autonomous experiment ledgers live under `_workspace/experiments/{run}/`

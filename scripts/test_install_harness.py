@@ -23,6 +23,14 @@ def assert_contains(text: str, needle: str, message: str) -> None:
     raise AssertionError(message)
 
 
+def assert_agents_note(text: str) -> None:
+  assert_contains(
+    text,
+    "AGENTS.md stays repo-owned.",
+    "Expected installer output to explain that AGENTS.md remains repo-owned.",
+  )
+
+
 def run_install(
   *args: str, env: dict[str, str] | None = None, expect_success: bool = True
 ) -> subprocess.CompletedProcess[str]:
@@ -45,8 +53,11 @@ def run_install(
 
 
 def assert_standard_install(project_root: Path) -> None:
+  shared_root = project_root / ".agents" / "skills" / "harness"
   shared_skill = project_root / ".agents" / "skills" / "harness" / "SKILL.md"
+  agents_guide = shared_root / "references" / "agents-md-guide.md"
   assert_true(shared_skill.exists(), f"Missing shared install: {shared_skill}")
+  assert_true(agents_guide.exists(), f"Missing AGENTS guide: {agents_guide}")
   assert_true(
     not shared_skill.is_symlink(), "Expected copy mode to create a standalone SKILL.md"
   )
@@ -67,7 +78,9 @@ def assert_standard_install(project_root: Path) -> None:
 def assert_shared_install(project_root: Path, expect_symlink: bool = False) -> None:
   shared_root = project_root / ".agents" / "skills" / "harness"
   shared_skill = shared_root / "SKILL.md"
+  agents_guide = shared_root / "references" / "agents-md-guide.md"
   assert_true(shared_skill.exists(), f"Missing shared install: {shared_skill}")
+  assert_true(agents_guide.exists(), f"Missing AGENTS guide: {agents_guide}")
   assert_true(
     shared_root.is_symlink() == expect_symlink,
     f"Expected shared install symlink={expect_symlink}: {shared_root}",
@@ -94,6 +107,7 @@ def main() -> int:
       "Dry run only; no changes made.",
       "Expected dry-run output to confirm no changes were made.",
     )
+    assert_agents_note(dry_run.stdout)
     assert_true(
       not (project_dry_run / ".agents").exists(),
       "Dry run should not create the shared install path.",
@@ -101,9 +115,10 @@ def main() -> int:
 
     project_standard = tmp_root / "project-standard"
     project_standard.mkdir()
-    run_install(
+    standard_install = run_install(
       "--scope", "project", "--target", str(project_standard), "--layout", "standard"
     )
+    assert_agents_note(standard_install.stdout)
     assert_standard_install(project_standard)
     rerun = run_install(
       "--scope",
@@ -136,7 +151,8 @@ def main() -> int:
     home_root.mkdir()
     home_env = os.environ.copy()
     home_env["HOME"] = str(home_root)
-    run_install("--scope", "user", "--layout", "standard", env=home_env)
+    user_standard = run_install("--scope", "user", "--layout", "standard", env=home_env)
+    assert_agents_note(user_standard.stdout)
     shared_user_skill = home_root / ".agents" / "skills" / "harness" / "SKILL.md"
     assert_true(
       shared_user_skill.exists(), f"Missing user-level install: {shared_user_skill}"

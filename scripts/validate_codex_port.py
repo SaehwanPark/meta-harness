@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_FILES = [
   ROOT / "AGENTS.md",
   ROOT / ".agents/skills/harness/SKILL.md",
+  ROOT / ".agents/skills/harness/references/agents-md-guide.md",
   ROOT / ".agents/skills/harness/references/agent-design-patterns.md",
   ROOT / ".agents/skills/harness/references/autonomous-experimentation.md",
   ROOT / ".agents/skills/harness/references/orchestrator-template.md",
@@ -77,6 +78,48 @@ INSTALL_VALIDATION_COMMANDS = [
   "python3 scripts/validate_codex_port.py",
 ]
 
+AGENTS_MAX_LINES = 24
+
+REPO_AGENTS_REQUIRED_TOKENS = [
+  "keep this file short and repo-wide.",
+  "meta harness is a portable repository for designing repo-local agent harnesses.",
+  ".agents/skills/harness/",
+  "docs/harness/readme.md",
+  "python3 scripts/test_install_harness.py",
+  "python3 scripts/validate_codex_port.py",
+  "rippable",
+]
+
+MAIN_SKILL_REQUIRED_TOKENS = [
+  "highest-leverage repo guide",
+  "what / why / how",
+  "rippable",
+  "references/agents-md-guide.md",
+]
+
+AGENTS_REFERENCE_REQUIRED_TOKENS = [
+  "highest-leverage repo guide",
+  "what to include",
+  "what to leave out",
+  "progressive disclosure",
+  "human-written",
+  "rippable harness note",
+  "compact template",
+]
+
+ROOT_DOC_EXPECTATIONS = {
+  "README.md": [
+    "AGENTS Authoring Guide",
+    "agents-md-guide.md",
+    "rippable harness",
+  ],
+  "docs/harness/README.md": [
+    "AGENTS Authoring Guide",
+    "agents-md-guide.md",
+    "rippable",
+  ],
+}
+
 COMPATIBILITY_EXPECTATIONS = {
   "forgecode.md": [
     ".agents/skills/harness/",
@@ -133,6 +176,7 @@ def read_text(path: Path) -> str:
 def iter_root_docs_markdown() -> list[Path]:
   markdown_paths = set(ROOT.glob("*.md"))
   markdown_paths.update(ROOT.glob("docs/**/*.md"))
+  markdown_paths.update(ROOT.glob(".agents/skills/harness/**/*.md"))
   return sorted(markdown_paths)
 
 
@@ -236,6 +280,10 @@ def check_main_skill(failures: list[str]) -> None:
     if heading not in lowered:
       fail(f"Main skill is missing heading: {heading}", failures)
 
+  for token in MAIN_SKILL_REQUIRED_TOKENS:
+    if token not in lowered:
+      fail(f"Main skill is missing updated guidance token: {token}", failures)
+
   for phase in range(1, 7):
     if f"phase {phase}:" not in lowered:
       fail(f"Main skill is missing explicit Phase {phase}", failures)
@@ -266,6 +314,18 @@ def check_pattern_reference(failures: list[str]) -> None:
         f"Pattern reference should contain at least 6 occurrences of '{subsection}' but found {count}",
         failures,
       )
+
+  for token in ("rippable harness rule", "explicit handoffs", "removable"):
+    if token not in text:
+      fail(f"Pattern reference is missing updated guidance token: {token}", failures)
+
+
+def check_orchestrator_reference(failures: list[str]) -> None:
+  path = ROOT / ".agents/skills/harness/references/orchestrator-template.md"
+  text = read_text(path).casefold()
+  for token in ("removable model-specific logic", "deletion trigger"):
+    if token not in text:
+      fail(f"Orchestrator template is missing updated guidance token: {token}", failures)
 
 
 def check_autonomous_reference(failures: list[str]) -> None:
@@ -299,6 +359,37 @@ def check_for_banned_tokens(failures: list[str]) -> None:
         )
 
 
+def check_repo_agents(failures: list[str]) -> None:
+  path = ROOT / "AGENTS.md"
+  text = read_text(path)
+  lowered = text.casefold()
+  if len(text.splitlines()) > AGENTS_MAX_LINES:
+    fail(
+      f"AGENTS.md should stay concise ({AGENTS_MAX_LINES} lines max) but has {len(text.splitlines())}",
+      failures,
+    )
+
+  for token in REPO_AGENTS_REQUIRED_TOKENS:
+    if token not in lowered:
+      fail(f"AGENTS.md is missing required repo guidance: {token}", failures)
+
+
+def check_agents_reference(failures: list[str]) -> None:
+  path = ROOT / ".agents/skills/harness/references/agents-md-guide.md"
+  text = read_text(path).casefold()
+  for token in AGENTS_REFERENCE_REQUIRED_TOKENS:
+    if token not in text:
+      fail(f"AGENTS guide is missing updated guidance token: {token}", failures)
+
+
+def check_root_doc_expectations(failures: list[str]) -> None:
+  for relative_path, required_tokens in ROOT_DOC_EXPECTATIONS.items():
+    text = read_text(ROOT / relative_path)
+    for token in required_tokens:
+      if token not in text:
+        fail(f"{relative_path} is missing required synchronized guidance: {token}", failures)
+
+
 def check_installation_doc(failures: list[str]) -> None:
   installer_text = read_text(ROOT / "scripts/install_harness.py")
   installation_text = read_text(ROOT / "docs/installation.md")
@@ -323,6 +414,14 @@ def check_installation_doc(failures: list[str]) -> None:
   if "--mode symlink" not in installation_text:
     fail("docs/installation.md is missing --mode symlink guidance", failures)
 
+  for token in (
+    "does not create or update the target repo's `AGENTS.md`",
+    "agents-md-guide.md",
+    "AGENTS.md stays repo-owned",
+  ):
+    if token not in installation_text and token not in installer_text:
+      fail(f"Installer contract is missing updated AGENTS guidance: {token}", failures)
+
 
 def check_compatibility_docs(failures: list[str]) -> None:
   compatibility_root = ROOT / "docs/compatibility"
@@ -346,8 +445,12 @@ def main() -> int:
     return 1
 
   check_root_docs_markdown(failures)
+  check_repo_agents(failures)
+  check_agents_reference(failures)
+  check_root_doc_expectations(failures)
   check_main_skill(failures)
   check_pattern_reference(failures)
+  check_orchestrator_reference(failures)
   check_autonomous_reference(failures)
   check_for_banned_tokens(failures)
   check_installation_doc(failures)

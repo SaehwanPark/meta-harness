@@ -9,6 +9,7 @@ Use this template when a workflow is reusable enough to deserve a top-level orch
 - Prefer markdown specs and `_workspace/` artifacts over implied coordination.
 - Add worker-delegation notes only where parallelism is clearly bounded.
 - Keep failure policy explicit. A reusable orchestrator should say what happens when a phase fails, stalls, or returns conflicting results.
+- Keep model-specific retries, shortcuts, and recovery heuristics in a clearly removable section instead of weaving them through the whole spec.
 
 ## Template
 
@@ -62,6 +63,11 @@ Describe the end-to-end outcome and the boundary of responsibility.
 - partial completion policy:
 - conflict resolution policy:
 - escalation trigger:
+
+## Removable Model-Specific Logic
+- temporary retries or recovery heuristics:
+- optional shortcuts or guardrails:
+- deletion trigger:
 
 ## Validation Checks
 - structural checks:

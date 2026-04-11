@@ -11,7 +11,7 @@
 
 Meta Harness is a portable, standards-first meta-skill for designing domain-specific workflows, reusable specialist skills, and deterministic handoff artifacts.
 
-Current project version: `0.2`. See [Changelog](CHANGELOG.md) for checkpoint-based version history.
+Current project version: `0.3`. See [Changelog](CHANGELOG.md) for checkpoint-based version history.
 
 Adapted from [the original Harness project](https://github.com/revfactory/harness) and distributed here under the same [Apache 2.0](LICENSE) license.
 
@@ -20,7 +20,9 @@ Adapted from [the original Harness project](https://github.com/revfactory/harnes
 Compared to the original Claude Code-based Harness, this project adds:
 
 - a standards-first repository layout built around `AGENTS.md`, `.agents/skills/`, and `docs/harness/`
+- concise, human-written `AGENTS.md` guidance built around repo-wide `WHAT / WHY / HOW` plus progressive disclosure
 - runtime-neutral artifact contracts based on skills, team specs, and deterministic `_workspace/` handoffs
+- rippable harness design guidance that keeps temporary model-specific recovery logic easy to remove
 - a repo-local bootstrap installer for project-level and user-level skill installs
 - a tighter maintenance loop through repo-local validation and simpler, platform-independent conventions
 
@@ -42,6 +44,7 @@ Compared to the original Claude Code-based Harness, this project adds:
 - [Changelog](CHANGELOG.md)
 - [Harness Output Specs](docs/harness/README.md)
 - [Starter Research Example](docs/harness/starter-research/README.md)
+- [AGENTS Authoring Guide](.agents/skills/harness/references/agents-md-guide.md)
 - [Orchestrator Template](.agents/skills/harness/references/orchestrator-template.md)
 
 ## Repository Layout
@@ -76,13 +79,15 @@ python3 scripts/install_harness.py --scope user --layout standard
 
 Use `--layout forgecode`, `--layout droid`, `--layout openhands`, or `--layout aider` when you want a client-specific mirror or follow-up guidance.
 Use `--layout codex` when you want Codex to see both the shared Harness tree and the native `.codex/skills/harness/` mirror.
+Harness installs the skill tree only; the target repository keeps ownership of its own `AGENTS.md`, `README.md`, and docs.
 See [Compatibility Guides](docs/compatibility/README.md) for path mappings and agent-specific follow-up.
 
 ## Use
 
 1. Read [AGENTS.md](AGENTS.md).
 2. Read the main skill at [.agents/skills/harness/SKILL.md](.agents/skills/harness/SKILL.md).
-3. Generate the smallest durable artifact set that fits the domain:
+3. When a target repository needs durable repo-wide guidance, start from the [AGENTS Authoring Guide](.agents/skills/harness/references/agents-md-guide.md) and keep `AGENTS.md` limited to repo-wide `WHAT / WHY / HOW`.
+4. Generate the smallest durable artifact set that fits the domain:
    - `.agents/skills/<domain>-orchestrator/SKILL.md`
    - `.agents/skills/<specialist>/SKILL.md`
    - `docs/harness/<domain>/team-spec.md`
@@ -109,6 +114,7 @@ The main skill preserves the 6-phase workflow:
 6. Validation and Testing
 
 Pattern guidance lives in [.agents/skills/harness/references/agent-design-patterns.md](.agents/skills/harness/references/agent-design-patterns.md). Output-spec conventions live in [docs/harness/README.md](docs/harness/README.md).
+Use the AGENTS guide when you need a short always-loaded repo contract, and keep evolving retry or recovery logic in rippable harness docs instead of the root file.
 Start from the [orchestrator template](.agents/skills/harness/references/orchestrator-template.md) when you need a durable workflow spec, or adapt the [starter research example](docs/harness/starter-research/README.md) when you want a concrete minimal package.
 
 ## Validation
@@ -118,7 +124,7 @@ python3 scripts/test_install_harness.py
 python3 scripts/validate_codex_port.py
 ```
 
-The smoke test checks the installer across project and user scopes. The validator checks required files, README links, main-skill headings, pattern coverage, and the absence of removed runtime-specific paths in the canonical docs.
+The smoke test checks the installer across project and user scopes. The validator checks required files, README links, the short `AGENTS.md` contract, main-skill headings, pattern coverage, and the absence of removed runtime-specific paths in the canonical docs.
 
 ## License
 

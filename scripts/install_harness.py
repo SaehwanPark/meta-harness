@@ -113,8 +113,16 @@ def aider_followup(root: Path) -> str:
   )
 
 
+def intentional_agents_note(root: Path) -> str:
+  guide_path = root / ".agents" / "skills" / "harness" / "references" / "agents-md-guide.md"
+  return (
+    "AGENTS.md stays repo-owned. Create or revise it intentionally only when the "
+    f"target repository needs durable repo-wide guidance. Start from {guide_path}."
+  )
+
+
 def post_install_notes(scope: str, layout: str, root: Path) -> list[str]:
-  notes: list[str] = []
+  notes: list[str] = [intentional_agents_note(root)]
   if layout == "openhands":
     notes.append(
       "OpenHands uses the shared .agents/skills/ location; keep repo-specific setup in .openhands/ only when needed."

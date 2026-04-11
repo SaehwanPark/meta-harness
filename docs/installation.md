@@ -10,7 +10,7 @@ Install the shared Harness skill into an existing repository:
 python3 scripts/install_harness.py --scope project --target /path/to/repo --layout standard
 ```
 
-The installer creates `.agents/skills/harness/` inside the target repository and leaves the target repo's `AGENTS.md`, `README.md`, and docs untouched.
+The installer creates `.agents/skills/harness/` inside the target repository and does not create or update the target repo's `AGENTS.md`, `README.md`, or docs.
 
 ## User-Level Install
 
@@ -19,6 +19,8 @@ Install Harness as a shared skill for agents that scan user-level `.agents/skill
 ```shell
 python3 scripts/install_harness.py --scope user --layout standard
 ```
+
+The installed skill tree includes the AGENTS authoring guide, but repo-level context files remain repo-owned and should be written intentionally.
 
 ## Layout Options
 
@@ -39,5 +41,6 @@ python3 scripts/install_harness.py --scope user --layout standard
 ## Notes
 
 - The canonical source remains in `.agents/skills/harness/` in this repository.
+- Use `.agents/skills/harness/references/agents-md-guide.md` when a target repo needs a short, deliberate `AGENTS.md`.
 - See [Compatibility Guides](compatibility/README.md) for agent-specific path and config details.
 - Use `--mode symlink` if you want the installed skill to point back to this repository during local iteration.
