@@ -26,6 +26,7 @@ python3 scripts/install_harness.py --scope user --layout standard
 - `forgecode`: also mirrors Harness into `.forge/skills/harness/` or `~/forge/skills/harness/`
 - `droid`: also mirrors Harness into `.factory/skills/harness/`
 - `openhands`: uses the shared `.agents/skills/harness/` tree
+- `codex`: also mirrors Harness into `.codex/skills/harness/`
 - `aider`: uses the shared tree and prints the `.aider.conf.yml` follow-up snippet for `AGENTS.md`
 
 ## Local Development

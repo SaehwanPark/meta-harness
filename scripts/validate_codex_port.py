@@ -20,6 +20,7 @@ REQUIRED_FILES = [
   ROOT / ".agents/skills/harness/references/skill-testing-guide.md",
   ROOT / ".agents/skills/harness/references/qa-agent-guide.md",
   ROOT / "docs/compatibility/README.md",
+  ROOT / "docs/compatibility/codex.md",
   ROOT / "docs/compatibility/forgecode.md",
   ROOT / "docs/compatibility/droid.md",
   ROOT / "docs/compatibility/openhands.md",
@@ -84,6 +85,14 @@ COMPATIBILITY_EXPECTATIONS = {
     "~/forge/skills/harness/",
     "python3 scripts/install_harness.py --scope project --target /path/to/repo --layout forgecode",
     "python3 scripts/install_harness.py --scope user --layout forgecode",
+  ],
+  "codex.md": [
+    ".agents/skills/harness/",
+    "~/.agents/skills/harness/",
+    ".codex/skills/harness/",
+    "~/.codex/skills/harness/",
+    "python3 scripts/install_harness.py --scope project --target /path/to/repo --layout codex",
+    "python3 scripts/install_harness.py --scope user --layout codex",
   ],
   "droid.md": [
     ".agents/skills/harness/",

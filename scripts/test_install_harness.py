@@ -153,6 +153,25 @@ def main() -> int:
       "Expected aider dry-run output to include the user config path.",
     )
 
+    codex_home_root = tmp_root / "home-codex"
+    codex_home_root.mkdir()
+    codex_env = os.environ.copy()
+    codex_env["HOME"] = str(codex_home_root)
+    user_codex = run_install("--scope", "user", "--layout", "codex", env=codex_env)
+    assert_true(
+      (codex_home_root / ".agents" / "skills" / "harness" / "SKILL.md").exists(),
+      "Missing shared user-level install alongside Codex mirror.",
+    )
+    assert_true(
+      (codex_home_root / ".codex" / "skills" / "harness" / "SKILL.md").exists(),
+      "Missing user-level Codex mirror install.",
+    )
+    assert_contains(
+      user_codex.stdout,
+      "Codex can use the shared install and the native .codex/skills mirror.",
+      "Expected Codex post-install guidance in output.",
+    )
+
     project_forge = tmp_root / "project-forge"
     project_forge.mkdir()
     run_install(
@@ -173,6 +192,17 @@ def main() -> int:
     assert_true(
       (project_droid / ".factory" / "skills" / "harness" / "SKILL.md").exists(),
       "Missing Droid mirror install.",
+    )
+
+    project_codex = tmp_root / "project-codex"
+    project_codex.mkdir()
+    run_install(
+      "--scope", "project", "--target", str(project_codex), "--layout", "codex"
+    )
+    assert_standard_install(project_codex)
+    assert_true(
+      (project_codex / ".codex" / "skills" / "harness" / "SKILL.md").exists(),
+      "Missing Codex mirror install.",
     )
 
     project_openhands = tmp_root / "project-openhands"

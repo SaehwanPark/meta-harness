@@ -75,6 +75,7 @@ python3 scripts/install_harness.py --scope user --layout standard
 ```
 
 Use `--layout forgecode`, `--layout droid`, `--layout openhands`, or `--layout aider` when you want a client-specific mirror or follow-up guidance.
+Use `--layout codex` when you want Codex to see both the shared Harness tree and the native `.codex/skills/harness/` mirror.
 See [Compatibility Guides](docs/compatibility/README.md) for path mappings and agent-specific follow-up.
 
 ## Use

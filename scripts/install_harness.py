@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_SKILL_DIR = ROOT / ".agents" / "skills" / "harness"
-LAYOUTS = ("standard", "forgecode", "droid", "openhands", "aider")
+LAYOUTS = ("standard", "forgecode", "droid", "openhands", "aider", "codex")
 MODES = ("copy", "symlink")
 SCOPES = ("project", "user")
 
@@ -73,6 +73,9 @@ def destination_specs(scope: str, layout: str) -> list[tuple[str, str]]:
     specs.append(("forgecode", native))
   elif layout == "droid":
     specs.append(("droid", ".factory/skills/harness"))
+  elif layout == "codex":
+    native = ".codex/skills/harness" if scope == "project" else ".codex/skills/harness"
+    specs.append(("codex", native))
 
   return specs
 
@@ -123,6 +126,10 @@ def post_install_notes(scope: str, layout: str, root: Path) -> list[str]:
   if layout == "droid":
     notes.append(
       "Droid can use the shared install and the native .factory/skills mirror. Reserve .factory/droids for subagents with their own tool/model policy."
+    )
+  if layout == "codex":
+    notes.append(
+      "Codex can use the shared install and the native .codex/skills mirror. Keep reusable Harness workflow logic in the shared tree and use the Codex mirror for native discovery."
     )
   if layout == "aider":
     notes.append(aider_followup(root))
