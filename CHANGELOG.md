@@ -4,8 +4,8 @@ This repository uses checkpoint-based versioning for the meta-harness project hi
 
 ## 0.3
 
-- Checkpoint: pending post-merge main-branch finalization
-- Scope: AGENTS authoring guidance and rippable-harness upgrades
+- Checkpoint: `b24fc51` (`Merge pull request #4 from SaehwanPark/codex/v0.3-agents-harness-upgrade`)
+- Scope: post-PR #4 release after the AGENTS authoring and rippable-harness updates were merged into `main`
 
 ## 0.2
 
