@@ -36,6 +36,23 @@ Compared to the original Claude Code-based Harness, this project adds:
 - deterministic `_workspace/` handoff conventions
 - a small bootstrap installer plus validation and smoke-test scripts
 
+## Collaboration Model
+
+- The Lead is the default orchestrator. It owns context, planning, work contracts, subAgent prompts, output contracts, synthesis, validation, and the final decision.
+- For `$harness` or harness-style multi-agent requests, the default mode is approval-first: the Lead drafts the full plan, iterates with the user, and waits for explicit final approval before spawning subAgents or mutating target deliverables.
+- When a task can be bounded, the Lead should delegate to a bounded implementer instead of directly editing implementation deliverables.
+- Direct Lead writes are limited to explicit user authorization, non-delegable emergency unblockers, or final synthesis and handoff artifacts owned by the Lead; document any such exception in `_workspace/`.
+- Keep a compact context pack in the Lead thread or top-level `_workspace/` handoff: goal, scope, source authority, active constraints, subAgent ids and roles, output paths, tests, blockers, and final decision state.
+- A reusable plan should name `RequestMeaning`, `Assumptions`, `Architecture`, `FileOwnership`, `WavePlan`, `SpawnPlan`, `SpawnPrompts`, `TurnByTurnFeedback`, `ValidationPlan`, `FinalReviewCriteria`, and `ApprovalGate`.
+- Spawn prompts are work contracts: they must include source authority, read/write boundaries, tool permissions, output paths, acceptance criteria, stop conditions, and reporting format.
+- Avoid full-history forks with explicit model overrides; when a specific model is needed, use a compact handoff that carries only the required context.
+- Use cheap and fast models for deterministic implementers after the patch is already decided.
+- Use coding-optimized models for bounded code changes where the task is still implementation-heavy but narrow.
+- Use frontier, high, or xhigh only for broad research, multi-source synthesis, governance or security review, architecture ambiguity, or cross-runtime reasoning.
+- Researchers may use web, search, or scrapling only when current external information or multi-source evidence is actually needed.
+- Reviewers should read the original request, the produced artifact, and the acceptance criteria, then produce a deterministic report.
+- Keep runtime-specific orchestration and recovery logic out of the root docs unless the repository already depends on it; link to deeper docs instead. The detailed approval-first prompt contract lives in [docs/harness/README.md](docs/harness/README.md).
+
 ## Docs
 
 - [Installation](docs/installation.md)
