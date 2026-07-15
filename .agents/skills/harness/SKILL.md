@@ -38,12 +38,13 @@ Harness generates only the artifacts needed to make the workflow reusable:
 - `.agents/skills/{domain}-orchestrator/SKILL.md` for reusable top-level orchestration
 - `.agents/skills/{specialist}/SKILL.md` for reusable specialist behavior
 - `.agents/skills/{specialist}/references/*` for progressive-disclosure details
+- `.agents/skills/{specialist}/templates/*` for optional runtime templates that should ship with a skill but remain inactive until copied or adapted intentionally
 - `docs/harness/{domain}/team-spec.md` for role topology, handoffs, and failure policy
 - `docs/harness/{domain}/roles/{role}.md` only when a role needs a durable brief but not a full skill
-- `_workspace/{phase}_{role}_{artifact}.md` for intermediate artifacts and review evidence
+- `_workspace/{phase}_{role}_{artifact}.md` for durable intermediate artifacts and review evidence when a handoff must be inspectable, resumable, or shared across agents
 - `_workspace/experiments/{run}/results.tsv` when the harness includes an autonomous experiment loop
 
-Default to specialist skills plus a markdown team spec. Add extra role briefs only when the role is stable enough to justify its own file.
+Default to the smallest reusable surface: often one skill, sometimes a skill plus a team spec. Add extra role briefs, runtime adapters, or handoff files only when they solve a durable coordination need.
 
 ## AGENTS.md Guidance
 
@@ -64,9 +65,11 @@ Default to specialist skills plus a markdown team spec. Add extra role briefs on
 ## Portable Defaults
 
 - Prefer repo-local skills first.
-- Use a single main agent by default.
-- Spawn workers only for bounded, clearly parallelizable work.
-- Use file-based handoffs and markdown specs instead of assumed peer-to-peer runtime messaging.
+- Keep direct or single-agent work when one context can complete the task without losing important information.
+- Delegate only when work units are independent, specialization or context isolation has clear value, and one owner can synthesize the results.
+- Prefer delegated workers for read-heavy exploration, review, isolated tests, and summarization. For parallel writes or tests with shared mutable resources, require non-overlapping ownership or isolated environments.
+- Keep delegation shallow. Recursive fan-out is exceptional and must have an explicit depth, concurrency, and synthesis policy.
+- Use file-based handoffs when work must be inspectable, resumable, audited, or consumed across agent boundaries. Allow concise in-thread summaries for ephemeral, low-risk coordination.
 - Do not require model pins, SDK runtimes, or MCP orchestration unless the repository already depends on them.
 - Keep model-specific retries and recovery logic easy to rip out as models improve.
 - Require YAML frontmatter in every generated `SKILL.md`. Include at least `name` and `description` before the markdown body so native skill discovery can reliably find repo-specific generated skills.
@@ -79,7 +82,7 @@ Default to specialist skills plus a markdown team spec. Add extra role briefs on
 1. Inspect the repository, request, and existing docs.
 2. Identify the domain, core task types, expected outputs, and quality bar.
 3. Note reusable existing materials, current runtime assumptions, and any existing repo-wide guidance that already belongs in `AGENTS.md`.
-4. Detect whether the workflow is best expressed as reusable skills, role briefs, a single orchestrator, or an autonomous experiment loop on user-controlled compute.
+4. Detect whether the workflow is best expressed as direct work, one reusable skill, role briefs, an orchestrator, delegated workers, or an autonomous experiment loop on user-controlled compute.
 5. If the request is an autonomous experiment workflow, define the mutable surface, immutable evaluation surface, baseline requirement, and metric before generating artifacts.
 6. Capture the result in a concise domain summary before generating new artifacts.
 
@@ -92,10 +95,10 @@ Output:
 ### Phase 2: Team Architecture Design
 
 1. Choose the smallest architecture that can cover the workflow.
-2. Decide whether the work stays single-agent, needs a sequential orchestrator, or benefits from bounded parallel workers.
+2. Apply the delegation decision gate: identify independent work units, context pressure, specialization value, overlapping files or mutable resources, permission needs, and the final synthesis owner.
 3. Select one of the six patterns from `references/agent-design-patterns.md`.
 4. For autonomous experiment loops, choose the matching workflow profile from `references/autonomous-experimentation.md` and decide whether it composes with Pipeline, Supervisor, or Producer-Reviewer.
-5. Define how artifacts move between phases through `_workspace/` files and final output paths.
+5. Define how information moves between phases through final outputs, concise summaries, or `_workspace/` files. Persist only handoffs that need inspection, resumability, auditability, or cross-agent consumption.
 6. Decide which recovery or model-specific logic must stay removable as the harness evolves.
 
 Output:
@@ -114,6 +117,7 @@ Output:
 2. Write explicit responsibilities, inputs, outputs, review edges, and failure policy.
 3. Keep role boundaries aligned with specialization, parallelism, context pressure, and reuse.
 4. Avoid creating separate files for roles that are too narrow or single-use.
+5. Keep portable specialist behavior in skills, narrow durable responsibility in role briefs, reusable coordination in orchestrators, and runtime-specific execution settings in removable adapters.
 
 Output:
 
@@ -139,9 +143,10 @@ Output:
 
 1. Define the reusable end-to-end workflow in an orchestrator skill or team spec.
 2. Specify phase order, handoff files, ownership, fallback rules, and which recovery logic is stable versus removable.
-3. Reserve worker delegation for clearly parallel slices such as broad research, multi-surface review, or independent generation branches.
-4. For autonomous experiment loops, preserve the run ledger, baseline artifact, and keep/discard policy under `_workspace/experiments/{run}/`.
-5. Preserve intermediate artifacts in `_workspace/` for debugging and auditability.
+3. Reserve worker delegation for clearly parallel slices such as broad research, multi-surface review, isolated tests, log analysis, or independent generation branches.
+4. For parallel writes or stateful tests, assign non-overlapping files and resources or use isolated environments; never rely on later synthesis to repair uncontrolled interference.
+5. For autonomous experiment loops, preserve the run ledger, baseline artifact, and keep/discard policy under `_workspace/experiments/{run}/`.
+6. Preserve intermediate artifacts in `_workspace/` when they provide debugging, handoff, or audit value; otherwise return a bounded summary to the coordinator.
 
 Output:
 
@@ -213,6 +218,8 @@ Every generated harness should meet these checks:
 - any repo `AGENTS.md` stays short, repo-wide, and pointer-heavy
 - model-specific recovery logic is isolated enough to remove without rewriting the whole harness
 - no platform-specific runtime assumptions are required unless the repository already depends on them
+- delegated work names its ownership boundary, synthesis owner, and partial-failure behavior
+- parallel write and stateful-test workflows use non-overlapping ownership or isolated environments
 
 ## Reference Pointers
 
@@ -224,3 +231,4 @@ Every generated harness should meet these checks:
 - `references/skill-writing-guide.md` for authoring specialist skills
 - `references/skill-testing-guide.md` for validation and iteration loops
 - `references/qa-agent-guide.md` for cross-boundary QA methodology
+- `references/codex-agent-adapter.md` for an optional, removable mapping to current Codex subagents and custom agents

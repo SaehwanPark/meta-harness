@@ -1,0 +1,10 @@
+name = "replace-with-agent-name"
+description = "Describe the bounded tasks this agent should receive and when it should not be used."
+developer_instructions = """
+Own one bounded work unit from the parent task.
+Respect the declared read/write boundary and return a concise result with evidence.
+Do not broaden scope, delegate again, or hide partial failure.
+"""
+
+# Add optional Codex configuration only when the target repository has a measured need.
+# Prefer inheriting model, reasoning, tools, and permissions from the parent task.

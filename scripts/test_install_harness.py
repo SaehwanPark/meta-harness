@@ -11,6 +11,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = ROOT / "scripts" / "install_harness.py"
+CANONICAL_SKILL = ROOT / ".agents" / "skills" / "harness"
+DEPLOYABLE_PAYLOAD = (
+  Path("references/codex-agent-adapter.md"),
+  Path("templates/codex-agent.toml"),
+)
 
 
 def assert_true(condition: bool, message: str) -> None:
@@ -29,6 +34,17 @@ def assert_agents_note(text: str) -> None:
     "AGENTS.md stays repo-owned.",
     "Expected installer output to explain that AGENTS.md remains repo-owned.",
   )
+
+
+def assert_deployable_payload(installed_root: Path) -> None:
+  for relative_path in DEPLOYABLE_PAYLOAD:
+    installed = installed_root / relative_path
+    canonical = CANONICAL_SKILL / relative_path
+    assert_true(installed.exists(), f"Missing deployable payload: {installed}")
+    assert_true(
+      installed.read_bytes() == canonical.read_bytes(),
+      f"Installed payload differs from canonical source: {installed}",
+    )
 
 
 def run_install(
@@ -73,6 +89,7 @@ def assert_standard_install(project_root: Path) -> None:
     not (project_root / "docs").exists(),
     "Installer should not create docs/ in the target",
   )
+  assert_deployable_payload(shared_root)
 
 
 def assert_shared_install(project_root: Path, expect_symlink: bool = False) -> None:
@@ -85,6 +102,7 @@ def assert_shared_install(project_root: Path, expect_symlink: bool = False) -> N
     shared_root.is_symlink() == expect_symlink,
     f"Expected shared install symlink={expect_symlink}: {shared_root}",
   )
+  assert_deployable_payload(shared_root)
 
 
 def main() -> int:
@@ -157,6 +175,7 @@ def main() -> int:
     assert_true(
       shared_user_skill.exists(), f"Missing user-level install: {shared_user_skill}"
     )
+    assert_deployable_payload(shared_user_skill.parent)
     assert_true(
       not shared_user_skill.is_symlink(), "Expected copy mode for user install"
     )
@@ -182,6 +201,13 @@ def main() -> int:
       (codex_home_root / ".codex" / "skills" / "harness" / "SKILL.md").exists(),
       "Missing user-level Codex mirror install.",
     )
+    assert_deployable_payload(
+      codex_home_root / ".codex" / "skills" / "harness"
+    )
+    assert_true(
+      not (codex_home_root / ".codex" / "agents").exists(),
+      "Harness installation must not activate user-level Codex custom agents.",
+    )
     assert_contains(
       user_codex.stdout,
       "Codex can use the shared install and the native .codex/skills mirror.",
@@ -198,6 +224,7 @@ def main() -> int:
       (project_forge / ".forge" / "skills" / "harness" / "SKILL.md").exists(),
       "Missing ForgeCode mirror install.",
     )
+    assert_deployable_payload(project_forge / ".forge" / "skills" / "harness")
 
     project_droid = tmp_root / "project-droid"
     project_droid.mkdir()
@@ -209,6 +236,7 @@ def main() -> int:
       (project_droid / ".factory" / "skills" / "harness" / "SKILL.md").exists(),
       "Missing Droid mirror install.",
     )
+    assert_deployable_payload(project_droid / ".factory" / "skills" / "harness")
 
     project_codex = tmp_root / "project-codex"
     project_codex.mkdir()
@@ -219,6 +247,11 @@ def main() -> int:
     assert_true(
       (project_codex / ".codex" / "skills" / "harness" / "SKILL.md").exists(),
       "Missing Codex mirror install.",
+    )
+    assert_deployable_payload(project_codex / ".codex" / "skills" / "harness")
+    assert_true(
+      not (project_codex / ".codex" / "agents").exists(),
+      "Harness installation must not activate project-level Codex custom agents.",
     )
 
     project_openhands = tmp_root / "project-openhands"

@@ -6,6 +6,11 @@ import re
 import sys
 from pathlib import Path
 
+try:
+  import tomllib
+except ModuleNotFoundError:  # Python 3.10 compatibility
+  tomllib = None
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -15,11 +20,13 @@ REQUIRED_FILES = [
   ROOT / ".agents/skills/harness/references/agents-md-guide.md",
   ROOT / ".agents/skills/harness/references/agent-design-patterns.md",
   ROOT / ".agents/skills/harness/references/autonomous-experimentation.md",
+  ROOT / ".agents/skills/harness/references/codex-agent-adapter.md",
   ROOT / ".agents/skills/harness/references/orchestrator-template.md",
   ROOT / ".agents/skills/harness/references/team-examples.md",
   ROOT / ".agents/skills/harness/references/skill-writing-guide.md",
   ROOT / ".agents/skills/harness/references/skill-testing-guide.md",
   ROOT / ".agents/skills/harness/references/qa-agent-guide.md",
+  ROOT / ".agents/skills/harness/templates/codex-agent.toml",
   ROOT / "docs/compatibility/README.md",
   ROOT / "docs/compatibility/codex.md",
   ROOT / "docs/compatibility/forgecode.md",
@@ -131,6 +138,9 @@ ROOT_DOC_EXPECTATIONS = {
     "YAML frontmatter",
     "`name` and `description`",
   ],
+  "docs/compatibility/README.md": [
+    ".codex/agents/",
+  ],
 }
 
 COMPATIBILITY_EXPECTATIONS = {
@@ -151,6 +161,8 @@ COMPATIBILITY_EXPECTATIONS = {
     "python3 scripts/install_harness.py --scope user --layout codex",
     "YAML frontmatter",
     "`name` and `description`",
+    "codex-agent-adapter.md",
+    "codex-agent.toml",
   ],
   "droid.md": [
     ".agents/skills/harness/",
@@ -360,6 +372,61 @@ def check_autonomous_reference(failures: list[str]) -> None:
       fail(f"Autonomous experimentation reference is missing: {token}", failures)
 
 
+def check_codex_adapter(failures: list[str]) -> None:
+  path = ROOT / ".agents/skills/harness/references/codex-agent-adapter.md"
+  text = read_text(path).casefold()
+  required_headings = [
+    "## selection",
+    "## read-heavy delegation",
+    "## write isolation and ownership",
+    "## concurrency and depth",
+    "## permissions",
+    "## synthesis and partial failure",
+    "## custom agent template",
+  ]
+  for heading in required_headings:
+    if heading not in text:
+      fail(f"Codex adapter is missing heading: {heading}", failures)
+
+
+def check_codex_agent_template(failures: list[str]) -> None:
+  path = ROOT / ".agents/skills/harness/templates/codex-agent.toml"
+  text = read_text(path)
+  if tomllib is not None:
+    try:
+      data = tomllib.loads(text)
+    except tomllib.TOMLDecodeError as error:
+      fail(f"Codex agent template is invalid TOML: {error}", failures)
+      return
+  else:
+    data = {}
+    for key in ("name", "description"):
+      match = re.search(rf'^\s*{key}\s*=\s*"([^"]+)"\s*$', text, re.MULTILINE)
+      if match:
+        data[key] = match.group(1)
+    instructions = re.search(
+      r'^\s*developer_instructions\s*=\s*"""(.+?)"""\s*$',
+      text,
+      re.MULTILINE | re.DOTALL,
+    )
+    if instructions:
+      data["developer_instructions"] = instructions.group(1)
+
+  for key in ("name", "description", "developer_instructions"):
+    if not isinstance(data.get(key), str) or not data[key].strip():
+      fail(f"Codex agent template requires a non-empty string: {key}", failures)
+
+  for key in ("model", "model_reasoning_effort"):
+    if key in data or re.search(rf"^\s*{key}\s*=", text, re.MULTILINE):
+      fail(f"Codex agent template must inherit optional setting: {key}", failures)
+
+
+def check_portable_core_boundary(failures: list[str]) -> None:
+  path = ROOT / ".agents/skills/harness/SKILL.md"
+  if ".codex/" in read_text(path).casefold():
+    fail("Portable main skill must not require a .codex/ runtime path", failures)
+
+
 def check_for_banned_tokens(failures: list[str]) -> None:
   root = ROOT / ".agents/skills/harness"
   for path in sorted(root.rglob("*")):
@@ -476,6 +543,9 @@ def main() -> int:
   check_pattern_reference(failures)
   check_orchestrator_reference(failures)
   check_autonomous_reference(failures)
+  check_codex_adapter(failures)
+  check_codex_agent_template(failures)
+  check_portable_core_boundary(failures)
   check_for_banned_tokens(failures)
   check_installation_doc(failures)
   check_compatibility_docs(failures)

@@ -12,6 +12,8 @@ Typical generated files include:
 - `docs/harness/{domain}/roles/{role}.md`
 - `_workspace/{phase}_{role}_{artifact}.md`
 
+These are durable contracts, not mandatory ceremony for every internal step. Persist a handoff when another agent or phase must consume it, or when inspection, audit, resumption, or conflict resolution matters. Low-risk ephemeral coordination may use a concise runtime summary while final and public artifacts remain deterministic.
+
 Generated `SKILL.md` files under `.agents/skills/` should start with YAML frontmatter containing at least `name` and `description`, followed by the markdown body.
 
 Autonomous experiment workflows may additionally preserve deterministic run logs such as:
@@ -21,5 +23,7 @@ Autonomous experiment workflows may additionally preserve deterministic run logs
 - `_workspace/experiments/{run}/final-summary.md`
 
 Keep model-specific retries, shortcuts, and recovery heuristics in removable, rippable sections of the team spec or linked references instead of hard-wiring them into the core artifact contract.
+
+Portable team specs should name delegation eligibility, write ownership, synthesis responsibility, and partial-failure behavior whenever workers are used. Runtime-native mappings belong in removable adapters such as the optional [Codex agent adapter](../../.agents/skills/harness/references/codex-agent-adapter.md), not in the canonical artifact contract.
 
 This repository keeps `docs/harness/` as the canonical destination and now includes one docs-first starter example for reference without shipping example skills in the canonical source tree.
