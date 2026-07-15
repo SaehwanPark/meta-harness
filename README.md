@@ -22,6 +22,8 @@ Compared to the original Claude Code-based Harness, this project adds:
 - a standards-first repository layout built around `AGENTS.md`, `.agents/skills/`, and `docs/harness/`
 - concise, human-written `AGENTS.md` guidance built around repo-wide `WHAT / WHY / HOW` plus progressive disclosure
 - runtime-neutral artifact contracts based on skills, team specs, and deterministic `_workspace/` handoffs
+- capability-aware delegation guidance that favors bounded read-heavy workers and isolates parallel writes
+- an optional, removable Codex adapter and inactive custom-agent template without making Codex a canonical dependency
 - rippable harness design guidance that keeps temporary model-specific recovery logic easy to remove
 - a repo-local bootstrap installer for project-level and user-level skill installs
 - a tighter maintenance loop through repo-local validation and simpler, platform-independent conventions
@@ -46,6 +48,7 @@ Compared to the original Claude Code-based Harness, this project adds:
 - [Starter Research Example](docs/harness/starter-research/README.md)
 - [AGENTS Authoring Guide](.agents/skills/harness/references/agents-md-guide.md)
 - [Orchestrator Template](.agents/skills/harness/references/orchestrator-template.md)
+- [Optional Codex Agent Adapter](.agents/skills/harness/references/codex-agent-adapter.md)
 
 ## Repository Layout
 
@@ -93,6 +96,8 @@ See [Compatibility Guides](docs/compatibility/README.md) for path mappings and a
    - `docs/harness/<domain>/team-spec.md`
    - `_workspace/{phase}_{role}_{artifact}.md`
 
+Keep small, tightly coupled work in one agent. Delegate independent read-heavy exploration, review, tests, or summarization when context isolation or parallelism has concrete value. Require non-overlapping ownership or isolated checkouts for parallel writes. Persist `_workspace/` handoffs when they need auditability, resumption, or cross-agent synthesis; low-risk ephemeral coordination can return a bounded summary instead.
+
 Generated `SKILL.md` files should begin with YAML frontmatter containing at least `name` and `description` so native skill discovery can reliably select repo-specific generated skills.
 
 Good requests for Harness:
@@ -116,6 +121,7 @@ The main skill preserves the 6-phase workflow:
 6. Validation and Testing
 
 Pattern guidance lives in [.agents/skills/harness/references/agent-design-patterns.md](.agents/skills/harness/references/agent-design-patterns.md). Output-spec conventions live in [docs/harness/README.md](docs/harness/README.md).
+Codex users can optionally map portable patterns to native subagents and custom agents with the [Codex agent adapter](.agents/skills/harness/references/codex-agent-adapter.md); the adapter and its template ship inactive inside the skill package.
 Use the AGENTS guide when you need a short always-loaded repo contract, and keep evolving retry or recovery logic in rippable harness docs instead of the root file.
 Start from the [orchestrator template](.agents/skills/harness/references/orchestrator-template.md) when you need a durable workflow spec, or adapt the [starter research example](docs/harness/starter-research/README.md) when you want a concrete minimal package.
 

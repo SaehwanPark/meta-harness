@@ -5,8 +5,8 @@ Use this template when a workflow is reusable enough to deserve a top-level orch
 ## Authoring Rules
 
 - Define the goal before defining the roles.
-- Name every phase output and handoff file.
-- Prefer markdown specs and `_workspace/` artifacts over implied coordination.
+- Name every phase output and any durable handoff file.
+- Prefer markdown specs and `_workspace/` artifacts when coordination must be inspectable, resumable, audited, or consumed across agents. Allow bounded summaries for low-risk ephemeral coordination.
 - Add worker-delegation notes only where parallelism is clearly bounded.
 - Keep failure policy explicit. A reusable orchestrator should say what happens when a phase fails, stalls, or returns conflicting results.
 - Keep model-specific retries, shortcuts, and recovery heuristics in a clearly removable section instead of weaving them through the whole spec.
@@ -76,9 +76,16 @@ Describe the end-to-end outcome and the boundary of responsibility.
 - baseline comparison, if useful:
 
 ## Optional Worker Delegation Notes
+- eligible task classes and expected benefit:
 - safe parallel slices:
-- forbidden overlaps:
-- synthesis owner:
+- forbidden path, resource, or semantic overlaps:
+- write and test-resource ownership or environment isolation:
+- runtime-selected concurrency and maximum delegation depth:
+- result artifact or bounded summary format:
+- synthesis owner and acceptance criteria:
+- partial-worker failure policy:
+- conflicting-result resolution:
+- escalation trigger:
 
 ## Test Scenarios
 ### Normal flow

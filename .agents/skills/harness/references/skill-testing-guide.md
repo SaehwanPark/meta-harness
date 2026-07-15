@@ -180,3 +180,35 @@ Bundle a validation helper when:
 - the script reduces manual noise without hiding important judgment calls
 
 Keep the script small. It should enforce invariants, not replace human review.
+
+## 10. Evaluate Delegation Topology Changes
+
+When changing whether a workflow delegates work, compare the current guidance with the proposed guidance rather than comparing only skill versus no skill.
+
+Use the same:
+
+- task fixture and repository snapshot
+- model family and permission boundary
+- time budget and output contract
+- acceptance checks and grading rubric
+
+Start with four paired scenarios:
+
+1. a small near-miss that should remain direct and create no durable harness artifacts
+2. a read-heavy review with independent branches and one synthesis owner
+3. a write-heavy task that must reject overlapping writes or isolate them by ownership or checkout
+4. a failure case with one missing branch and conflicting findings that must preserve uncertainty
+
+Add a dynamic-backlog scenario only when supervisor behavior changes materially. Run one pair first and repeat only a tie or anomalous result. Blind the comparator to current-versus-proposed labels when practical.
+
+Score task correctness, evidence coverage, delegation appropriateness, synthesis quality, write safety, and coordination overhead. Measure elapsed time and token use only when the runtime exposes comparable telemetry; never infer unavailable usage.
+
+Apply these hard gates before comparing scores:
+
+- evaluation runs do not modify the canonical skill under test
+- parallel workers never make overlapping writes in one checkout
+- the synthesis owner and acceptance criteria are explicit
+- missing branches and unresolved conflicts are disclosed
+- no result invents evidence to fill a failed branch
+
+Treat a delegation change as high confidence only when it passes every hard gate, preserves correctness across applicable cases, improves the targeted dimension in more than one case, and does not regress the near-miss. Otherwise document and defer it.

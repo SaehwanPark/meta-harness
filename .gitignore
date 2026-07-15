@@ -31,5 +31,9 @@ Thumbs.db
 .env*
 .env
 
+# Python caches
+__pycache__/
+*.py[cod]
+
 # Local-only working docs
 docs/claude-code-to-codex-porting.local.md

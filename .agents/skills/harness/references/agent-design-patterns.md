@@ -8,7 +8,7 @@ Before choosing a pattern, choose the coordination style that fits the work:
 
 | Coordination style | Use when | Typical artifacts |
 | --- | --- | --- |
-| Single-agent workflow | one person or one skill can complete the job without durable specialist boundaries | one `SKILL.md`, one output contract |
+| Single-agent workflow | one agent and its selected skills can complete the job without losing important context | one `SKILL.md` or one output contract |
 | Sequential orchestration skill | work has clear phase dependencies | orchestrator `SKILL.md`, `_workspace/` handoffs |
 | Parallel worker fan-out | several bounded slices can run independently and then be merged | orchestrator spec, specialist skills, synthesis step |
 | Supervisor-led delegation | the backlog changes during execution and needs reassignment | team spec with routing and reassignment rules |
@@ -16,9 +16,9 @@ Before choosing a pattern, choose the coordination style that fits the work:
 
 Decision guide:
 
-- Start with single-agent unless role boundaries are clearly reusable.
+- Keep work single-agent when the task is small, tightly coupled, or cheaper to solve in one context.
 - Upgrade to sequential orchestration when outputs from one phase become required inputs to the next.
-- Upgrade to parallel worker fan-out only when the branches are genuinely independent.
+- Upgrade to parallel worker fan-out when branches are genuinely independent and context isolation, latency, or specialization has concrete value.
 - Upgrade to supervisor-led delegation when tasks cannot be fully assigned up front.
 - Keep hierarchical delegation shallow. If the tree grows deeper than two coordination layers, flatten it.
 
@@ -53,7 +53,7 @@ Sequential dependent work where each phase consumes the prior phase's artifact.
 ### Recommended Portable Implementation Style
 
 - use a sequential orchestrator skill
-- define a file handoff for every phase boundary
+- define a durable file handoff for boundaries that need inspection, resumption, audit, or cross-agent consumption; use a concise summary for trivial ephemeral transitions
 - keep each phase artifact narrow enough that the next phase can read it quickly
 - add a reviewer or QA phase only where a real quality gate exists
 
@@ -84,7 +84,8 @@ Parallel independent work followed by a synthesis step.
 - use bounded parallel workers only for clearly independent branches
 - keep every branch on the same input snapshot
 - define the synthesis criteria before work starts
-- preserve all branch artifacts so disagreements can be traced later
+- preserve branch artifacts when disagreements, audits, or later resumption must be traceable
+- keep read-heavy branches independent; for parallel writes, require non-overlapping ownership or isolated checkouts and otherwise serialize the work
 
 ## 3. Expert Pool
 
@@ -174,6 +175,7 @@ A coordinator manages a changing backlog and reallocates work as conditions chan
 - define the task queue format in markdown or JSON
 - assign work in chunks large enough to reduce churn
 - require explicit status updates when tasks are reassigned or blocked
+- isolate concurrent writers by ownership or checkout, and keep final integration with one owner
 
 ## 6. Hierarchical Delegation
 
@@ -203,6 +205,7 @@ A top-level goal breaks into sub-goals that may each need their own coordination
 - let the top level own global goals and acceptance criteria
 - let each subordinate layer own a bounded sub-domain
 - flatten the design if reporting lines start to hide rather than clarify dependencies
+- keep final reconciliation centralized and declare any exception to the default one-layer delegation depth
 
 ## Combined Patterns
 
@@ -214,6 +217,19 @@ Real harnesses often blend patterns:
 - Hierarchical Delegation + Pipeline: a top-level split into domains, each with its own ordered workflow
 
 When combining patterns, document the outermost pattern first, then note the local variation inside the relevant phase.
+
+## Delegation Decision Gate
+
+Before selecting a multi-agent pattern, record:
+
+- which work units are independent
+- whether the value comes from specialization, parallel latency, or context isolation
+- which paths or mutable resources each writer or test worker owns
+- whether permissions and tools are sufficient for every worker
+- who owns synthesis and final acceptance
+- how partial failures and conflicting results are reported
+
+If those answers are unclear, keep the workflow single-agent or sequential. Runtime support for subagents does not by itself justify delegation.
 
 ## Workflow Profile: Autonomous Experimentation
 

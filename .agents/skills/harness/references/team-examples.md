@@ -88,6 +88,8 @@ _workspace/
 
 - keep the hierarchy at two levels: supervisor plus domain leads
 - flatten further if sub-domain briefs become too thin to justify separate files
+- run frontend and backend writes concurrently only when file ownership is disjoint or each lead has an isolated checkout
+- keep integration and conflict resolution with one owner before QA begins
 
 ## Example 3: Comprehensive Code Review
 

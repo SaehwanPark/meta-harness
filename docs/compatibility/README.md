@@ -5,7 +5,7 @@ Harness keeps `.agents/skills/harness/` as the shared install path and adds nati
 | Agent | Shared skill path | Native path | Native files for agent-specific behavior |
 | --- | --- | --- | --- |
 | ForgeCode | `.agents/skills/harness/` or `~/.agents/skills/harness/` | `.forge/skills/harness/` or `~/forge/skills/harness/` | `.forge/agents/` or `~/forge/agents/` |
-| Codex | `.agents/skills/harness/` or `~/.agents/skills/harness/` | `.codex/skills/harness/` or `~/.codex/skills/harness/` | none |
+| Codex | `.agents/skills/harness/` or `~/.agents/skills/harness/` | `.codex/skills/harness/` or `~/.codex/skills/harness/` | optional `.codex/agents/` or `~/.codex/agents/` custom agents |
 | Droid | `.agents/skills/harness/` or `~/.agents/skills/harness/` | `.factory/skills/harness/` or `~/.factory/skills/harness/` | `.factory/droids/` or `~/.factory/droids/` |
 | OpenHands | `.agents/skills/harness/` or `~/.agents/skills/harness/` | none | `.openhands/` for setup scripts, hooks, and repo customization |
 | Aider | `.agents/skills/harness/` or `~/.agents/skills/harness/` | none | `.aider.conf.yml` for `AGENTS.md` loading |
