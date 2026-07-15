@@ -1,0 +1,6 @@
+scenario	baseline_score	proposed_score	baseline_gates	proposed_gates	verdict
+small_direct_task	98	100	pass	pass	proposed_narrow_win
+read_heavy_review	95	100	pass	pass	proposed_win
+overlapping_writes	84	98	pass	pass	proposed_win
+partial_failure_conflict	86	99	pass	pass	proposed_win
+
