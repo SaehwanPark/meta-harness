@@ -1,3 +1,9 @@
+---
+title: OpenHands Compatibility
+description: Install the shared Harness skill and keep optional OpenHands setup repository-local.
+layout: default
+---
+
 # OpenHands Compatibility
 
 ## Install Paths

@@ -1,3 +1,9 @@
+---
+title: Starter Research Example
+description: A minimal docs-first Harness package with a team spec and deterministic handoffs.
+layout: default
+---
+
 # Starter Research Example
 
 This starter example shows the smallest useful harness package for a research workflow without adding example skills to the canonical `.agents/skills/harness/` tree.

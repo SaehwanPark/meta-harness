@@ -1,3 +1,9 @@
+---
+title: ForgeCode Compatibility
+description: Install the shared Harness skill and optional native ForgeCode mirror.
+layout: default
+---
+
 # ForgeCode Compatibility
 
 ## Install Paths

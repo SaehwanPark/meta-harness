@@ -1,139 +1,137 @@
 <p align="center">
-  <img src="meta_harness_banner.png" alt="Harness Banner" width="600">
+  <img src="meta_harness_banner.png" alt="Meta Harness banner" width="600">
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License"></a>
-  <img src="https://img.shields.io/badge/Harness-Portable-black.svg" alt="Portable Harness">
+  <strong>Portable agent workflow design</strong><br>
+  Turn a project goal into reusable skills and inspectable handoffs.
+</p>
+
+<p align="center">
+  <a href="https://saehwanpark.github.io/meta-harness/">Documentation</a> ·
+  <a href="https://github.com/SaehwanPark/meta-harness">Source</a> ·
+  <a href="LICENSE">Apache 2.0</a>
 </p>
 
 # Meta Harness
 
-Meta Harness is a portable, standards-first meta-skill for designing domain-specific workflows, reusable specialist skills, and deterministic handoff artifacts.
+Meta Harness is a runtime-neutral meta-skill for designing domain-specific
+workflows, reusable specialist skills, and deterministic handoff artifacts.
+It is adapted from [the original Harness project](https://github.com/revfactory/harness)
+and distributed under the Apache 2.0 license.
 
-Current project version: `0.4`. See [Changelog](CHANGELOG.md) for checkpoint-based version history.
+Current project version: `0.5.0`. See the [changelog](CHANGELOG.md) for the
+checkpoint-based project history.
 
-Adapted from [the original Harness project](https://github.com/revfactory/harness) and distributed here under the same [Apache 2.0](LICENSE) license.
+## Start here
 
-## What This Adds
+The [Meta Harness documentation portal](https://saehwanpark.github.io/meta-harness/)
+is the recommended entry point. It covers installation, the six-phase workflow,
+architecture patterns, prompt design, compatibility, and durable output specs.
 
-Compared to the original Claude Code-based Harness, this project adds:
+For a quick project install:
 
-- a standards-first repository layout built around `AGENTS.md`, `.agents/skills/`, and `docs/harness/`
-- concise, human-written `AGENTS.md` guidance built around repo-wide `WHAT / WHY / HOW` plus progressive disclosure
-- runtime-neutral artifact contracts based on skills, team specs, and deterministic `_workspace/` handoffs
-- capability-aware delegation guidance that favors bounded read-heavy workers and isolates parallel writes
-- an optional, removable Codex adapter and inactive custom-agent template without making Codex a canonical dependency
-- rippable harness design guidance that keeps temporary model-specific recovery logic easy to remove
-- a repo-local bootstrap installer for project-level and user-level skill installs
-- a tighter maintenance loop through repo-local validation and simpler, platform-independent conventions
+~~~shell
+python3 scripts/install_harness.py \
+  --scope project \
+  --target /path/to/repo \
+  --layout standard
+~~~
 
-## What It Includes
+Then ask for a goal-shaped workflow, for example:
 
-- a 6-phase workflow for analysis, architecture, generation, integration, and validation
-- 6 architecture patterns: Pipeline, Fan-out/Fan-in, Expert Pool, Producer-Reviewer, Supervisor, and Hierarchical Delegation
-- an autonomous experimentation workflow profile for user-controlled compute
-- repo-local skills under `.agents/skills/`
-- durable output specs under `docs/harness/`
-- deterministic `_workspace/` handoff conventions
-- a small bootstrap installer plus validation and smoke-test scripts
+~~~text
+Design a reusable research harness for this repository.
+Keep the handoffs deterministic and validate one normal and one failure flow.
+~~~
 
-## Docs
+## What the repository contains
 
-- [Installation](docs/installation.md)
-- [Compatibility Guides](docs/compatibility/README.md)
-- [Sample Prompts](docs/sample-prompts.md)
-- [Changelog](CHANGELOG.md)
-- [Harness Output Specs](docs/harness/README.md)
-- [Starter Research Example](docs/harness/starter-research/README.md)
-- [AGENTS Authoring Guide](.agents/skills/harness/references/agents-md-guide.md)
-- [Orchestrator Template](.agents/skills/harness/references/orchestrator-template.md)
-- [Optional Codex Agent Adapter](.agents/skills/harness/references/codex-agent-adapter.md)
+- a six-phase workflow from domain analysis through validation;
+- six coordination patterns: Pipeline, Fan-out/Fan-in, Expert Pool,
+  Producer-Reviewer, Supervisor, and Hierarchical Delegation;
+- portable skills under `.agents/skills/`;
+- durable team specs and role contracts under `docs/harness/`;
+- deterministic `_workspace/` handoffs when inspection or resumption matters;
+- a bootstrap installer with standard and agent-specific layouts;
+- a removable Codex adapter without making Codex a canonical dependency.
 
-## Repository Layout
+## Six-phase workflow
 
-```text
-meta-harness/
-├── AGENTS.md
-├── .agents/skills/harness/
-│   ├── SKILL.md
-│   └── references/
-├── docs/harness/README.md
-├── docs/harness/starter-research/
-├── scripts/install_harness.py
-├── scripts/test_install_harness.py
-├── scripts/validate_codex_port.py
-└── LICENSE
-```
+| Phase | Question it answers |
+| --- | --- |
+| Domain analysis | What is this project, task, and quality bar? |
+| Team architecture | What coordination shape earns its complexity? |
+| Role and artifact definition | Who owns each output and handoff? |
+| Skill generation | What reusable behavior belongs in a skill? |
+| Integration and orchestration | How does information move between phases? |
+| Validation and testing | Does the workflow work, fail clearly, and stay maintainable? |
 
-## Install
+Read the [workflow guide](docs/guides/workflow.md) and
+[pattern guide](docs/guides/patterns.md) for the operational details.
+
+## Installation
 
 Install into a project:
 
-```shell
-python3 scripts/install_harness.py --scope project --target /path/to/repo --layout standard
-```
+~~~shell
+python3 scripts/install_harness.py \
+  --scope project \
+  --target /path/to/repo \
+  --layout standard
+~~~
 
 Install as a user-level shared skill:
 
-```shell
+~~~shell
 python3 scripts/install_harness.py --scope user --layout standard
-```
+~~~
 
-Use `--layout forgecode`, `--layout droid`, `--layout openhands`, or `--layout aider` when you want a client-specific mirror or follow-up guidance.
-Use `--layout codex` when you want Codex to see both the shared Harness tree and the native `.codex/skills/harness/` mirror.
-Harness installs the skill tree only; the target repository keeps ownership of its own `AGENTS.md`, `README.md`, and docs.
-See [Compatibility Guides](docs/compatibility/README.md) for path mappings and agent-specific follow-up.
+Use `--layout codex`, `--layout forgecode`, or `--layout droid` when a native
+mirror is useful. `openhands` and `aider` keep the shared skill path and add
+client-specific follow-up guidance. See the
+[installation guide](docs/installation.md) and
+[compatibility matrix](docs/compatibility/README.md).
 
-## Use
+The installer owns only the skill destinations. The target repository keeps
+ownership of its `AGENTS.md`, `README.md`, and documentation.
 
-1. Read [AGENTS.md](AGENTS.md).
-2. Read the main skill at [.agents/skills/harness/SKILL.md](.agents/skills/harness/SKILL.md).
-3. When a target repository needs durable repo-wide guidance, start from the [AGENTS Authoring Guide](.agents/skills/harness/references/agents-md-guide.md) and keep `AGENTS.md` limited to repo-wide `WHAT / WHY / HOW`.
-4. Generate the smallest durable artifact set that fits the domain:
-   - `.agents/skills/<domain>-orchestrator/SKILL.md`
-   - `.agents/skills/<specialist>/SKILL.md`
-   - `docs/harness/<domain>/team-spec.md`
-   - `_workspace/{phase}_{role}_{artifact}.md`
+## Repository contract
 
-Keep small, tightly coupled work in one agent. Delegate independent read-heavy exploration, review, tests, or summarization when context isolation or parallelism has concrete value. Require non-overlapping ownership or isolated checkouts for parallel writes. Persist `_workspace/` handoffs when they need auditability, resumption, or cross-agent synthesis; low-risk ephemeral coordination can return a bounded summary instead.
+The canonical source is `.agents/skills/harness/SKILL.md`. Generated skills
+must begin with YAML frontmatter containing at least `name` and `description`.
+Use `docs/harness/` for durable team specs and role briefs, and `_workspace/`
+for deterministic intermediate artifacts that need inspection, resumption, or
+cross-agent synthesis.
 
-Generated `SKILL.md` files should begin with YAML frontmatter containing at least `name` and `description` so native skill discovery can reliably select repo-specific generated skills.
+Keep `AGENTS.md` short and repo-wide. Put conditional detail in skills,
+references, or project documentation. Prefer direct work for small tasks and
+add workers only when boundaries, ownership, synthesis, and partial-failure
+behavior are explicit.
 
-Good requests for Harness:
+## Authoring guidance
 
-```text
-Build a reusable research harness for this repository.
-Design a review workflow with explicit QA handoffs.
-Define specialist skills and a team spec for this domain.
-Design an autonomous experiment harness for this repository with a fixed metric and a deterministic results ledger.
-```
-
-## Workflow and Patterns
-
-The main skill preserves the 6-phase workflow:
-
-1. Domain Analysis
-2. Team Architecture Design
-3. Role and Artifact Definition Generation
-4. Skill Generation
-5. Integration and Orchestration
-6. Validation and Testing
-
-Pattern guidance lives in [.agents/skills/harness/references/agent-design-patterns.md](.agents/skills/harness/references/agent-design-patterns.md). Output-spec conventions live in [docs/harness/README.md](docs/harness/README.md).
-Codex users can optionally map portable patterns to native subagents and custom agents with the [Codex agent adapter](.agents/skills/harness/references/codex-agent-adapter.md); the adapter and its template ship inactive inside the skill package.
-Use the AGENTS guide when you need a short always-loaded repo contract, and keep evolving retry or recovery logic in rippable harness docs instead of the root file.
-Start from the [orchestrator template](.agents/skills/harness/references/orchestrator-template.md) when you need a durable workflow spec, or adapt the [starter research example](docs/harness/starter-research/README.md) when you want a concrete minimal package.
+Read the AGENTS Authoring Guide
+(`.agents/skills/harness/references/agents-md-guide.md`) when a target repository
+needs durable repo-wide rules. Keep temporary model-specific recovery logic in
+a rippable harness layer. Every generated skill starts with YAML frontmatter
+and declares its `name` and `description`.
 
 ## Validation
 
-```shell
+Run the repository checks from the project root:
+
+~~~shell
+python3 scripts/validate_pages.py
 python3 scripts/test_install_harness.py
 python3 scripts/validate_codex_port.py
-```
+~~~
 
-The smoke test checks the installer across project and user scopes. The validator checks required files, README links, the short `AGENTS.md` contract, main-skill headings, pattern coverage, and the absence of removed runtime-specific paths in the canonical docs.
+The first check protects the rendered Pages source and internal navigation.
+The installer smoke test exercises project/user scopes, layouts, dry runs,
+replacement, and symlink mode. The Codex-port validator protects canonical
+paths, required references, frontmatter guidance, and legacy-path exclusions.
 
 ## License
 
-Apache 2.0
+Apache 2.0. See [LICENSE](LICENSE).

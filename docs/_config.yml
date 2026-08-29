@@ -1,0 +1,17 @@
+title: "Meta Harness"
+tagline: "Portable agent workflow design"
+description: "Design domain-specific workflows, reusable specialist skills, and deterministic handoff artifacts."
+url: "https://saehwanpark.github.io"
+baseurl: "/meta-harness"
+repository: "SaehwanPark/meta-harness"
+version: "0.5.0"
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"

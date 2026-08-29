@@ -1,46 +1,124 @@
+---
+title: Installation
+description: Install the canonical Meta Harness skill into a project or user-level skills directory.
+layout: default
+---
+
 # Installation
 
-Meta Harness ships with a repo-local bootstrap installer so you can install the canonical Harness skill into a project or into a user-level shared skills directory.
+Meta Harness is distributed as a repository-owned skill tree. The bootstrap
+installer copies that tree into a project or into your user-level skills
+directory; it does not take ownership of the target project's documentation.
 
-## Project Install
+## Choose an install scope
 
-Install the shared Harness skill into an existing repository:
+| Scope | Destination | Use it when… |
+| --- | --- | --- |
+| Project | `./.agents/skills/harness/` | one repository should carry its own Harness install |
+| User | `~/.agents/skills/harness/` | several repositories should share one install |
 
-```shell
-python3 scripts/install_harness.py --scope project --target /path/to/repo --layout standard
-```
+The project scope is the safer default for a reproducible repository setup.
+The user scope is convenient when you maintain several projects with the same
+Harness version.
 
-The installer creates `.agents/skills/harness/` inside the target repository and does not create or update the target repo's `AGENTS.md`, `README.md`, or docs.
+## Install into a project
 
-## User-Level Install
+Run this command from the Meta Harness checkout:
 
-Install Harness as a shared skill for agents that scan user-level `.agents/skills/` directories:
+~~~shell
+python3 scripts/install_harness.py \
+  --scope project \
+  --target /path/to/repo \
+  --layout standard
+~~~
 
-```shell
+The target directory must already exist. The installer creates the shared
+`.agents/skills/harness/` path and preserves the target's `AGENTS.md`,
+`README.md`, and documentation.
+
+## Install for your user account
+
+~~~shell
 python3 scripts/install_harness.py --scope user --layout standard
-```
+~~~
 
-The installed skill tree includes the AGENTS authoring guide, but repo-level context files remain repo-owned and should be written intentionally.
+This writes to `~/.agents/skills/harness/` for the current user. Use this
+scope when the client discovers shared skills from the user home directory.
 
-## Layout Options
+## Select a layout
 
-- `standard`: installs the shared `.agents/skills/harness/` tree only
-- `forgecode`: also mirrors Harness into `.forge/skills/harness/` or `~/forge/skills/harness/`
-- `droid`: also mirrors Harness into `.factory/skills/harness/`
-- `openhands`: uses the shared `.agents/skills/harness/` tree
-- `codex`: also mirrors Harness into `.codex/skills/harness/`
-- `aider`: uses the shared tree and prints the `.aider.conf.yml` follow-up snippet for `AGENTS.md`
+`standard` installs only the portable shared tree. Select a native mirror
+when the client has a separate discovery convention:
 
-## Local Development
+| Layout | Adds | Follow-up |
+| --- | --- | --- |
+| `standard` | `.agents/skills/harness/` | none |
+| `codex` | `.codex/skills/harness/` alongside the shared tree | keeps custom agents inactive |
+| `forgecode` | `.forge/skills/harness/` alongside the shared tree | reserve `.forge/agents/` for native agents |
+| `droid` | `.factory/skills/harness/` alongside the shared tree | reserve `.factory/droids/` for native droids |
+| `openhands` | shared tree only | keep optional setup in `.openhands/` |
+| `aider` | shared tree only | add `AGENTS.md` to Aider's read list |
 
-1. Read [AGENTS.md](../AGENTS.md) for repo-wide rules.
-2. Read [.agents/skills/harness/SKILL.md](../.agents/skills/harness/SKILL.md) for the main workflow.
-3. Run `python3 scripts/test_install_harness.py` to smoke test the installer.
-4. Run `python3 scripts/validate_codex_port.py` for structural validation.
+See the [compatibility matrix](compatibility/README.html) for exact paths and
+client-specific notes.
 
-## Notes
+## Verify and repeat safely
 
-- The canonical source remains in `.agents/skills/harness/` in this repository.
-- Use `.agents/skills/harness/references/agents-md-guide.md` when a target repo needs a short, deliberate `AGENTS.md`.
-- See [Compatibility Guides](compatibility/README.md) for agent-specific path and config details.
-- Use `--mode symlink` if you want the installed skill to point back to this repository during local iteration.
+Preview a resolved install without changing any destination:
+
+~~~shell
+python3 scripts/install_harness.py \
+  --scope project \
+  --target /path/to/repo \
+  --layout codex \
+  --dry-run
+~~~
+
+Re-running an install fails when a destination already exists. Use
+`--force` only after confirming the destination is the Harness tree you intend
+to replace:
+
+~~~shell
+python3 scripts/install_harness.py \
+  --scope project \
+  --target /path/to/repo \
+  --layout standard \
+  --force
+~~~
+
+During local Harness development, `--mode symlink` can point a destination at
+this checkout so changes are visible immediately:
+
+~~~shell
+python3 scripts/install_harness.py \
+  --scope project \
+  --target /path/to/repo \
+  --layout standard \
+  --mode symlink
+~~~
+
+Use symlink mode only when the target intentionally depends on this working
+copy. Use the default copy mode for a standalone install.
+
+The installer does not create or update the target repo's `AGENTS.md`,
+`README.md`, or docs. The [AGENTS Authoring Guide](https://github.com/SaehwanPark/meta-harness/blob/main/.agents/skills/harness/references/agents-md-guide.md)
+explains how to add durable target-repository guidance intentionally.
+
+> [!TIP]
+> If you are unsure which client path to use, start with `standard`. The
+> shared `.agents/skills/harness/` tree is the portable source; native mirrors
+> are optional discovery conveniences.
+
+## Validate the repository
+
+Run the same checks used by continuous integration from the Meta Harness root:
+
+~~~shell
+python3 scripts/test_install_harness.py
+python3 scripts/validate_codex_port.py
+~~~
+
+## Next step
+
+After installation, use a prompt that names the goal, output, and constraint.
+The [prompt library](sample-prompts.html) includes small starting points.
