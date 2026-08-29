@@ -1,3 +1,9 @@
+---
+title: Droid Compatibility
+description: Install the shared Harness skill and optional native Droid mirror.
+layout: default
+---
+
 # Droid Compatibility
 
 ## Install Paths

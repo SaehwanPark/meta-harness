@@ -35,5 +35,10 @@ Thumbs.db
 __pycache__/
 *.py[cod]
 
+# GitHub Pages build output
+_site/
+.jekyll-cache/
+.jekyll-metadata
+
 # Local-only working docs
 docs/claude-code-to-codex-porting.local.md

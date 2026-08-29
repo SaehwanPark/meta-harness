@@ -274,10 +274,11 @@ def check_root_docs_markdown(failures: list[str]) -> None:
       if not is_local_link(target):
         continue
       path_part = target.split("#", 1)[0]
-      if not path_part:
+      if not path_part or path_part.startswith(("{{", "{%")):
         continue
       resolved = (path.parent / path_part).resolve()
-      if not resolved.exists():
+      rendered_source = resolved.with_suffix(".md") if path_part.endswith(".html") else resolved
+      if not resolved.exists() and not rendered_source.exists():
         fail(
           f"Local link target does not exist in {path.relative_to(ROOT)}: {target}",
           failures,
@@ -491,7 +492,9 @@ def check_installation_doc(failures: list[str]) -> None:
 
   layouts = re.findall(r'"([^"]+)"', layout_match.group(1))
   for layout in layouts:
-    if not re.search(rf"- `{re.escape(layout)}`:", installation_text):
+    bullet = rf"-\s+{re.escape(layout)}\s*:"
+    table = rf"\|[^\n]*{re.escape(layout)}[^\n]*\|"
+    if not re.search(rf"(?:{bullet}|{table})", installation_text):
       fail(f"docs/installation.md is missing layout guidance for '{layout}'", failures)
 
   for command in INSTALL_VALIDATION_COMMANDS:

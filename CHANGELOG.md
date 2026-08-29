@@ -2,6 +2,13 @@
 
 This repository uses checkpoint-based versioning for the meta-harness project history.
 
+## 0.5.0
+
+- Scope: refined user-facing documentation and a GitHub Pages documentation portal
+- Added: Jekyll layout, responsive navigation, public workflow and pattern guides, and Pages deployment automation
+- Added: dependency-free Pages source and rendered-link validation in repository CI
+- Validation: installer smoke tests and Codex-port checks remain part of the release gate
+
 ## 0.4
 
 - Checkpoint: `b2a4b3a` (`Merge pull request #8 from SaehwanPark/feat/harness-modernization`)

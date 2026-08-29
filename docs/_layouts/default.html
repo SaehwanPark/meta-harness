@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  {% assign page_title = page.title | default: site.title %}
+  {% assign page_description = page.description | default: site.description %}
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title | escape }} · {{ site.title | escape }}</title>
+    <meta name="description" content="{{ page_description | escape }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ page_title | escape }}">
+    <meta property="og:description" content="{{ page_description | escape }}">
+    <meta property="og:url" content="{{ site.url }}{{ site.baseurl }}{{ page.url }}">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    <link rel="canonical" href="{{ site.url }}{{ site.baseurl }}{{ page.url }}">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header">
+      <div class="header-left">
+        <button
+          class="nav-toggle-btn"
+          type="button"
+          aria-controls="site-navigation"
+          aria-expanded="false"
+          aria-label="Open navigation"
+        >☰</button>
+        <a class="header-brand" href="{{ '/' | relative_url }}">
+          <span class="logo-icon" aria-hidden="true">◈</span>
+          <span>Meta Harness</span>
+          <span class="header-tagline">{{ site.tagline }}</span>
+        </a>
+      </div>
+      <div class="header-actions">
+        <span class="version-badge">v{{ site.version }}</span>
+        <a
+          class="github-link"
+          href="https://github.com/SaehwanPark/meta-harness"
+          target="_blank"
+          rel="noopener"
+        >
+          <svg aria-hidden="true" height="18" width="18" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2.2.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+          </svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="app-container">
+      <aside id="site-navigation" class="sidebar" aria-label="Documentation navigation">
+        <nav>
+          <div class="nav-section">
+            <div class="nav-section-title">Start here</div>
+            <ul class="nav-list">
+              <li class="nav-item"><a class="nav-link" href="{{ '/' | relative_url }}">⌂ Documentation portal</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ '/installation.html' | relative_url }}">↗ Installation</a></li>
+            </ul>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Design a harness</div>
+            <ul class="nav-list">
+              <li class="nav-item"><a class="nav-link" href="{{ '/guides/workflow.html' | relative_url }}">◎ Six-phase workflow</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ '/guides/patterns.html' | relative_url }}">◇ Architecture patterns</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ '/sample-prompts.html' | relative_url }}">✦ Prompt library</a></li>
+            </ul>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Use with your agent</div>
+            <ul class="nav-list">
+              <li class="nav-item"><a class="nav-link" href="{{ '/compatibility/README.html' | relative_url }}">▦ Compatibility matrix</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ '/compatibility/codex.html' | relative_url }}">⌘ Codex integration</a></li>
+            </ul>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Reference</div>
+            <ul class="nav-list">
+              <li class="nav-item"><a class="nav-link" href="{{ '/harness/README.html' | relative_url }}">▤ Output specifications</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ '/harness/starter-research/README.html' | relative_url }}">▱ Starter research example</a></li>
+              <li class="nav-item"><a class="nav-link" href="https://github.com/SaehwanPark/meta-harness/blob/main/CHANGELOG.md" target="_blank" rel="noopener">↺ Changelog</a></li>
+            </ul>
+          </div>
+        </nav>
+      </aside>
+
+      <main id="main-content" class="main-content">
+        {{ content }}
+
+        <footer class="site-footer">
+          <div>Meta Harness is released under the Apache 2.0 license.</div>
+          <div>
+            <a href="https://github.com/SaehwanPark/meta-harness" target="_blank" rel="noopener">GitHub repository</a>
+          </div>
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        const navButton = document.querySelector(".nav-toggle-btn");
+        const sidebar = document.querySelector(".sidebar");
+        const navLinks = document.querySelectorAll(".nav-link");
+
+        if (navButton && sidebar) {
+          navButton.addEventListener("click", function () {
+            const open = sidebar.classList.toggle("open");
+            navButton.setAttribute("aria-expanded", String(open));
+            navButton.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+          });
+
+          navLinks.forEach(function (link) {
+            link.addEventListener("click", function () {
+              sidebar.classList.remove("open");
+              navButton.setAttribute("aria-expanded", "false");
+              navButton.setAttribute("aria-label", "Open navigation");
+            });
+          });
+        }
+
+        function normalize(path) {
+          const withoutIndex = path.replace(/\/index\.html$/, "/");
+          return withoutIndex.replace(/\/+$/, "") || "/";
+        }
+
+        const currentPath = normalize(window.location.pathname);
+        navLinks.forEach(function (link) {
+          const linkPath = normalize(new URL(link.href, window.location.href).pathname);
+          if (linkPath === currentPath) {
+            link.classList.add("active");
+            link.setAttribute("aria-current", "page");
+          }
+        });
+
+        document.querySelectorAll("blockquote").forEach(function (blockquote) {
+          const firstParagraph = blockquote.querySelector("p");
+          if (!firstParagraph) return;
+          const source = firstParagraph.innerHTML.trim();
+          const match = source.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*/i);
+          if (!match) return;
+          const type = match[1].toLowerCase();
+          const label = type.charAt(0).toUpperCase() + type.slice(1);
+          const icons = { note: "ℹ", tip: "✦", important: "◆", warning: "⚠", caution: "!" };
+          blockquote.classList.add("callout", "callout-" + type);
+          firstParagraph.innerHTML =
+            '<span class="callout-title">' + icons[type] + " " + label + "</span>" +
+            source.slice(match[0].length);
+        });
+      }());
+    </script>
+  </body>
+</html>

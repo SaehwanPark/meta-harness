@@ -1,3 +1,9 @@
+---
+title: Research Lead Role
+description: A bounded synthesis role for a docs-first repository research workflow.
+layout: default
+---
+
 # Research Lead
 
 ## Responsibilities

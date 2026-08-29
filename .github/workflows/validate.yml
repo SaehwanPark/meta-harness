@@ -18,6 +18,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Validate GitHub Pages source
+        run: python3 scripts/validate_pages.py
+
       - name: Run installer smoke tests
         run: python3 scripts/test_install_harness.py
 

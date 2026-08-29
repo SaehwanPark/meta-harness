@@ -1,3 +1,9 @@
+---
+title: Aider Compatibility
+description: Install the shared Harness skill and load repository guidance in Aider.
+layout: default
+---
+
 # Aider Compatibility
 
 ## Install Paths

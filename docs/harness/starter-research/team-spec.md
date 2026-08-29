@@ -1,3 +1,9 @@
+---
+title: Starter Research Team Spec
+description: A compact team topology and failure policy for a repository-specific research brief.
+layout: default
+---
+
 # Starter Research Team Spec
 
 ## Goal
