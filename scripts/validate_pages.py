@@ -16,6 +16,7 @@ REQUIRED_FILES = (
   DOCS / "assets" / "css" / "style.css",
   DOCS / "index.md",
   ROOT / ".github" / "workflows" / "pages.yml",
+  ROOT / ".github" / "workflows" / "validate.yml",
 )
 
 REQUIRED_LAYOUT_PATHS = (
@@ -80,6 +81,8 @@ def validate() -> list[str]:
   for path in REQUIRED_FILES:
     if not path.exists():
       errors.append(f"missing required Pages file: {path.relative_to(ROOT)}")
+  if errors:
+    return errors
 
   config = (DOCS / "_config.yml").read_text(encoding="utf-8")
   if 'baseurl: "/meta-harness"' not in config:
@@ -110,17 +113,18 @@ def validate() -> list[str]:
       source_path = resolve_source_path(page, target)
       if source_path is None:
         continue
-      if target.endswith(".md") and source_path.is_relative_to(DOCS):
+      clean_target = target.split("#", 1)[0].strip()
+      if clean_target.endswith(".md") and source_path.is_relative_to(DOCS):
         errors.append(
           f"public page links to Markdown source instead of rendered HTML: "
           f"{page.relative_to(ROOT)} -> {target}"
         )
-      elif target.endswith(".html") and not source_path.exists():
+      elif clean_target.endswith(".html") and not source_path.exists():
         errors.append(
           f"rendered page link has no Markdown source: "
           f"{page.relative_to(ROOT)} -> {target}"
         )
-      elif target.endswith(".md") and not source_path.exists():
+      elif clean_target.endswith(".md") and not source_path.exists():
         errors.append(
           f"local Markdown link has no source: {page.relative_to(ROOT)} -> {target}"
         )
