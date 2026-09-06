@@ -40,6 +40,24 @@ def main() -> int:
     assert_true(parsed["existing_roles"] == [], "unexpected role inventory")
     assert_true(parsed["existing_profiles"] == [".cursor/agents/reviewer.md"], "profile inventory missing")
 
+  with tempfile.TemporaryDirectory(prefix="meta-harness-skill-only-") as skill_tmp:
+    skill_root = Path(skill_tmp)
+    skill_path = skill_root / ".agents/skills/demo/SKILL.md"
+    skill_path.parent.mkdir(parents=True)
+    skill_path.write_text("---\nname: demo\ndescription: demo\n---\n", encoding="utf-8")
+    assert_true(
+      audit_target(skill_root).operation_classification == "skill-only update",
+      "skill-only classification missing",
+    )
+
+  with tempfile.TemporaryDirectory(prefix="meta-harness-migration-") as migration_tmp:
+    migration_root = Path(migration_tmp)
+    (migration_root / ".forge").mkdir()
+    assert_true(
+      audit_target(migration_root).operation_classification == "migration",
+      "migration classification missing",
+    )
+
   with tempfile.TemporaryDirectory(prefix="meta-harness-stale-profile-") as stale_tmp:
     stale_root = Path(stale_tmp)
     stale_profile = stale_root / ".cursor/agents/old.md"

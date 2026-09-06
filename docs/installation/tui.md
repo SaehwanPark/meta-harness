@@ -14,23 +14,25 @@ CLI; it does not contain a second filesystem mutation engine.
 
 1. Choose **Project** or **User** scope with the scope radio controls.
 2. Enter an existing project target when project scope is selected.
-3. Toggle first-class runtime checkboxes: Pi, Codex, Antigravity, Cursor
-   CLI/Agent, or Generic Agent Skills.
+3. Toggle first-class runtime checkboxes: Pi, Codex, Antigravity, and Cursor
+   CLI/Agent; select Generic Agent Skills separately for best-effort mode.
 4. Choose the optional Pi safe-agent-team integration, native profile
    generation, semantic model policy, and Copy/Symlink mode.
 5. Review the plan preview before applying it.
 
-Use Space to toggle a checkbox, arrows or Tab to move focus, Enter to continue,
-and `q` or Escape to cancel. The compact line-mode fallback uses numbered
-choices when the terminal is too small for the full view.
+The dependency-free frontend accepts all selections from the keyboard: enter
+scope, target, comma-separated runtime numbers, toggles, and single-letter
+actions. The compact line-mode fallback uses numbered choices when the
+terminal is too small for the full view.
 
 ## Preview and conflicts
 
 The preview shows every `CREATE`, `UPDATE`, `KEEP`, `SKIP`, `REMOVE`, and
 `CONFLICT` operation. The installer does not mutate anything while the preview
-is open. A conflict screen offers **Inspect**, **Back**, or **Repair**; repair
-means selecting a different target or explicitly replacing a managed Harness
-artifact, never overwriting an unknown user path.
+is open. A conflict screen offers **Inspect**, **Repair**, or **Cancel**;
+repair retries only managed Harness artifacts with an explicit force choice,
+never overwriting an unknown user path. Inspect leaves the plan unchanged;
+cancel is the default.
 
 A dry-run action renders the same plan and exits without writing. The final
 confirmation applies only after all destinations pass preflight, so one

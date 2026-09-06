@@ -54,7 +54,7 @@ except ModuleNotFoundError:  # pragma: no cover - supports direct package import
   )
 
 
-VERSION = "0.8.1"
+VERSION = "0.8.2"
 COMMANDS = ("install", "audit", "doctor", "compile", "validate")
 # Kept as a read-only compatibility alias for callers that imported the old
 # script constants before the planner refactor.
@@ -356,6 +356,10 @@ def run_compile(args: argparse.Namespace) -> int:
       model_policy=args.model_policy,
     )
     full_plan = build_install_plan(request)
+    if not (full_plan.root / ".agents" / "skills" / "harness" / "SKILL.md").is_file():
+      raise InstallerError(
+        "compile requires the canonical portable skill in the target; run install first"
+      )
     profile_operations = tuple(
       operation for operation in full_plan.operations if operation.generated_content is not None
     )

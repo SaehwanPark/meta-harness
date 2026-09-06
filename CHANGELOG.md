@@ -2,6 +2,11 @@
 
 This repository uses checkpoint-based versioning for the meta-harness project history.
 
+## 0.8.2
+
+- Hardened the audit classification contract for migrations, skill-only updates, and stale native profiles.
+- Clarified generic best-effort selection and fail-closed TUI behavior, and required an installed portable skill before standalone profile compilation.
+
 ## 0.8.1
 
 - Hardened audit evidence, generated profile serialization, role overrides, and fail-closed TUI actions after the v0.8.0 release.
