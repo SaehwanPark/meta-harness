@@ -20,8 +20,11 @@ workflows, reusable specialist skills, and deterministic handoff artifacts.
 It is adapted from [the original Harness project](https://github.com/revfactory/harness)
 and distributed under the Apache 2.0 license.
 
-Current project version: `0.5.0`. See the [changelog](CHANGELOG.md) for the
-checkpoint-based project history.
+Current project version: `0.6.0`. Meta Harness actively supports Pi, Codex,
+Antigravity, and Cursor CLI/Agent through one portable workflow model and
+runtime adapters. Generic Agent Skills use is best effort; legacy client
+layouts are unverified and deprecated. See the [changelog](CHANGELOG.md) for
+the checkpoint-based project history.
 
 ## Start here
 
@@ -53,8 +56,10 @@ Keep the handoffs deterministic and validate one normal and one failure flow.
 - portable skills under `.agents/skills/`;
 - durable team specs and role contracts under `docs/harness/`;
 - deterministic `_workspace/` handoffs when inspection or resumption matters;
-- a bootstrap installer with standard and agent-specific layouts;
-- a removable Codex adapter without making Codex a canonical dependency.
+- a bootstrap installer with a portable layout and optional native mirrors;
+- removable runtime adapters for Pi, Codex, Antigravity, and Cursor CLI/Agent
+  without forking the canonical skill;
+- explicit capability degradation and rippability rules for runtime profiles.
 
 ## Six-phase workflow
 
@@ -87,14 +92,24 @@ Install as a user-level shared skill:
 python3 scripts/install_harness.py --scope user --layout standard
 ~~~
 
-Use `--layout codex`, `--layout forgecode`, or `--layout droid` when a native
-mirror is useful. `openhands` and `aider` keep the shared skill path and add
-client-specific follow-up guidance. See the
-[installation guide](docs/installation.md) and
-[compatibility matrix](docs/compatibility/README.md).
+Use the shared `standard` layout as the portable default. Runtime-specific
+installation and capability guidance for the actively supported Pi, Codex,
+Antigravity, and Cursor CLI/Agent targets is in the
+[compatibility matrix](docs/compatibility/README.md). Generic clients are
+best-effort only; ForgeCode, Droid, OpenHands, and Aider are retained as
+unverified, deprecated migration notes.
 
 The installer owns only the skill destinations. The target repository keeps
 ownership of its `AGENTS.md`, `README.md`, and documentation.
+
+## Runtime support and architecture
+
+The portable contract is authoritative: `.agents/skills/` contains reusable
+behavior, `docs/harness/` contains role and team contracts, and `_workspace/`
+contains durable handoffs. Runtime-native profiles are removable adapters, not
+sources of truth. Read the [architecture guide](docs/architecture/README.md)
+and [compatibility matrix](docs/compatibility/README.md) before adding a
+runtime-specific integration.
 
 ## Repository contract
 

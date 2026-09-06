@@ -1,33 +1,21 @@
 ---
-title: OpenHands Compatibility
-description: Install the shared Harness skill and keep optional OpenHands setup repository-local.
+title: OpenHands Compatibility (Deprecated)
+description: Unverified and deprecated migration guidance for legacy OpenHands setups.
 layout: default
 ---
 
-# OpenHands Compatibility
+# OpenHands Compatibility (Deprecated)
 
-## Install Paths
+OpenHands is not a first-class Meta Harness target and is no longer actively
+verified. Existing `.openhands/` setup or hook files are repository-owned and
+are not generated or maintained by Meta Harness.
 
-- Shared project install: `.agents/skills/harness/`
-- Shared user install: `~/.agents/skills/harness/`
-- OpenHands repo customization: `.openhands/`
+For best-effort use, install the portable skill at `.agents/skills/harness/`
+and follow the [generic guide](generic.html). Verify skills, permissions,
+workspace behavior, and handoffs in your own OpenHands setup.
 
-## Install Commands
-
-Project install for OpenHands:
-
-```shell
-python3 scripts/install_harness.py --scope project --target /path/to/repo --layout openhands
-```
-
-User-level shared install:
-
-```shell
-python3 scripts/install_harness.py --scope user --layout openhands
-```
-
-## When To Use Shared Skills Vs OpenHands Repo Customization
-
-- Use `.agents/skills/harness/` for reusable Harness instructions, references, and shared workflow contracts.
-- Use `.openhands/setup.sh`, `.openhands/hooks.json`, or `.openhands/pre-commit.sh` only for repository-specific execution setup, enforcement hooks, or pre-commit behavior.
-- Prefer the project-level shared install when you are working inside a cloned repository. Use the user-level shared install when your OpenHands environment exposes shared skills across repositories.
+Historical (deprecated) paths and commands were `.agents/skills/harness/`,
+`~/.agents/skills/harness/`, `.openhands/`,
+`python3 scripts/install_harness.py --scope project --target /path/to/repo --layout openhands`,
+and `python3 scripts/install_harness.py --scope user --layout openhands`.
+They are retained for migration, not as a support guarantee.
