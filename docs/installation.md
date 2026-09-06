@@ -67,7 +67,7 @@ python3 scripts/install_harness.py install \
   --native-profiles --non-interactive
 ```
 
-Or compile profiles separately:
+Or compile profiles separately after the canonical skill is installed:
 
 ```shell
 python3 scripts/install_harness.py compile \
@@ -88,9 +88,10 @@ Inspect an existing repository without mutation:
 python3 scripts/install_harness.py audit --target /path/to/repo
 ```
 
-The audit reports `existing_skills`, `existing_roles`, `detected_runtimes`,
-`stale_artifacts`, `compatibility_risks`, `operation_classification`, and a
-`recommended_action`. Legacy artifacts receive an explicit keep/migrate/remove/
+The audit reports `existing_skills`, `existing_roles`, `existing_profiles`,
+`detected_runtimes`, `stale_artifacts`, `stale_profiles`,
+`compatibility_risks`, `operation_classification`, and a `recommended_action`.
+Legacy artifacts receive an explicit keep/migrate/remove/
 ignore decision; audit itself is read-only.
 
 Check prerequisites:

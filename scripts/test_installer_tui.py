@@ -25,6 +25,7 @@ def main() -> int:
   assert_true(request.agents == ("pi", "cursor"), "TUI request should use core normalization")
   assert_true("[x] pi" in render_main_screen(state), "TUI should render checked runtime")
   assert_true("[ ] generic" in render_main_screen(state), "TUI should render unchecked runtime")
+  assert_true("Portable compatibility (best effort)" in render_main_screen(state), "TUI should separate generic compatibility")
   assert_true(state.toggle_agent("generic").agents == ("pi", "cursor", "generic"), "toggle should be deterministic")
 
   with tempfile.TemporaryDirectory(prefix="meta-harness-tui-") as tmp:

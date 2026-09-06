@@ -152,10 +152,14 @@ def _classify(
 ) -> str:
   if not skills and not roles and not runtimes and not stale:
     return "new harness"
+  if stale and not skills and not roles:
+    return "migration"
   if stale or stale_profiles or duplicate_roles or duplicate_skills:
     return "drift repair"
   if any(item.name != "generic" for item in runtimes) and not skills:
     return "runtime adapter update"
+  if skills and not roles and all(item.name == "generic" for item in runtimes):
+    return "skill-only update"
   if skills or roles:
     return "existing harness extension"
   return "maintenance/audit"

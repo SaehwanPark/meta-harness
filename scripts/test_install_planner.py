@@ -151,6 +151,18 @@ def main() -> int:
     apply_install_plan(profiles)
     assert_true((profile_root / ".agents/skills/harness/SKILL.md").exists(), "portable skill missing after profile install")
     assert_true((profile_root / ".cursor/agents/meta-harness.md").exists(), "Cursor profile not written")
+    profiles_again = build_install_plan(
+      InstallRequest(
+        "project",
+        profile_root,
+        ("pi", "codex", "antigravity", "cursor"),
+        native_profiles=True,
+      )
+    )
+    assert_true(
+      all(operation.action == Action.KEEP for operation in profiles_again.operations),
+      "native profile reinstall should be idempotent",
+    )
 
     legacy_root = Path(tmp) / "legacy"
     legacy_root.mkdir()
@@ -241,6 +253,24 @@ def main() -> int:
     env["USERPROFILE"] = str(user_home)
     user = run_cli("install", "--scope", "user", "--agent", "generic", env=env)
     assert_true((user_home / ".agents/skills/harness/SKILL.md").exists(), "user install did not honor injected home")
+    compile_empty = Path(tmp) / "compile-empty"
+    compile_empty.mkdir()
+    compile_error = run_cli(
+      "compile",
+      "--scope",
+      "project",
+      "--target",
+      str(compile_empty),
+      "--agent",
+      "codex",
+      "--dry-run",
+      expect=1,
+    )
+    assert_true(
+      "run install first" in compile_error.stderr,
+      "compile should require the canonical target skill",
+    )
+
     cli_role_root = Path(tmp) / "cli-role"
     (cli_role_root / "docs/harness/demo/roles").mkdir(parents=True)
     cli_role = cli_role_root / "docs/harness/demo/roles/worker.md"

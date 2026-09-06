@@ -100,10 +100,13 @@ def render_main_screen(state: TuiState, compact: bool = False) -> str:
       "Actively supported coding agents",
     ]
   )
-  for agent in ACTIVE_AGENTS:
+  for agent in ACTIVE_AGENTS[:-1]:
     lines.append(f"  {_checkbox(agent in state.agents)} {agent}")
   lines.extend(
     [
+      "",
+      "Portable compatibility (best effort)",
+      f"  {_checkbox('generic' in state.agents)} generic Agent Skills only",
       "",
       f"  {_checkbox(state.pi_safe_agent_team != 'off')} Use pi-safe-agent-team when available",
       f"  {_checkbox(state.native_profiles)} Generate native execution profiles",
@@ -140,14 +143,23 @@ def _ask(output: TextIO, stream: TextIO, prompt: str, default: str = "") -> str:
 
 def _select_agents(value: str) -> tuple[str, ...]:
   selected: list[str] = []
+  invalid: list[str] = []
   values = [part.strip().casefold() for part in value.replace(" ", "").split(",") if part.strip()]
   for item in values:
     if item.isdigit():
       index = int(item) - 1
       if 0 <= index < len(ACTIVE_AGENTS):
         selected.append(ACTIVE_AGENTS[index])
+      else:
+        invalid.append(item)
     elif item in ACTIVE_AGENTS:
       selected.append(item)
+    else:
+      invalid.append(item)
+  if invalid:
+    raise InstallerError(
+      f"unknown runtime selection: {', '.join(invalid)}; choose 1-{len(ACTIVE_AGENTS)} or a runtime name"
+    )
   if not selected:
     raise InstallerError("select at least one runtime (for example: pi,cursor)")
   return tuple(normalize_agents(selected))
