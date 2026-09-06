@@ -169,6 +169,8 @@ def main() -> int:
     home_root.mkdir()
     home_env = os.environ.copy()
     home_env["HOME"] = str(home_root)
+    # Path.home() uses USERPROFILE on Windows, so inject both home variables.
+    home_env["USERPROFILE"] = str(home_root)
     user_standard = run_install("--scope", "user", "--layout", "standard", env=home_env)
     assert_agents_note(user_standard.stdout)
     shared_user_skill = home_root / ".agents" / "skills" / "harness" / "SKILL.md"
@@ -192,6 +194,7 @@ def main() -> int:
     codex_home_root.mkdir()
     codex_env = os.environ.copy()
     codex_env["HOME"] = str(codex_home_root)
+    codex_env["USERPROFILE"] = str(codex_home_root)
     user_codex = run_install("--scope", "user", "--layout", "codex", env=codex_env)
     assert_true(
       (codex_home_root / ".agents" / "skills" / "harness" / "SKILL.md").exists(),
