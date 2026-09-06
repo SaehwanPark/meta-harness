@@ -18,6 +18,7 @@ from typing import Iterable
 
 ACTIVE_RUNTIMES = ("pi", "codex", "antigravity", "cursor")
 LEGACY_ARTIFACTS = {
+  "codex": (".codex/skills/harness",),
   "forgecode": (".forge", ".forge/skills/harness", ".forge/agents"),
   "droid": (".factory", ".factory/skills/harness", ".factory/droids"),
   "openhands": (".openhands",),
