@@ -4,7 +4,7 @@ description: "Design domain-specific workflows, reusable specialist skills, and 
 url: "https://saehwanpark.github.io"
 baseurl: "/meta-harness"
 repository: "SaehwanPark/meta-harness"
-version: "0.8.3"
+version: "0.8.4"
 markdown: kramdown
 kramdown:
   input: GFM
