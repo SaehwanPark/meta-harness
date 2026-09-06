@@ -232,12 +232,15 @@ def run_tui(
       "[i] Install, [d] Dry Run, or [c] Cancel (c): ",
       "c",
     ).casefold()
-    if action == "c":
+    if action in ("c", "cancel"):
       output_stream.write("Cancelled.\n")
       return 0
-    if action == "d":
+    if action in ("d", "dry", "dry-run"):
       output_stream.write("Dry run only; no changes made.\n")
       return 0
+    if action not in ("i", "install"):
+      output_stream.write("No valid action selected; nothing was changed.\n")
+      return 1
     apply_install_plan(plan)
     output_stream.write("Installed selected Meta Harness artifacts.\n")
     return 0
