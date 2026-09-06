@@ -39,6 +39,16 @@ def main() -> int:
     parsed = json.loads(render_report(report, "json"))
     assert_true(parsed["existing_roles"] == [], "unexpected role inventory")
     assert_true(parsed["existing_profiles"] == [".cursor/agents/reviewer.md"], "profile inventory missing")
+    assert_true(
+      parsed["handoff"] == {
+        "producer": "phase-0-auditor",
+        "consumer": "phase-1-domain-analyst",
+        "path": "_workspace/00_contract_inventory.md",
+        "schema": "phase-0 inventory contract",
+        "completion": "audit-complete",
+      },
+      "audit handoff metadata missing",
+    )
 
   with tempfile.TemporaryDirectory(prefix="meta-harness-skill-only-") as skill_tmp:
     skill_root = Path(skill_tmp)

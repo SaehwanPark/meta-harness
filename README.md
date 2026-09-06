@@ -20,7 +20,7 @@ workflows, reusable specialist skills, and deterministic handoff artifacts.
 It is adapted from [the original Harness project](https://github.com/revfactory/harness)
 and distributed under the Apache 2.0 license.
 
-Current project version: `0.8.2`. Meta Harness actively supports Pi, Codex,
+Current project version: `0.8.3`. Meta Harness actively supports Pi, Codex,
 Antigravity, and Cursor CLI/Agent through one portable workflow model and
 runtime adapters. Generic Agent Skills use is best effort; legacy client
 layouts are unverified and deprecated. See the [changelog](CHANGELOG.md) for

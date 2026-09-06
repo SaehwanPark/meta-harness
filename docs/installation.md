@@ -90,8 +90,8 @@ python3 scripts/install_harness.py audit --target /path/to/repo
 
 The audit reports `existing_skills`, `existing_roles`, `existing_profiles`,
 `detected_runtimes`, `stale_artifacts`, `stale_profiles`,
-`compatibility_risks`, `operation_classification`, and a `recommended_action`.
-Legacy artifacts receive an explicit keep/migrate/remove/
+`compatibility_risks`, `operation_classification`, `recommended_action`, and
+`handoff` metadata. Legacy artifacts receive an explicit keep/migrate/remove/
 ignore decision; audit itself is read-only.
 
 Check prerequisites:

@@ -58,6 +58,15 @@ class AuditReport:
   compatibility_risks: tuple[str, ...] = ()
   operation_classification: str = "new harness"
   recommended_action: tuple[str, ...] = ()
+  handoff: dict[str, str] = field(
+    default_factory=lambda: {
+      "producer": "phase-0-auditor",
+      "consumer": "phase-1-domain-analyst",
+      "path": "_workspace/00_contract_inventory.md",
+      "schema": "phase-0 inventory contract",
+      "completion": "audit-complete",
+    }
+  )
 
   def to_dict(self) -> dict[str, object]:
     value = asdict(self)

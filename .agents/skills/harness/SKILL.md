@@ -192,6 +192,12 @@ detected_runtimes: []
 stale_artifacts: []
 compatibility_risks: []
 recommended_action: ...
+handoff:
+  producer: phase-0-auditor
+  consumer: phase-1-domain-analyst
+  path: _workspace/00_contract_inventory.md
+  schema: phase-0 inventory contract
+  completion: audit-complete
 ```
 
 Do not silently overwrite an existing source of truth. Resolve conflicts before
