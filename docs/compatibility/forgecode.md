@@ -1,34 +1,25 @@
 ---
-title: ForgeCode Compatibility
-description: Install the shared Harness skill and optional native ForgeCode mirror.
+title: ForgeCode Compatibility (Deprecated)
+description: Unverified and deprecated migration guidance for legacy ForgeCode layouts.
 layout: default
 ---
 
-# ForgeCode Compatibility
+# ForgeCode Compatibility (Deprecated)
 
-## Install Paths
+ForgeCode is not a first-class Meta Harness target and is no longer actively
+verified. Existing `.forge/skills/` or `.forge/agents/` files may remain in a
+repository, but this project makes no runtime capability or maintenance
+promise for them.
 
-- Shared project install: `.agents/skills/harness/`
-- Shared user install: `~/.agents/skills/harness/`
-- ForgeCode project mirror: `.forge/skills/harness/`
-- ForgeCode user mirror: `~/forge/skills/harness/`
+For best-effort use, install the portable skill at `.agents/skills/harness/`
+and follow the [generic guide](generic.html). Do not treat a ForgeCode mirror
+as a second source of truth. Remove or regenerate legacy native profiles only
+after reviewing their ownership.
 
-## Install Commands
-
-Project install with ForgeCode mirror:
-
-```shell
-python3 scripts/install_harness.py --scope project --target /path/to/repo --layout forgecode
-```
-
-User-level install with ForgeCode mirror:
-
-```shell
-python3 scripts/install_harness.py --scope user --layout forgecode
-```
-
-## When To Use Shared Skills Vs Native Agents
-
-- Use `.agents/skills/harness/` for reusable Harness guidance you want other agents to share.
-- Use `.forge/skills/harness/` when you want ForgeCode's native skill discovery path in addition to the shared one.
-- Use `.forge/agents/` or `~/forge/agents/` only for ForgeCode-specific agents with their own tool or model policy. Do not move shared Harness workflow logic there unless it is truly ForgeCode-only.
+Historical (deprecated) paths were `.agents/skills/harness/`,
+`~/.agents/skills/harness/`, `.forge/skills/harness/`, and `~/forge/skills/harness/`.
+The old commands
+`python3 scripts/install_harness.py --scope project --target /path/to/repo --layout forgecode`
+and `python3 scripts/install_harness.py --scope user --layout forgecode`
+remain documented only so existing automation can be migrated; they are not a
+current support claim.

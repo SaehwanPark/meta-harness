@@ -1,53 +1,58 @@
 ---
 title: Compatibility Matrix
-description: Choose the shared or native skill path for each supported agent client.
+description: Choose the portable or first-class runtime path for Meta Harness.
 layout: default
 ---
 
 # Compatibility Matrix
 
-Meta Harness keeps one portable source tree and adds native mirrors only when
-a client benefits from a separate discovery path. The shared tree is always
-the source of truth.
+Meta Harness has one portable skill source and four actively supported runtime
+targets. First-class means that the target has an owned adapter guide,
+capability mapping, and validation responsibility; it does not mean every
+feature is identical in every configuration.
 
-| Agent | Shared skill path | Native path | Native files for agent-specific behavior |
-| --- | --- | --- | --- |
-| ForgeCode | `.agents/skills/harness/` or `~/.agents/skills/harness/` | `.forge/skills/harness/` or `~/forge/skills/harness/` | `.forge/agents/` or `~/forge/agents/` |
-| Codex | `.agents/skills/harness/` or `~/.agents/skills/harness/` | `.codex/skills/harness/` or `~/.codex/skills/harness/` | optional `.codex/agents/` or `~/.codex/agents/` |
-| Droid | `.agents/skills/harness/` or `~/.agents/skills/harness/` | `.factory/skills/harness/` or `~/.factory/skills/harness/` | `.factory/droids/` or `~/.factory/droids/` |
-| OpenHands | `.agents/skills/harness/` or `~/.agents/skills/harness/` | none | optional `.openhands/` setup files |
-| Aider | `.agents/skills/harness/` or `~/.agents/skills/harness/` | none | `.aider.conf.yml` read configuration |
+## Support levels
 
-Use the shared path when several clients should consume the same reusable
-workflow. Add a native mirror only for client-specific discovery or execution
-behavior. Keep model settings and native agent definitions out of the
-portable skill contract.
+| Runtime | Status | Skill path | Native execution material | Typical capabilities |
+| --- | --- | --- | --- | --- |
+| [Pi](pi.html) | **First-class** | `.agents/skills/harness/` | Optional Pi extension; no required mirror | Skills; model/provider routing; workers and rich coordination with `pi-safe-agent-team` |
+| [Codex](codex.html) | **First-class** | `.agents/skills/harness/` or `~/.agents/skills/harness/` | Optional `.codex/agents/` | Skills; custom agents; runtime-dependent isolation, messaging, and persistence |
+| [Antigravity](antigravity.html) | **First-class** | `.agents/skills/harness/` | Optional runtime-native agent profiles | Skills; subagents and model/tool controls where enabled by the runtime |
+| [Cursor CLI / Agent](cursor.html) | **First-class** | `.agents/skills/harness/` | Optional `.cursor/agents/` | Skills; native profiles; runtime-dependent background execution and isolation |
+| [Generic](generic.html) | **Best effort** | Client-defined Agent Skills path, commonly `.agents/skills/` | None guaranteed | Portable instructions only; no assumed workers, isolation, messaging, or model routing |
 
-## Choose a client guide
+The portable source remains `.agents/skills/harness/` in a project and
+`~/.agents/skills/harness/` for a user-level install. Native profiles are
+adapters or generated artifacts, never a second source of truth.
 
-- [ForgeCode](forgecode.html) — shared and native ForgeCode paths.
-- [Codex](codex.html) — optional project/user mirror and native adapter.
-- [Droid](droid.html) — shared tree plus optional Factory mirror.
-- [OpenHands](openhands.html) — shared tree with repository setup only when needed.
-- [Aider](aider.html) — shared tree plus the required AGENTS read-list follow-up.
+## Capability and degradation policy
 
-## Shared versus native
+Adapters report capabilities as **supported**, **supported with extension**,
+**advisory**, or **unsupported**. If a runtime cannot enforce exclusive writes,
+use an isolated workspace, explicit non-overlapping ownership, or serialize the
+work. If native communication is unavailable, use a parent summary or a
+`_workspace/` handoff. Never silently claim a stronger guarantee.
 
-The shared path is the right default when:
+## Rippability
 
-- portability across clients matters;
-- a workflow should be installed without activating custom agents;
-- the target repository owns its own AGENTS.md, README.md, and docs;
-- model and runtime configuration should remain inherited.
+You can remove `.codex/agents/`, `.cursor/agents/`, or other native profiles
+without removing `.agents/skills/`, `docs/harness/`, or `_workspace/`. Runtime
+settings, retries, and model choices belong in removable adapters.
 
-The native path is useful only when a client does not discover the shared
-directory on its own. The installation command can create both paths for
-Codex, ForgeCode, and Droid.
+## Legacy clients
 
-> [!IMPORTANT]
-> Keep reusable Harness behavior in the shared skill tree. Use native
-> directories for native behavior, not as a second source of truth.
+ForgeCode, Droid, OpenHands, and Aider are retained as **unverified and
+deprecated** migration notes only. They are not first-class support targets.
+Use the [generic guide](generic.html) unless you have independently verified
+the client's Agent Skills behavior.
 
-Return to the [installation guide](../installation.html) for the command
-options, or read the [Codex guide](codex.html) for the most complete native
-mirror example.
+## Related architecture
+
+- [Portable contract](../architecture/portable-contract.html)
+- [Runtime capabilities](../architecture/runtime-capabilities.html)
+- [Role contract](../architecture/role-contract.html)
+- [Handoffs](../architecture/handoffs.html)
+
+See the [installation guide](../installation.html) for the currently shipped
+installer surface. Runtime-native generation remains optional and must not
+replace the portable contract.

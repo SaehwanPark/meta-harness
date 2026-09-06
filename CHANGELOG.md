@@ -2,6 +2,14 @@
 
 This repository uses checkpoint-based versioning for the meta-harness project history.
 
+## 0.6.0
+
+- Scope: clarified product positioning around one portable workflow model with four actively supported runtime adapters.
+- Added: first-class compatibility guidance for Pi, Codex, Antigravity, and Cursor CLI/Agent, plus a generic best-effort path.
+- Added: public architecture guides for the portable contract, runtime capabilities, role semantics, and handoffs.
+- Changed: capability-aware degradation and rippability rules are now explicit; native profiles are removable and non-canonical.
+- Deprecated: ForgeCode, Droid, OpenHands, and Aider compatibility claims are unverified migration notes rather than supported targets.
+
 ## 0.5.0
 
 - Scope: refined user-facing documentation and a GitHub Pages documentation portal

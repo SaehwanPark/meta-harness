@@ -20,14 +20,18 @@ workflows, reusable specialist skills, and deterministic handoff artifacts.
 It is adapted from [the original Harness project](https://github.com/revfactory/harness)
 and distributed under the Apache 2.0 license.
 
-Current project version: `0.5.0`. See the [changelog](CHANGELOG.md) for the
-checkpoint-based project history.
+Current project version: `0.6.0`. Meta Harness actively supports Pi, Codex,
+Antigravity, and Cursor CLI/Agent through one portable workflow model and
+runtime adapters. Generic Agent Skills use is best effort; legacy client
+layouts are unverified and deprecated. See the [changelog](CHANGELOG.md) for
+the checkpoint-based project history.
 
 ## Start here
 
 The [Meta Harness documentation portal](https://saehwanpark.github.io/meta-harness/)
-is the recommended entry point. It covers installation, the six-phase workflow,
-architecture patterns, prompt design, compatibility, and durable output specs.
+is the recommended entry point. It covers installation, the Phase 0 inventory
+and drift audit, the six execution phases, architecture patterns, prompt design,
+compatibility, and durable output specs.
 
 For a quick project install:
 
@@ -47,19 +51,22 @@ Keep the handoffs deterministic and validate one normal and one failure flow.
 
 ## What the repository contains
 
-- a six-phase workflow from domain analysis through validation;
+- a Phase 0 inventory and drift audit followed by six execution phases from domain analysis through validation;
 - six coordination patterns: Pipeline, Fan-out/Fan-in, Expert Pool,
   Producer-Reviewer, Supervisor, and Hierarchical Delegation;
 - portable skills under `.agents/skills/`;
 - durable team specs and role contracts under `docs/harness/`;
 - deterministic `_workspace/` handoffs when inspection or resumption matters;
-- a bootstrap installer with standard and agent-specific layouts;
-- a removable Codex adapter without making Codex a canonical dependency.
+- a bootstrap installer with a portable layout and optional native mirrors;
+- removable runtime adapters for Pi, Codex, Antigravity, and Cursor CLI/Agent
+  without forking the canonical skill;
+- explicit capability degradation and rippability rules for runtime profiles.
 
-## Six-phase workflow
+## Phase 0 audit plus six-phase workflow
 
 | Phase | Question it answers |
 | --- | --- |
+| Inventory and drift audit | What already exists, what is stale, and what operation is safe? |
 | Domain analysis | What is this project, task, and quality bar? |
 | Team architecture | What coordination shape earns its complexity? |
 | Role and artifact definition | Who owns each output and handoff? |
@@ -87,14 +94,27 @@ Install as a user-level shared skill:
 python3 scripts/install_harness.py --scope user --layout standard
 ~~~
 
-Use `--layout codex`, `--layout forgecode`, or `--layout droid` when a native
-mirror is useful. `openhands` and `aider` keep the shared skill path and add
-client-specific follow-up guidance. See the
-[installation guide](docs/installation.md) and
-[compatibility matrix](docs/compatibility/README.md).
+Use the shared `standard` layout as the portable default. Runtime-specific
+installation and capability guidance for the actively supported Pi, Codex,
+Antigravity, and Cursor CLI/Agent targets is in the
+[compatibility matrix](docs/compatibility/README.md). Generic clients are
+best-effort only; ForgeCode, Droid, OpenHands, and Aider are retained as
+unverified, deprecated migration notes.
 
-The installer owns only the skill destinations. The target repository keeps
-ownership of its `AGENTS.md`, `README.md`, and documentation.
+The installer owns only explicitly planned skill/profile destinations. The
+target repository keeps ownership of its `AGENTS.md`, `README.md`, and
+documentation. Legacy layout flags remain compatibility aliases and are
+unverified/deprecated; use the active-runtime compatibility matrix when the
+new planner is available.
+
+## Runtime support and architecture
+
+The portable contract is authoritative: `.agents/skills/` contains reusable
+behavior, `docs/harness/` contains role and team contracts, and `_workspace/`
+contains durable handoffs. Runtime-native profiles are removable adapters, not
+sources of truth. Read the [architecture guide](docs/architecture/README.md)
+and [compatibility matrix](docs/compatibility/README.md) before adding a
+runtime-specific integration.
 
 ## Repository contract
 

@@ -1,42 +1,29 @@
 ---
-title: Aider Compatibility
-description: Install the shared Harness skill and load repository guidance in Aider.
+title: Aider Compatibility (Deprecated)
+description: Unverified and deprecated migration guidance for legacy Aider setups.
 layout: default
 ---
 
-# Aider Compatibility
+# Aider Compatibility (Deprecated)
 
-## Install Paths
+Aider is not a first-class Meta Harness target and is no longer actively
+verified. Existing `.aider.conf.yml` settings remain user-owned; Meta Harness
+does not promise native agent or subagent behavior for Aider.
 
-- Shared project install: `.agents/skills/harness/`
-- Shared user install: `~/.agents/skills/harness/`
-- Aider config: `.aider.conf.yml` or `~/.aider.conf.yml`
+For best-effort use, install the portable skill at `.agents/skills/harness/`
+and follow the [generic guide](generic.html). If Aider supports an explicit
+read list in your setup, add `AGENTS.md` there and verify all other behavior
+manually.
 
-## Install Commands
-
-Project install for Aider:
-
-```shell
-python3 scripts/install_harness.py --scope project --target /path/to/repo --layout aider
-```
-
-User-level shared install for Aider:
-
-```shell
-python3 scripts/install_harness.py --scope user --layout aider
-```
-
-## Required Follow-Up
-
-Tell Aider to read `AGENTS.md` by adding this snippet to the repo or home-level config file:
+Historical (deprecated) paths and commands were `.agents/skills/harness/`,
+`~/.agents/skills/harness/`, `.aider.conf.yml`, `~/.aider.conf.yml`,
+`python3 scripts/install_harness.py --scope project --target /path/to/repo --layout aider`,
+and `python3 scripts/install_harness.py --scope user --layout aider`.
+The historical read-list shape was:
 
 ```yaml
 read:
   - AGENTS.md
 ```
 
-## When To Use Shared Skills Vs Native Aider Config
-
-- Use `.agents/skills/harness/` for the reusable Harness instructions and references.
-- Use `.aider.conf.yml` only for Aider configuration such as reading `AGENTS.md`.
-- There is no separate Aider-native agent or subagent format to mirror Harness into, so the shared skill tree is the canonical install surface.
+These references support migration only.

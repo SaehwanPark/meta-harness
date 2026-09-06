@@ -61,7 +61,7 @@ project's ownership.
 <div class="stat-grid">
   <div class="stat">
     <div class="stat-value">6</div>
-    <div class="stat-label">phases from analysis to validation</div>
+    <div class="stat-label">execution phases after the Phase 0 audit</div>
   </div>
   <div class="stat">
     <div class="stat-value">6</div>
@@ -86,9 +86,12 @@ The core design is intentionally small:
 - validation checks structure, behavior, and failure paths before the workflow
   is treated as reusable.
 
-## The six-phase path
+## Phase 0 audit plus the six-phase path
 
 <ol class="phase-list">
+  <li>
+    <div><strong>Inventory and drift audit</strong><span>Inspect existing skills, roles, profiles, adapters, conflicts, and stale artifacts before mutation.</span></div>
+  </li>
   <li>
     <div><strong>Domain analysis</strong><span>Inspect the project, task types, constraints, and existing guidance.</span></div>
   </li>
@@ -134,7 +137,7 @@ for the reusable skill and its contracts:
 
 | Surface | Purpose |
 | --- | --- |
-| `.agents/skills/harness/SKILL.md` | canonical six-phase workflow and portable defaults |
+| `.agents/skills/harness/SKILL.md` | canonical Phase 0 audit, six-phase workflow, and portable defaults |
 | `docs/harness/` | durable team-spec and role-artifact contracts |
 | `_workspace/` | deterministic intermediate handoffs when inspection or resumption matters |
 | `scripts/` | installer and repository validation |

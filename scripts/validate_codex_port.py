@@ -21,6 +21,11 @@ REQUIRED_FILES = [
   ROOT / ".agents/skills/harness/references/agent-design-patterns.md",
   ROOT / ".agents/skills/harness/references/autonomous-experimentation.md",
   ROOT / ".agents/skills/harness/references/codex-agent-adapter.md",
+  ROOT / ".agents/skills/harness/references/pi-agent-adapter.md",
+  ROOT / ".agents/skills/harness/references/antigravity-agent-adapter.md",
+  ROOT / ".agents/skills/harness/references/cursor-agent-adapter.md",
+  ROOT / ".agents/skills/harness/references/generic-agent-adapter.md",
+  ROOT / ".agents/skills/harness/references/runtime-capabilities.md",
   ROOT / ".agents/skills/harness/references/orchestrator-template.md",
   ROOT / ".agents/skills/harness/references/team-examples.md",
   ROOT / ".agents/skills/harness/references/skill-writing-guide.md",
@@ -39,6 +44,8 @@ REQUIRED_FILES = [
   ROOT / "docs/harness/starter-research/roles/research-lead.md",
   ROOT / "scripts/install_harness.py",
   ROOT / "scripts/test_install_harness.py",
+  ROOT / "scripts/audit_harness.py",
+  ROOT / "scripts/test_audit_harness.py",
   ROOT / "scripts/validate_codex_port.py",
 ]
 
@@ -47,7 +54,8 @@ MAIN_SKILL_HEADINGS = [
   "## required inputs",
   "## generated artifacts",
   "## portable defaults",
-  "## 6-phase workflow",
+  "## phase 0: inventory & drift audit",
+  "## phases 1–6 workflow",
   "## architecture selection",
   "## validation expectations",
   "## reference pointers",
@@ -102,6 +110,12 @@ MAIN_SKILL_REQUIRED_TOKENS = [
   "what / why / how",
   "rippable",
   "references/agents-md-guide.md",
+  "portable concepts",
+  "role contract",
+  "phase 0",
+  "handoff classes",
+  "semantic model policy",
+  "safe degradation",
   "require yaml frontmatter in every generated `skill.md`",
   "start every generated `skill.md` with yaml frontmatter containing at least `name` and `description`",
 ]
@@ -377,17 +391,26 @@ def check_codex_adapter(failures: list[str]) -> None:
   path = ROOT / ".agents/skills/harness/references/codex-agent-adapter.md"
   text = read_text(path).casefold()
   required_headings = [
-    "## selection",
-    "## read-heavy delegation",
-    "## write isolation and ownership",
-    "## concurrency and depth",
-    "## permissions",
-    "## synthesis and partial failure",
-    "## custom agent template",
+    "## capability mapping",
+    "## selection and lowering",
+    "## isolation, depth, and partial failure",
+    "## adapter acceptance checklist",
   ]
   for heading in required_headings:
     if heading not in text:
       fail(f"Codex adapter is missing heading: {heading}", failures)
+
+  required_terms = (
+    "skills —",
+    "roles and subagents",
+    "write isolation",
+    "communication",
+    "model policy",
+    "unavailable capabilities",
+  )
+  for term in required_terms:
+    if term not in text:
+      fail(f"Codex adapter is missing capability guidance: {term}", failures)
 
 
 def check_codex_agent_template(failures: list[str]) -> None:
@@ -424,8 +447,24 @@ def check_codex_agent_template(failures: list[str]) -> None:
 
 def check_portable_core_boundary(failures: list[str]) -> None:
   path = ROOT / ".agents/skills/harness/SKILL.md"
-  if ".codex/" in read_text(path).casefold():
-    fail("Portable main skill must not require a .codex/ runtime path", failures)
+  runtime_paths = (".codex/", ".cursor/", ".antigravity/", ".pi/")
+  operational_terms = re.compile(
+    r"\\b(must|required|canonical|install(?:ed)?|discover(?:y)?|source of truth|only)\\b",
+    re.IGNORECASE,
+  )
+  for line_number, line in enumerate(read_text(path).splitlines(), start=1):
+    if not any(token in line.casefold() for token in runtime_paths):
+      continue
+    # Rippability sections may name removable output paths as examples. A
+    # portable skill becomes runtime-coupled only when it asks users to use a
+    # native path as an operational requirement or source of truth.
+    if operational_terms.search(line) and not re.search(
+      r"\\b(remov|delet|rippab|optional)\\w*\\b", line, re.IGNORECASE
+    ):
+      fail(
+        f"Portable main skill contains an operational runtime path at line {line_number}: {line.strip()}",
+        failures,
+      )
 
 
 def check_for_banned_tokens(failures: list[str]) -> None:

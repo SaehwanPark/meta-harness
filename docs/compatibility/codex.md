@@ -1,51 +1,57 @@
 ---
 title: Codex Compatibility
-description: Install the shared Harness skill and optional native Codex mirror.
+description: Use the canonical skill with Codex and optionally generate native execution profiles.
 layout: default
 ---
 
 # Codex Compatibility
 
-## Install Paths
+Codex is a first-class Meta Harness target. The portable skill remains the
+source of truth; a native mirror or custom agent is optional execution
+material.
 
-- Shared project install: `.agents/skills/harness/`
-- Shared user install: `~/.agents/skills/harness/`
-- Codex project mirror: `.codex/skills/harness/`
-- Codex user mirror: `~/.codex/skills/harness/`
+## Paths and install commands
 
-## Install Commands
-
-Project install with Codex mirror:
+- Shared project skill: `.agents/skills/harness/`
+- Shared user skill: `~/.agents/skills/harness/`
+- Optional project mirror: `.codex/skills/harness/`
+- Optional user mirror: `~/.codex/skills/harness/`
+- Optional native profiles: `.codex/agents/` or the user-level Codex agents directory
 
 ```shell
 python3 scripts/install_harness.py --scope project --target /path/to/repo --layout codex
-```
-
-User-level install with Codex mirror:
-
-```shell
 python3 scripts/install_harness.py --scope user --layout codex
 ```
 
-## When To Use Shared Skills Vs Native Mirrors
+Start with the shared `standard` layout when native discovery is unnecessary.
+Do not put reusable domain behavior in `.codex/agents/`; keep those files
+runtime profiles that can be regenerated or removed.
 
-- Use `.agents/skills/harness/` for reusable Harness guidance that should stay canonical and portable.
-- Use `.codex/skills/harness/` when you want Codex's native discovery path in addition to the shared one.
-- Keep Codex-specific setup in `.codex/` only when it is genuinely native behavior and not part of the reusable Harness workflow contract.
+## Capability profile
 
-## Generated Skill Discovery
+Codex can discover Agent Skills and can use native/custom agent definitions.
+Worker spawning, write isolation, communication, permission handling, model
+and reasoning routing, and persistence vary with the Codex surface and project
+configuration. Treat ownership as advisory unless the selected execution
+profile provides isolation or enforcement.
 
-- Generated `SKILL.md` files should begin with YAML frontmatter.
-- Include at least `name` and `description` before the markdown heading so Codex can reliably discover repo-specific generated skills.
+Use the portable role contract and request semantic model policies (`inherit`,
+`balanced`, or `strong`) rather than requiring a model ID. Keep delegation
+shallow and assign non-overlapping files to parallel workers.
 
-## Optional Native Agent Adapter
+## Degradation
 
-Harness remains usable without native Codex agents. When a portable workflow has independent work units and benefits from context isolation, specialization, or parallel read-heavy work, use the [optional Codex agent adapter](https://github.com/SaehwanPark/meta-harness/blob/main/.agents/skills/harness/references/codex-agent-adapter.md) to map the workflow onto Codex subagents.
+If a requested native capability is unavailable, lower it explicitly: use an
+isolated workspace, state non-overlapping ownership, or serialize conflicting
+work. If messaging or durable state is unavailable, use parent-mediated
+summaries and `_workspace/` artifacts. Never assume a native profile makes a
+portable guarantee enforceable.
 
-The deployable skill includes an inactive [custom-agent TOML template](https://github.com/SaehwanPark/meta-harness/blob/main/.agents/skills/harness/templates/codex-agent.toml). Installing Harness does not copy it into `.codex/agents/` or activate an agent. Copy and adapt it intentionally only when the target repository needs a stable execution profile.
+## Rippability
 
-- Keep skills responsible for reusable knowledge and workflow.
-- Keep custom agents responsible for optional runtime execution settings.
-- Prefer bounded read-heavy delegation.
-- Require non-overlapping ownership or isolated worktrees for parallel writes.
-- Leave model and reasoning settings inherited unless the repository has measured reasons to pin them.
+Removing `.codex/agents/` or `.codex/skills/harness/` leaves the shared
+`.agents/skills/harness/` source and portable `docs/harness/` contracts intact.
+See the [portable contract](../architecture/portable-contract.html) and
+[compatibility matrix](README.html). The optional [codex-agent-adapter.md](https://github.com/SaehwanPark/meta-harness/blob/main/.agents/skills/harness/references/codex-agent-adapter.md)
+and `codex-agent.toml` template describe removable native execution material.
+Generated skill files must use YAML frontmatter with `name` and `description`.
