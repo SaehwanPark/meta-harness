@@ -47,6 +47,23 @@ def main() -> int:
     assert_true("Dry run only; no changes made." in output_stream.getvalue(), "TUI dry-run confirmation missing")
     assert_true(not (target / ".agents").exists(), "TUI dry-run must not mutate target")
 
+    invalid_target = Path(tmp) / "invalid-action"
+    invalid_target.mkdir()
+    invalid_input = TtyBuffer(
+      "project\n"
+      f"{invalid_target}\n"
+      "1\n"
+      "auto\n"
+      "n\n"
+      "inherit\n"
+      "copy\n"
+      "x\n"
+    )
+    invalid_output = TtyBuffer()
+    invalid_status = run_tui(input_stream=invalid_input, output_stream=invalid_output)
+    assert_true(invalid_status == 1, "invalid TUI action should fail closed")
+    assert_true(not (invalid_target / ".agents").exists(), "invalid action must not mutate target")
+
   print("OK: Installer TUI state and smoke tests passed.")
   return 0
 
