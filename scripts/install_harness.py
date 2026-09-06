@@ -54,7 +54,7 @@ except ModuleNotFoundError:  # pragma: no cover - supports direct package import
   )
 
 
-VERSION = "0.8.2"
+VERSION = "0.8.3"
 COMMANDS = ("install", "audit", "doctor", "compile", "validate")
 # Kept as a read-only compatibility alias for callers that imported the old
 # script constants before the planner refactor.
