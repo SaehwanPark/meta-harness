@@ -263,7 +263,13 @@ class RoleDefinition:
     object.__setattr__(self, "reads", tuple(str(value) for value in self.reads))
     object.__setattr__(self, "writes", tuple(str(value) for value in self.writes))
     object.__setattr__(self, "permissions", tuple(str(value) for value in self.permissions))
-    object.__setattr__(self, "runtime_overrides", dict(self.runtime_overrides))
+    normalized_overrides = dict(self.runtime_overrides)
+    unknown_overrides = set(normalized_overrides) - set(RUNTIME_SPECS)
+    if unknown_overrides:
+      raise InstallerError(
+        f"Unknown role runtime override(s): {', '.join(sorted(unknown_overrides))}"
+      )
+    object.__setattr__(self, "runtime_overrides", normalized_overrides)
     if self.source is not None:
       object.__setattr__(self, "source", Path(self.source).expanduser().resolve())
 
@@ -283,6 +289,40 @@ def _parse_contract_value(value: str) -> object:
       return []
     return [part.strip().strip('"').strip("'") for part in inner.split(",")]
   return value.strip('"').strip("'")
+
+
+def _parse_runtime_overrides(contract: str) -> dict[str, str]:
+  """Parse the optional ``runtime_overrides`` mapping without PyYAML."""
+  overrides: dict[str, list[str]] = {}
+  in_block = False
+  current_agent: str | None = None
+  for raw_line in contract.splitlines():
+    if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+      continue
+    indent = len(raw_line) - len(raw_line.lstrip(" "))
+    stripped = raw_line.strip()
+    if indent == 0 and stripped.startswith("runtime_overrides:"):
+      in_block = True
+      current_agent = None
+      inline = stripped.split(":", 1)[1].strip()
+      if inline and inline not in ("{}", "null"):
+        parsed = _parse_contract_value(inline)
+        if isinstance(parsed, str) and parsed:
+          overrides["*"] = [parsed]
+      continue
+    if in_block and indent == 0:
+      break
+    if not in_block:
+      continue
+    if indent == 2 and stripped.endswith(":"):
+      current_agent = stripped[:-1].strip().casefold()
+      overrides.setdefault(current_agent, [])
+      continue
+    if indent >= 4 and current_agent and ":" in stripped:
+      key, raw_value = stripped.split(":", 1)
+      value = str(_parse_contract_value(raw_value))
+      overrides[current_agent].append(f"{key.strip()}={value}")
+  return {agent: ", ".join(values) for agent, values in overrides.items() if agent != "*" and values}
 
 
 def parse_role_definition(path: str | Path) -> RoleDefinition:
@@ -329,6 +369,7 @@ def parse_role_definition(path: str | Path) -> RoleDefinition:
   model_policy = str(values.get("model_policy", "inherit"))
   completion = values.get("completion.artifact", values.get("artifact", ""))
   permissions = values.get("permissions", ())
+  runtime_overrides = _parse_runtime_overrides(block_match.group(1)) if block_match else {}
   def as_tuple(value: object) -> tuple[str, ...]:
     if isinstance(value, (list, tuple)):
       return tuple(str(item) for item in value)
@@ -344,6 +385,7 @@ def parse_role_definition(path: str | Path) -> RoleDefinition:
     model_policy=model_policy,
     completion_artifact=str(completion),
     permissions=as_tuple(permissions),
+    runtime_overrides=runtime_overrides,
   )
 
 
@@ -731,7 +773,9 @@ def build_install_plan(request: InstallRequest) -> InstallPlan:
       for role in roles:
         profile_name = f"{role.name}.{'toml' if agent == 'codex' else 'md'}"
         profile_path = root / spec.native_profile_dir / profile_name
-        override = request.runtime_overrides.get(agent, "")
+        override = request.runtime_overrides.get(
+          agent, role.runtime_overrides.get(agent, "")
+        )
         effective_policy = (
           request.model_policy if request.model_policy != "inherit" else role.model_policy
         )

@@ -462,20 +462,22 @@ def check_portable_core_boundary(failures: list[str]) -> None:
   path = ROOT / ".agents/skills/harness/SKILL.md"
   runtime_paths = (".codex/", ".cursor/", ".antigravity/", ".pi/")
   operational_terms = re.compile(
-    r"\\b(must|required|canonical|install(?:ed)?|discover(?:y)?|source of truth|only)\\b",
+    r"\b(must|required|canonical|install(?:ed)?|discover(?:y)?|source of truth|only)\b",
     re.IGNORECASE,
   )
-  for line_number, line in enumerate(read_text(path).splitlines(), start=1):
+  exception_terms = re.compile(r"\b(remov|delet|rippab|optional)\w*\b", re.IGNORECASE)
+  lines = read_text(path).splitlines()
+  for index, line in enumerate(lines):
     if not any(token in line.casefold() for token in runtime_paths):
       continue
     # Rippability sections may name removable output paths as examples. A
     # portable skill becomes runtime-coupled only when it asks users to use a
-    # native path as an operational requirement or source of truth.
-    if operational_terms.search(line) and not re.search(
-      r"\\b(remov|delet|rippab|optional)\\w*\\b", line, re.IGNORECASE
-    ):
+    # native path as an operational requirement or source of truth. Include
+    # nearby lines so a heading or continuation can state the exception.
+    context = "\n".join(lines[max(0, index - 2) : min(len(lines), index + 3)])
+    if operational_terms.search(line) and not exception_terms.search(context):
       fail(
-        f"Portable main skill contains an operational runtime path at line {line_number}: {line.strip()}",
+        f"Portable main skill contains an operational runtime path at line {index + 1}: {line.strip()}",
         failures,
       )
 
