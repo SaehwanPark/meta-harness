@@ -44,6 +44,8 @@ REQUIRED_FILES = [
   ROOT / "docs/harness/starter-research/roles/research-lead.md",
   ROOT / "scripts/install_harness.py",
   ROOT / "scripts/test_install_harness.py",
+  ROOT / "scripts/audit_harness.py",
+  ROOT / "scripts/test_audit_harness.py",
   ROOT / "scripts/validate_codex_port.py",
 ]
 

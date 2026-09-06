@@ -24,5 +24,8 @@ jobs:
       - name: Run installer smoke tests
         run: python3 scripts/test_install_harness.py
 
+      - name: Run inventory and drift audit smoke tests
+        run: python3 scripts/test_audit_harness.py
+
       - name: Run repository validator
         run: python3 scripts/validate_codex_port.py
