@@ -115,6 +115,14 @@ The actively supported adapters use this capability vocabulary as follows. Exact
 
 The generic row is a portability fallback, not a first-class execution guarantee. Keep portable skills usable there, but use one root agent, explicit ownership, and serialized execution whenever a role would otherwise conflict.
 
+## Rippability boundary
+
+Native profiles and runtime-specific recovery settings are removable lowering
+artifacts. Deleting them must leave the canonical `.agents/skills/` tree,
+portable role contracts, and `_workspace/` handoff contract usable. Promote an
+intentional native change back into the portable contract instead of editing a
+generated profile as a second source of truth.
+
 ## Handoff classes
 
 - **Ephemeral coordination**: status, a short clarification, or a bounded summary. Use native messaging when available.

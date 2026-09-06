@@ -2,6 +2,11 @@
 
 This repository uses checkpoint-based versioning for the meta-harness project history.
 
+## 0.8.4
+
+- Extended release validation to enforce all runtime adapters, capability statuses, active-support claims, generic boundaries, and legacy deprecation boundaries.
+- Documented the runtime capability rippability boundary.
+
 ## 0.8.3
 
 - Aligned the Phase 0 inventory output with the durable handoff contract by naming its producer, consumer, path, schema, and completion state.

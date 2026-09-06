@@ -108,6 +108,20 @@ INSTALL_VALIDATION_COMMANDS = [
 
 AGENTS_MAX_LINES = 24
 
+FIRST_CLASS_RUNTIME_ADAPTERS = (
+  "pi",
+  "codex",
+  "antigravity",
+  "cursor",
+  "generic",
+)
+CAPABILITY_STATUSES = (
+  "supported",
+  "supported_with_extension",
+  "advisory",
+  "unsupported",
+)
+
 REPO_AGENTS_REQUIRED_TOKENS = [
   "keep this file short and repo-wide.",
   "meta harness is a portable repository for designing repo-local agent harnesses.",
@@ -426,6 +440,41 @@ def check_codex_adapter(failures: list[str]) -> None:
       fail(f"Codex adapter is missing capability guidance: {term}", failures)
 
 
+def check_runtime_contract(failures: list[str]) -> None:
+  capabilities_path = ROOT / ".agents/skills/harness/references/runtime-capabilities.md"
+  capabilities = read_text(capabilities_path).casefold()
+  for status in CAPABILITY_STATUSES:
+    if not re.search(rf"\b{re.escape(status)}\b", capabilities):
+      fail(f"Runtime capability reference is missing status vocabulary: {status}", failures)
+  for token in ("capability lowering", "handoff classes", "runtime profiles", "rippability"):
+    if token not in capabilities:
+      fail(f"Runtime capability reference is missing contract guidance: {token}", failures)
+
+  for runtime in FIRST_CLASS_RUNTIME_ADAPTERS:
+    path = ROOT / f".agents/skills/harness/references/{runtime}-agent-adapter.md"
+    text = read_text(path).casefold()
+    for term in ("skill", "role", "write", "communication", "model", "fallback"):
+      if term not in text:
+        fail(f"{path.relative_to(ROOT)} is missing runtime guidance: {term}", failures)
+    if not any(re.search(rf"\b{re.escape(status)}\b", text) for status in CAPABILITY_STATUSES):
+      fail(f"{path.relative_to(ROOT)} does not classify capability status", failures)
+
+  matrix_path = ROOT / "docs/compatibility/README.md"
+  matrix = read_text(matrix_path).casefold()
+  for runtime in ("pi", "codex", "antigravity", "cursor cli / agent"):
+    if runtime not in matrix:
+      fail(f"Compatibility matrix is missing active runtime: {runtime}", failures)
+  if "first-class" not in matrix:
+    fail("Compatibility matrix is missing the first-class support claim", failures)
+  if "generic" not in matrix or "best effort" not in matrix:
+    fail("Compatibility matrix is missing the generic best-effort boundary", failures)
+  for legacy in ("forgecode", "droid", "openhands", "aider"):
+    path = ROOT / f"docs/compatibility/{legacy}.md"
+    legacy_text = read_text(path).casefold()
+    if legacy not in matrix or "unverified" not in legacy_text or "deprecated" not in legacy_text:
+      fail(f"Compatibility docs are missing legacy boundary: {legacy}", failures)
+
+
 def check_codex_agent_template(failures: list[str]) -> None:
   path = ROOT / ".agents/skills/harness/templates/codex-agent.toml"
   text = read_text(path)
@@ -604,6 +653,7 @@ def main() -> int:
   check_orchestrator_reference(failures)
   check_autonomous_reference(failures)
   check_codex_adapter(failures)
+  check_runtime_contract(failures)
   check_codex_agent_template(failures)
   check_portable_core_boundary(failures)
   check_for_banned_tokens(failures)
