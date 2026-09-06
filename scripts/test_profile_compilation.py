@@ -13,6 +13,8 @@ except ModuleNotFoundError:  # pragma: no cover
 
 from installer_core import (
   InstallRequest,
+  RoleDefinition,
+  _profile_content,
   apply_install_plan,
   build_install_plan,
   parse_role_definition,
@@ -74,6 +76,11 @@ def main() -> int:
       assert_true(parsed["name"] == "reviewer", "Codex profile name missing")
       assert_true("src/**" in parsed["developer_instructions"], "Codex read boundary missing")
       assert_true("Model policy: strong" in parsed["developer_instructions"], "role model policy missing")
+    # Values from a role brief must not be able to break generated profile syntax.
+    unsafe_role = RoleDefinition("unsafe", responsibility='quote """ and null\x00')
+    unsafe_profile = _profile_content("codex", root, unsafe_role)
+    if tomllib is not None:
+      tomllib.loads(unsafe_profile)
     cursor_text = cursor.read_text(encoding="utf-8")
     assert_true(cursor_text.startswith("---\n"), "Cursor profile must begin with frontmatter")
     assert_true("Runtime override (removable): provider=example" in cursor_text, "override missing")
