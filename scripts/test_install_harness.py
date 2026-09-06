@@ -145,11 +145,11 @@ def main() -> int:
       str(project_standard),
       "--layout",
       "standard",
-      expect_success=False,
     )
-    assert_true(
-      "Destination already exists" in rerun.stderr,
-      "Expected rerun without --force to fail cleanly.",
+    assert_contains(
+      rerun.stdout,
+      "KEEP",
+      "Expected an idempotent rerun to keep the managed installation.",
     )
     marker = project_standard / ".agents" / "skills" / "harness" / "marker.txt"
     marker.write_text("replace me", encoding="utf-8")

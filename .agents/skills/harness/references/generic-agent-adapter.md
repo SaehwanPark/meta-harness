@@ -23,6 +23,9 @@ best effort, not a first-class execution guarantee.
 
 ## Safe lowering
 
+Unavailable capabilities are explicit; unsupported worker, isolation, and
+communication guarantees must not be inferred from skill discovery.
+
 1. Preserve the canonical skill and runtime-neutral role contract.
 2. Keep work single-agent unless the client independently proves a stronger
    capability.

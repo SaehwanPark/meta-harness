@@ -43,9 +43,15 @@ REQUIRED_FILES = [
   ROOT / "docs/harness/starter-research/team-spec.md",
   ROOT / "docs/harness/starter-research/roles/research-lead.md",
   ROOT / "scripts/install_harness.py",
+  ROOT / "scripts/installer_core.py",
+  ROOT / "scripts/installer_tui.py",
   ROOT / "scripts/test_install_harness.py",
+  ROOT / "scripts/test_installer_tui.py",
+  ROOT / "scripts/test_install_planner.py",
   ROOT / "scripts/audit_harness.py",
   ROOT / "scripts/test_audit_harness.py",
+  ROOT / "scripts/validate_skills.py",
+  ROOT / "scripts/validate_adapters.py",
   ROOT / "scripts/validate_codex_port.py",
 ]
 
@@ -522,9 +528,12 @@ def check_root_doc_expectations(failures: list[str]) -> None:
 
 def check_installation_doc(failures: list[str]) -> None:
   installer_text = read_text(ROOT / "scripts/install_harness.py")
+  core_path = ROOT / "scripts/installer_core.py"
+  if core_path.exists():
+    installer_text += "\n" + read_text(core_path)
   installation_text = read_text(ROOT / "docs/installation.md")
 
-  layout_match = re.search(r'LAYOUTS = \(([^)]+)\)', installer_text)
+  layout_match = re.search(r'(?:LAYOUTS|LEGACY_LAYOUTS) = \(([^)]+)\)', installer_text)
   if layout_match is None:
     fail("Could not parse installer layouts from scripts/install_harness.py", failures)
     return

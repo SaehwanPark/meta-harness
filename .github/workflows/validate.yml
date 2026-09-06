@@ -21,8 +21,20 @@ jobs:
       - name: Validate GitHub Pages source
         run: python3 scripts/validate_pages.py
 
+      - name: Validate portable skills
+        run: python3 scripts/validate_skills.py
+
+      - name: Validate runtime adapters and fixtures
+        run: python3 scripts/validate_adapters.py
+
       - name: Run installer smoke tests
         run: python3 scripts/test_install_harness.py
+
+      - name: Run installer planner tests
+        run: python3 scripts/test_install_planner.py
+
+      - name: Run installer TUI state tests
+        run: python3 scripts/test_installer_tui.py
 
       - name: Run inventory and drift audit smoke tests
         run: python3 scripts/test_audit_harness.py

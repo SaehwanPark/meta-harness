@@ -2,6 +2,13 @@
 
 This repository uses checkpoint-based versioning for the meta-harness project history.
 
+## 0.7.0
+
+- Scope: replaced layout-centric installation with an inspectable, idempotent planner and modern runtime selection CLI.
+- Added: `InstallRequest`, `InstallPlan`, explicit operation states, multi-runtime `--agent`, audit/doctor/compile/validate commands, conflict protection, and legacy deprecation warnings.
+- Added: dependency-free portable skill and adapter validators, runtime fixtures, migration guidance, and planner scenario coverage.
+- Changed: managed installations can be safely re-run; unknown user-owned destinations remain conflicts even with `--force`.
+
 ## 0.6.0
 
 - Scope: clarified product positioning around one portable workflow model with four actively supported runtime adapters.
