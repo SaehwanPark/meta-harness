@@ -11,7 +11,12 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
   tomllib = None
 
-from installer_core import InstallRequest, apply_install_plan, build_install_plan
+from installer_core import (
+  InstallRequest,
+  apply_install_plan,
+  build_install_plan,
+  parse_role_definition,
+)
 
 
 def assert_true(condition: bool, message: str) -> None:
@@ -36,10 +41,18 @@ def main() -> int:
       "communication:\n"
       "  parent: orchestrator\n"
       "model_policy: strong\n"
+      "runtime_overrides:\n"
+      "  cursor:\n"
+      "    provider: role-provider\n"
       "completion:\n"
       "  artifact: _workspace/review.md\n"
       "```\n",
       encoding="utf-8",
+    )
+    parsed_role = parse_role_definition(role)
+    assert_true(
+      parsed_role.runtime_overrides.get("cursor") == "provider=role-provider",
+      "role runtime override was not parsed",
     )
     plan = build_install_plan(
       InstallRequest(
