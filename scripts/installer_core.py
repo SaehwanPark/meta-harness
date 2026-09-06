@@ -1001,6 +1001,7 @@ __all__ = [
   "InstallerError",
   "LEGACY_LAYOUTS",
   "MODES",
+  "MODEL_POLICIES",
   "RUNTIME_SPECS",
   "RuntimeSpec",
   "RoleDefinition",

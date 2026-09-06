@@ -19,9 +19,10 @@ python3 scripts/install_harness.py install \
 ```
 
 Use `--agent generic` for portable Agent Skills only. Repeat `--agent` instead
-of using a comma-separated value. `--native-profiles` adds optional generated
-runtime profiles for runtimes that expose a profile format. Compile selected
-role briefs explicitly when a repository has durable role contracts:
+of using a comma-separated value. `--native-profiles` adds optional generated runtime profiles for runtimes that
+expose a profile format. On `install`, pass repeatable `--role` paths to lower
+specific portable role briefs. Compile selected role briefs explicitly when a
+repository has durable role contracts:
 
 ```shell
 python3 scripts/install_harness.py compile \
