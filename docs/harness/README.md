@@ -30,8 +30,10 @@ summary in `_workspace/00_contract_inventory.md` when needed:
 ~~~yaml
 existing_skills: []
 existing_roles: []
+existing_profiles: []
 detected_runtimes: []
 stale_artifacts: []
+stale_profiles: []
 compatibility_risks: []
 recommended_action: ...
 ~~~
