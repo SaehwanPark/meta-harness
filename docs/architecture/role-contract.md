@@ -49,5 +49,15 @@ portable requirement.
 - Keep delegation shallow: root → worker by default, with a second layer only
   when dependencies justify it.
 
+## Native profile compilation
+
+`meta-harness compile --agent codex --agent cursor` reads role briefs under
+`docs/harness/**/roles/` (or paths supplied with `--role`) and lowers each
+portable role into optional runtime profiles. The generated file preserves the
+role name, responsibility, reads/writes, workspace, communication, completion
+evidence, and semantic model policy; it does not become canonical. Use
+`--model-policy` only for a deliberate semantic default, and keep exact
+provider/model settings in a removable runtime override.
+
 See [runtime capabilities](runtime-capabilities.html) for status and fallback
 semantics.

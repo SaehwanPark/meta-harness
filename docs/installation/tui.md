@@ -17,7 +17,7 @@ CLI; it does not contain a second filesystem mutation engine.
 3. Toggle first-class runtime checkboxes: Pi, Codex, Antigravity, Cursor
    CLI/Agent, or Generic Agent Skills.
 4. Choose the optional Pi safe-agent-team integration, native profile
-   generation, and Copy/Symlink mode.
+   generation, semantic model policy, and Copy/Symlink mode.
 5. Review the plan preview before applying it.
 
 Use Space to toggle a checkbox, arrows or Tab to move focus, Enter to continue,

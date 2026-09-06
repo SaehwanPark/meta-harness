@@ -36,6 +36,7 @@ def main() -> int:
       "1,4\n"
       "auto\n"
       "y\n"
+      "inherit\n"
       "copy\n"
       "d\n"
     )

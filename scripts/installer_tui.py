@@ -18,6 +18,7 @@ try:
   from installer_core import (
     ACTIVE_AGENTS,
     MODES,
+    MODEL_POLICIES,
     SOURCE_SKILL_DIR,
     Action,
     InstallPlan,
@@ -31,6 +32,7 @@ except ModuleNotFoundError:  # pragma: no cover
   from scripts.installer_core import (
     ACTIVE_AGENTS,
     MODES,
+    MODEL_POLICIES,
     SOURCE_SKILL_DIR,
     Action,
     InstallPlan,
@@ -50,6 +52,7 @@ class TuiState:
   mode: str = "copy"
   native_profiles: bool = True
   pi_safe_agent_team: str = "auto"
+  model_policy: str = "inherit"
   force: bool = False
   dry_run: bool = False
 
@@ -75,6 +78,7 @@ class TuiState:
       mode=self.mode,
       native_profiles=self.native_profiles,
       pi_safe_agent_team=self.pi_safe_agent_team,
+      model_policy=self.model_policy,
       force=self.force,
       dry_run=self.dry_run,
       source=source,
@@ -103,6 +107,7 @@ def render_main_screen(state: TuiState, compact: bool = False) -> str:
       "",
       f"  {_checkbox(state.pi_safe_agent_team != 'off')} Use pi-safe-agent-team when available",
       f"  {_checkbox(state.native_profiles)} Generate native execution profiles",
+      f"  Model policy: {state.model_policy}",
       f"  (*) Copy    {'( ) Symlink' if state.mode == 'copy' else '(*) Symlink'}",
       "  [ Continue ]   [ Dry Run ]   [ Cancel ]",
     ]
@@ -112,7 +117,7 @@ def render_main_screen(state: TuiState, compact: bool = False) -> str:
       [
         "Meta Harness Installer (compact)",
         f"scope={state.scope} target={state.target or '-'}",
-        f"agents={','.join(state.agents)} mode={state.mode} profiles={state.native_profiles}",
+        f"agents={','.join(state.agents)} mode={state.mode} profiles={state.native_profiles} model={state.model_policy}",
         "Enter values as prompted; q cancels.",
       ]
     )
@@ -184,6 +189,14 @@ def run_tui(
       "n",
       "no",
     )
+    model_policy = _ask(
+      output_stream,
+      input_stream,
+      "Model policy [inherit/fast/economy/balanced/strong] (inherit): ",
+      "inherit",
+    ).casefold()
+    if model_policy not in MODEL_POLICIES:
+      raise InstallerError("model policy must be inherit, fast, economy, balanced, or strong")
     mode = _ask(output_stream, input_stream, "Mode [copy/symlink] (copy): ", "copy").casefold()
     if mode not in MODES:
       raise InstallerError("mode must be copy or symlink")
@@ -194,6 +207,7 @@ def run_tui(
       mode=mode,
       native_profiles=profiles,
       pi_safe_agent_team=team,
+      model_policy=model_policy,
     )
     request = state.to_request(source)
     plan = build_install_plan(request)

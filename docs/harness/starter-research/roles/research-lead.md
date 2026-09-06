@@ -6,6 +6,25 @@ layout: default
 
 # Research Lead
 
+## Portable role contract
+
+```yaml
+role: research-lead
+responsibility: synthesize evidence into a concise research report
+inputs: [request-summary, source-findings]
+outputs: [final-report]
+resources:
+  reads: [_workspace/00_input/request-summary.md, _workspace/01_source_findings.md]
+  writes: [_workspace/final/report.md]
+workspace:
+  preference: isolated
+communication:
+  parent: orchestrator
+model_policy: strong
+completion:
+  artifact: _workspace/final/report.md
+```
+
 ## Responsibilities
 
 - define the question boundary and completion criteria

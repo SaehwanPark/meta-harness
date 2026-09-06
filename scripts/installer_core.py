@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -27,6 +28,7 @@ LEGACY_LAYOUTS = ("standard", "forgecode", "droid", "openhands", "aider", "codex
 MODES = ("copy", "symlink")
 SCOPES = ("project", "user")
 MODEL_POLICIES = ("inherit", "fast", "economy", "balanced", "strong")
+ROLE_NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 class Action(str, Enum):
@@ -122,6 +124,9 @@ class InstallRequest:
   legacy_layout: str | None = None
   remove_legacy: bool = False
   source: Path = SOURCE_SKILL_DIR
+  roles: tuple[Path, ...] = ()
+  model_policy: str = "inherit"
+  runtime_overrides: Mapping[str, str] = field(default_factory=dict)
 
   def __post_init__(self) -> None:
     if self.scope not in SCOPES:
@@ -130,15 +135,26 @@ class InstallRequest:
       raise InstallerError(f"Unknown install mode: {self.mode}")
     if self.pi_safe_agent_team not in ("auto", "on", "off"):
       raise InstallerError("pi_safe_agent_team must be auto, on, or off")
+    if self.model_policy not in MODEL_POLICIES:
+      raise InstallerError(
+        f"Unknown model policy '{self.model_policy}'. Choose one of: {', '.join(MODEL_POLICIES)}"
+      )
     if self.legacy_layout is not None and self.legacy_layout not in LEGACY_LAYOUTS:
       raise InstallerError(f"Unknown legacy layout: {self.legacy_layout}")
     normalized_agents = tuple(normalize_agents(self.agents))
     if not normalized_agents:
       raise InstallerError("at least one runtime agent must be selected")
+    unknown_overrides = set(self.runtime_overrides) - set(RUNTIME_SPECS)
+    if unknown_overrides:
+      raise InstallerError(
+        f"Unknown runtime override(s): {', '.join(sorted(unknown_overrides))}"
+      )
     object.__setattr__(self, "agents", normalized_agents)
     object.__setattr__(self, "source", Path(self.source).expanduser().resolve())
     if self.target is not None:
       object.__setattr__(self, "target", Path(self.target).expanduser().resolve())
+    object.__setattr__(self, "roles", tuple(Path(role) for role in self.roles))
+    object.__setattr__(self, "runtime_overrides", dict(self.runtime_overrides))
 
 
 @dataclass(frozen=True)
@@ -199,6 +215,9 @@ class InstallPlan:
         "force": self.request.force,
         "dry_run": self.request.dry_run,
         "legacy_layout": self.request.legacy_layout,
+        "roles": [str(role) for role in self.request.roles],
+        "model_policy": self.request.model_policy,
+        "runtime_overrides": dict(self.request.runtime_overrides),
       },
       "operations": [op.to_dict() for op in self.operations],
       "warnings": list(self.warnings),
@@ -220,6 +239,132 @@ class InstallPlan:
       lines.extend(("", "Notes:"))
       lines.extend(f"- {note}" for note in self.post_install_notes)
     return "\n".join(lines)
+
+
+@dataclass(frozen=True)
+class RoleDefinition:
+  name: str
+  source: Path | None = None
+  responsibility: str = "Run the portable Meta Harness workflow."
+  reads: tuple[str, ...] = ()
+  writes: tuple[str, ...] = ()
+  workspace: str = "shared"
+  communication: str = "parent-mediated summary"
+  model_policy: str = "inherit"
+  completion_artifact: str = ""
+  permissions: tuple[str, ...] = ()
+  runtime_overrides: Mapping[str, str] = field(default_factory=dict)
+
+  def __post_init__(self) -> None:
+    name = _slugify_role_name(self.name)
+    object.__setattr__(self, "name", name)
+    if self.model_policy not in MODEL_POLICIES:
+      raise InstallerError(f"Unknown role model policy: {self.model_policy}")
+    object.__setattr__(self, "reads", tuple(str(value) for value in self.reads))
+    object.__setattr__(self, "writes", tuple(str(value) for value in self.writes))
+    object.__setattr__(self, "permissions", tuple(str(value) for value in self.permissions))
+    object.__setattr__(self, "runtime_overrides", dict(self.runtime_overrides))
+    if self.source is not None:
+      object.__setattr__(self, "source", Path(self.source).expanduser().resolve())
+
+
+def _slugify_role_name(value: str) -> str:
+  text = re.sub(r"[^a-zA-Z0-9]+", "-", str(value).strip()).strip("-").casefold()
+  return text or "meta-harness"
+
+
+def _parse_contract_value(value: str) -> object:
+  value = value.strip()
+  if not value:
+    return ""
+  if value.startswith("[") and value.endswith("]"):
+    inner = value[1:-1].strip()
+    if not inner:
+      return []
+    return [part.strip().strip('"').strip("'") for part in inner.split(",")]
+  return value.strip('"').strip("'")
+
+
+def parse_role_definition(path: str | Path) -> RoleDefinition:
+  """Read a lightweight YAML contract block from a role brief.
+
+  Full YAML is intentionally not required: role contracts use a small scalar
+  and inline-list subset so compilation remains dependency-free. A prose-only
+  role brief still compiles with its filename and heading as a safe default.
+  """
+  role_path = Path(path).expanduser().resolve()
+  if not role_path.is_file():
+    raise InstallerError(f"Role definition does not exist: {role_path}")
+  text = role_path.read_text(encoding="utf-8")
+  block_match = re.search(r"```(?:yaml|yml)\s*\n(.*?)```", text, re.IGNORECASE | re.DOTALL)
+  values: dict[str, object] = {}
+  if block_match:
+    current_nested: str | None = None
+    for raw_line in block_match.group(1).splitlines():
+      if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+        continue
+      stripped = raw_line.strip()
+      if stripped.endswith(":") and ":" not in stripped[:-1]:
+        current_nested = stripped[:-1]
+        continue
+      if ":" not in stripped:
+        continue
+      key, raw_value = stripped.split(":", 1)
+      key = key.strip()
+      parsed = _parse_contract_value(raw_value)
+      values[key] = parsed
+      if current_nested and key in ("preference", "artifact", "parent", "target"):
+        values[f"{current_nested}.{key}"] = parsed
+  heading = re.search(r"^#\s+(.+?)\s*$", text, re.MULTILINE)
+  name = str(values.get("role") or _slugify_role_name(heading.group(1) if heading else role_path.stem))
+  responsibility = str(values.get("responsibility") or "Run the portable role and return evidence.")
+  reads = values.get("reads", values.get("resources.reads", ()))
+  writes = values.get("writes", values.get("resources.writes", ()))
+  workspace = str(values.get("workspace", values.get("workspace.preference", "shared")))
+  if isinstance(values.get("workspace"), dict):
+    workspace = str(values["workspace"].get("preference", "shared"))  # type: ignore[union-attr]
+  communication = str(
+    values.get("communication", values.get("communication.parent", "parent-mediated summary"))
+  )
+  model_policy = str(values.get("model_policy", "inherit"))
+  completion = values.get("completion.artifact", values.get("artifact", ""))
+  permissions = values.get("permissions", ())
+  def as_tuple(value: object) -> tuple[str, ...]:
+    if isinstance(value, (list, tuple)):
+      return tuple(str(item) for item in value)
+    return (str(value),) if value else ()
+  return RoleDefinition(
+    name=name,
+    source=role_path,
+    responsibility=responsibility,
+    reads=as_tuple(reads),
+    writes=as_tuple(writes),
+    workspace=workspace,
+    communication=communication,
+    model_policy=model_policy,
+    completion_artifact=str(completion),
+    permissions=as_tuple(permissions),
+  )
+
+
+def discover_role_definitions(root: Path, paths: Sequence[Path] = ()) -> tuple[RoleDefinition, ...]:
+  selected = tuple(paths) or tuple(sorted((root / "docs" / "harness").glob("**/roles/*.md")))
+  if not selected:
+    return (RoleDefinition("meta-harness"),)
+  return tuple(parse_role_definition(path) for path in selected)
+
+
+def normalize_roles(root: Path, roles: Iterable[Path]) -> tuple[Path, ...]:
+  result: list[Path] = []
+  for role in roles:
+    path = Path(role).expanduser()
+    if not path.is_absolute():
+      target_path = root / path
+      path = target_path if target_path.exists() or not Path(path).exists() else Path(path)
+    path = path.resolve()
+    if path not in result:
+      result.append(path)
+  return tuple(result)
 
 
 def normalize_agents(agents: Iterable[str]) -> list[str]:
@@ -381,31 +526,59 @@ def _skill_operation(
   return InstallOperation(Action.UPDATE, destination, source, reason="managed copy is stale")
 
 
-def _profile_content(agent: str, source: Path, model_policy: str = "inherit") -> str:
+def _toml_string(value: str) -> str:
+  return value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
+
+
+def _profile_content(
+  agent: str,
+  source: Path,
+  role: RoleDefinition,
+  model_policy: str = "inherit",
+  runtime_override: str = "",
+) -> str:
   skill_path = ".agents/skills/harness/SKILL.md"
+  reads = ", ".join(role.reads) or "declared portable inputs"
+  writes = ", ".join(role.writes) or "no repository writes unless the role contract says otherwise"
+  communication = role.communication or "parent-mediated summary"
+  completion = role.completion_artifact or "the role's declared completion evidence"
+  override_note = (
+    f"Runtime override (removable): {runtime_override}.\n" if runtime_override else ""
+  )
   if agent == "codex":
-    return (
-      '# Generated by Meta Harness; edit the portable role contract instead.\n'
-      'name = "meta-harness"\n'
-      'description = "Run the portable Meta Harness workflow with explicit handoffs and safe ownership."\n'
-      'developer_instructions = """\n'
-      f"Read {skill_path} and keep it authoritative.\n"
-      "Preserve declared role ownership, use isolated workspaces or serialization for conflicting writes, "
-      "and report missing capabilities or partial failures.\n"
+    instructions = (
+      f"Read {skill_path} as the source of truth.\n"
+      f"Responsibility: {role.responsibility}\n"
+      f"Read boundary: {reads}. Write boundary: {writes}.\n"
+      f"Workspace: {role.workspace}. Communication: {communication}.\n"
+      f"Completion evidence: {completion}. Preserve safe ownership and report partial failures.\n"
       f"Model policy: {model_policy}. Inherit runtime defaults unless an explicit override is justified.\n"
-      '"""\n'
+      + override_note
+    )
+    return (
+      "# Generated by Meta Harness; edit the portable role contract instead.\n"
+      f'name = "{_toml_string(role.name)}"\n'
+      f'description = "{_toml_string(role.responsibility)}"\n'
+      f'developer_instructions = """\n{instructions}"""\n'
     )
   label = RUNTIME_SPECS[agent].label
   return (
-    "<!-- Generated by Meta Harness; edit the portable role contract instead. -->\n"
     "---\n"
-    "name: meta-harness\n"
-    f"description: Run the portable Meta Harness workflow in {label}.\n"
-    "---\n\n"
-    f"# {label} execution profile\n\n"
-    f"Read `{skill_path}` as the source of truth. Preserve declared ownership, "
-    "isolate or serialize conflicting writes, and report unavailable capabilities.\n"
-    f"Model policy: `{model_policy}`; inherit runtime defaults unless overridden intentionally.\n"
+    f"name: {role.name}\n"
+    f'description: "{role.responsibility.replace(chr(34), chr(92) + chr(34))}"\n'
+    "---\n"
+    "<!-- Generated by Meta Harness; edit the portable role contract instead. -->\n\n"
+    f"# {label} execution profile: {role.name}\n\n"
+    f"Read `{skill_path}` as the source of truth.\n\n"
+    f"- Responsibility: {role.responsibility}\n"
+    f"- Reads: {reads}\n"
+    f"- Writes: {writes}\n"
+    f"- Workspace: {role.workspace}\n"
+    f"- Communication: {communication}\n"
+    f"- Completion evidence: {completion}\n"
+    f"- Model policy: `{model_policy}`; inherit runtime defaults unless overridden intentionally.\n"
+    + (f"- Runtime override (removable): {runtime_override}\n" if runtime_override else "")
+    + "\nDo not silently weaken a required ownership or capability guarantee.\n"
   )
 
 
@@ -425,8 +598,10 @@ def _profile_operation(
       existing = ""
     if existing == content:
       return InstallOperation(Action.KEEP, destination, generated_content=content, reason="profile is current")
-    if existing.startswith("# Generated by Meta Harness") or existing.startswith(
-      "<!-- Generated by Meta Harness"
+    if (
+      existing.startswith("# Generated by Meta Harness")
+      or existing.startswith("<!-- Generated by Meta Harness")
+      or "<!-- Generated by Meta Harness" in existing[:300]
     ):
       return InstallOperation(Action.UPDATE, destination, generated_content=content, reason="generated profile is stale")
   return InstallOperation(
@@ -540,18 +715,35 @@ def build_install_plan(request: InstallRequest) -> InstallPlan:
     )
 
   if request.native_profiles:
+    role_paths = normalize_roles(root, request.roles)
+    roles = discover_role_definitions(root, role_paths)
+    role_names = [role.name for role in roles]
+    if len(role_names) != len(set(role_names)):
+      raise InstallerError("role definitions must have unique slugified names")
     for agent in request.agents:
       spec = RUNTIME_SPECS[agent]
       if spec.native_profile_dir is None:
         if agent == "pi" and request.pi_safe_agent_team == "on":
           warnings.append("Pi safe-agent-team is an external optional integration; no native profile was written.")
+        elif agent == "generic":
+          warnings.append("Generic mode has no native profile format; portable skills remain canonical.")
         continue
-      profile_path = root / spec.native_profile_dir / (
-        "meta-harness.toml" if agent == "codex" else "meta-harness.md"
-      )
-      operations.append(
-        _profile_operation(agent, profile_path, _profile_content(agent, source), root, request.force)
-      )
+      for role in roles:
+        profile_name = f"{role.name}.{'toml' if agent == 'codex' else 'md'}"
+        profile_path = root / spec.native_profile_dir / profile_name
+        override = request.runtime_overrides.get(agent, "")
+        effective_policy = (
+          request.model_policy if request.model_policy != "inherit" else role.model_policy
+        )
+        operations.append(
+          _profile_operation(
+            agent,
+            profile_path,
+            _profile_content(agent, source, role, effective_policy, override),
+            root,
+            request.force,
+          )
+        )
 
   if request.remove_legacy:
     for layout, (project_relative, user_relative) in LEGACY_MIRRORS.items():
@@ -731,6 +923,7 @@ __all__ = [
   "MODES",
   "RUNTIME_SPECS",
   "RuntimeSpec",
+  "RoleDefinition",
   "SCOPES",
   "SOURCE_SKILL_DIR",
   "apply_install_plan",
@@ -738,6 +931,9 @@ __all__ = [
   "destination_specs",
   "install_request_from_values",
   "normalize_agents",
+  "parse_role_definition",
+  "discover_role_definitions",
+  "normalize_roles",
   "payload_digest",
   "resolve_root",
   "runtime_selections",
