@@ -1,19 +1,24 @@
 ---
 title: CLI Installation
-description: Use the deterministic Meta Harness planner from scripts and CI.
+description: Use the deterministic Meta Harness planner from the installed CLI.
 layout: default
 ---
 
 # CLI Installation
 
-The CLI parses requests into an inspectable `InstallPlan`. The interactive
-frontend renders the same plan; filesystem mutation happens only
-when the plan has no conflicts and dry-run is not selected.
+The preferred command is the installed `meta-harness` CLI. It parses requests
+into an inspectable `InstallPlan`. The interactive frontend renders the same
+plan; filesystem mutation happens only when the plan has no conflicts and
+dry-run is not selected.
+
+When running directly from a source checkout without the CLI on `PATH`, replace
+`meta-harness` with `python scripts/install_harness.py`. Both forms use the same
+modern planner; the deprecated direct `--layout` form is for migration only.
 
 ## Install one or more runtimes
 
 ```shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project --target /path/to/repo \
   --agent pi --agent codex --non-interactive
 ```
@@ -25,7 +30,7 @@ specific portable role briefs. Compile selected role briefs explicitly when a
 repository has durable role contracts:
 
 ```shell
-python3 scripts/install_harness.py compile \
+meta-harness compile \
   --scope project --target /path/to/repo \
   --agent codex --agent cursor \
   --role docs/harness/example/roles/worker.md \
@@ -35,7 +40,7 @@ python3 scripts/install_harness.py compile \
 ## Inspect before writing
 
 ```shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project --target /path/to/repo \
   --agent cursor --native-profiles --dry-run --non-interactive
 ```

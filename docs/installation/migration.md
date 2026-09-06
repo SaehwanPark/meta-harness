@@ -13,7 +13,7 @@ inspected and deliberately migrated; they are not active support targets.
 ## Audit first
 
 ```shell
-python3 scripts/install_harness.py audit --target /path/to/repo
+meta-harness audit --target /path/to/repo
 ```
 
 Review `stale_artifacts`, `compatibility_risks`, and
@@ -31,7 +31,7 @@ removed automatically.
 ## Install the portable source
 
 ```shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project --target /path/to/repo \
   --agent generic --non-interactive
 ```
@@ -46,7 +46,7 @@ After confirming the audit result, ask the planner to remove recognized legacy
 Harness mirrors while retaining the shared source:
 
 ```shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project --target /path/to/repo \
   --agent generic --remove-legacy --non-interactive
 ```

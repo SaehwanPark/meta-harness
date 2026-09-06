@@ -171,6 +171,7 @@ ROOT_DOC_EXPECTATIONS = {
     "rippable harness",
     "YAML frontmatter",
     "`name` and `description`",
+    "meta-harness install",
   ],
   "docs/harness/README.md": [
     "AGENTS Authoring Guide",
@@ -178,6 +179,7 @@ ROOT_DOC_EXPECTATIONS = {
     "rippable",
     "YAML frontmatter",
     "`name` and `description`",
+    "meta-harness install",
   ],
   "docs/compatibility/README.md": [
     ".codex/agents/",
@@ -198,8 +200,9 @@ COMPATIBILITY_EXPECTATIONS = {
     "~/.agents/skills/harness/",
     ".codex/skills/harness/",
     "~/.codex/skills/harness/",
-    "python3 scripts/install_harness.py --scope project --target /path/to/repo --layout codex",
-    "python3 scripts/install_harness.py --scope user --layout codex",
+    "meta-harness install",
+    "--scope project --target /path/to/repo",
+    "--scope user",
     "YAML frontmatter",
     "`name` and `description`",
     "codex-agent-adapter.md",
@@ -607,6 +610,13 @@ def check_installation_doc(failures: list[str]) -> None:
     if command not in installation_text:
       fail(
         f"docs/installation.md is missing validation command: {command}",
+        failures,
+      )
+
+  for command in ("meta-harness install", "python scripts/install_harness.py install"):
+    if command not in installation_text:
+      fail(
+        f"docs/installation.md is missing preferred/source install command: {command}",
         failures,
       )
 

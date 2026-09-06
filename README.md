@@ -33,15 +33,19 @@ is the recommended entry point. It covers installation, the Phase 0 inventory
 and drift audit, the six execution phases, architecture patterns, prompt design,
 compatibility, and durable output specs.
 
-For a quick project install:
+For a quick project install, use the installed `meta-harness` CLI:
 
 ~~~shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project \
   --target /path/to/repo \
   --agent generic \
   --non-interactive
 ~~~
+
+When running directly from a source checkout without the CLI on `PATH`, use
+`python scripts/install_harness.py` with the same subcommand and options. This
+is the current planner entry point, not the deprecated `--layout` interface.
 
 Then ask for a goal-shaped workflow, for example:
 
@@ -84,7 +88,7 @@ Read the [workflow guide](docs/guides/workflow.md) and
 Install into a project:
 
 ~~~shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project \
   --target /path/to/repo \
   --agent pi \
@@ -95,7 +99,7 @@ python3 scripts/install_harness.py install \
 Install as a user-level shared skill:
 
 ~~~shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope user \
   --agent generic \
   --non-interactive

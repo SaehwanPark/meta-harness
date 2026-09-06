@@ -12,16 +12,32 @@ the target repository's `AGENTS.md`, `README.md`, or documentation.
 
 ## Modern CLI
 
-Use the explicit `install` command for deterministic automation:
+The preferred command is the installed `meta-harness` CLI. Use the explicit
+`install` command for deterministic automation:
 
 ```shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project \
   --target /path/to/repo \
   --agent pi \
   --agent cursor \
   --non-interactive
 ```
+
+When running directly from this repository without an installed CLI, use the
+same modern command through the source-checkout entry point:
+
+```shell
+python scripts/install_harness.py install \
+  --scope project \
+  --target /path/to/repo \
+  --agent pi \
+  --agent cursor \
+  --non-interactive
+```
+
+The source-checkout entry point uses the same planner and is not the deprecated
+`--layout` interface.
 
 `--agent` is repeatable. The actively supported targets are `pi`, `codex`,
 `antigravity`, `cursor`, and `generic`. All selections retain the shared
@@ -32,7 +48,7 @@ model routing.
 Preview first:
 
 ```shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project --target /path/to/repo \
   --agent codex --agent cursor \
   --native-profiles --dry-run --non-interactive
@@ -61,7 +77,7 @@ Native execution profiles are optional generated artifacts. Enable them during
 installation:
 
 ```shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project --target /path/to/repo \
   --agent codex --agent antigravity --agent cursor \
   --native-profiles --non-interactive
@@ -70,7 +86,7 @@ python3 scripts/install_harness.py install \
 Or compile profiles separately after the canonical skill is installed:
 
 ```shell
-python3 scripts/install_harness.py compile \
+meta-harness compile \
   --scope project --target /path/to/repo \
   --agent codex --agent cursor
 ```
@@ -85,7 +101,7 @@ Pi's optional `pi-safe-agent-team` integration is selected with
 Inspect an existing repository without mutation:
 
 ```shell
-python3 scripts/install_harness.py audit --target /path/to/repo
+meta-harness audit --target /path/to/repo
 ```
 
 The audit reports `existing_skills`, `existing_roles`, `existing_profiles`,
@@ -97,7 +113,7 @@ ignore decision; audit itself is read-only.
 Check prerequisites:
 
 ```shell
-python3 scripts/install_harness.py doctor --scope project --target /path/to/repo
+meta-harness doctor --scope project --target /path/to/repo
 ```
 
 ## Interactive mode
@@ -118,7 +134,7 @@ Copy mode is the default and produces a standalone installation. During local
 Harness development, symlink mode can point a destination at this checkout:
 
 ```shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project --target /path/to/repo \
   --agent generic --mode symlink --non-interactive
 ```
@@ -145,7 +161,7 @@ support:
 For example, this old form remains accepted but emits a deprecation warning:
 
 ```shell
-python3 scripts/install_harness.py \
+meta-harness \
   --scope project --target /path/to/repo --layout codex
 ```
 

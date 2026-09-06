@@ -7,25 +7,32 @@ layout: default
 # Codex Compatibility
 
 Codex is a first-class Meta Harness target. The portable skill remains the
-source of truth; a native mirror or custom agent is optional execution
-material.
+source of truth; generated native profiles are optional execution material.
 
 ## Paths and install commands
 
 - Shared project skill: `.agents/skills/harness/`
 - Shared user skill: `~/.agents/skills/harness/`
-- Optional project mirror: `.codex/skills/harness/`
-- Optional user mirror: `~/.codex/skills/harness/`
 - Optional native profiles: `.codex/agents/` or the user-level Codex agents directory
+- Deprecated project mirror: `.codex/skills/harness/`
+- Deprecated user mirror: `~/.codex/skills/harness/`
+
+Use the modern runtime selection command:
 
 ```shell
-python3 scripts/install_harness.py --scope project --target /path/to/repo --layout codex
-python3 scripts/install_harness.py --scope user --layout codex
+meta-harness install \
+  --scope project --target /path/to/repo \
+  --agent codex --non-interactive
+meta-harness install \
+  --scope user \
+  --agent codex --non-interactive
 ```
 
-Start with the shared `standard` layout when native discovery is unnecessary.
-Do not put reusable domain behavior in `.codex/agents/`; keep those files
-runtime profiles that can be regenerated or removed.
+The modern `--agent codex` path installs the canonical shared skill and can
+also generate optional `.codex/agents/` profiles. It does not create the
+deprecated `.codex/skills/harness/` mirror. Do not put reusable domain
+behavior in `.codex/agents/`; keep those files as runtime profiles that can be
+regenerated or removed.
 
 ## Capability profile
 

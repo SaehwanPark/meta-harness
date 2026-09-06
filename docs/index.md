@@ -24,16 +24,21 @@ layout: default
 
 ## Start with the shortest useful path
 
-Install the shared skill into a project, then ask for the smallest reusable
-workflow that meets your need:
+Install the shared skill into a project with the `meta-harness` CLI, then ask
+for the smallest reusable workflow that meets your need:
 
 ~~~shell
-python3 scripts/install_harness.py install \
+meta-harness install \
   --scope project \
   --target /path/to/repo \
   --agent generic \
   --non-interactive
 ~~~
+
+If you are using a source checkout without the CLI on `PATH`, run
+`python scripts/install_harness.py` with the same subcommand and options. The
+checkout command uses the same modern planner; the legacy `--layout` form is
+for migration only.
 
 The installer creates `.agents/skills/harness/` and leaves the target
 repository's `AGENTS.md`, `README.md`, and documentation under the target

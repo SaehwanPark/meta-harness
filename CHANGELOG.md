@@ -2,6 +2,10 @@
 
 This repository uses checkpoint-based versioning for the meta-harness project history.
 
+## Unreleased
+
+- Prefer the installed `meta-harness` CLI in user-facing installation docs while documenting the source-checkout planner fallback and keeping legacy layout examples migration-only.
+
 ## 0.8.4
 
 - Extended release validation to enforce all runtime adapters, capability statuses, active-support claims, generic boundaries, and legacy deprecation boundaries.

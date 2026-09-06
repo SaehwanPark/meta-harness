@@ -18,6 +18,21 @@ and recovery settings) separate. Skills and role specs are canonical;
 execution profiles are generated mappings and must not become a second source
 of truth.
 
+## Installing the portable contract
+
+Use the installed `meta-harness` CLI to install the canonical skill and select
+runtime adapters:
+
+~~~shell
+meta-harness install --scope project --target /path/to/repo --agent generic
+~~~
+
+When running from a source checkout without the CLI on `PATH`, use
+`python scripts/install_harness.py` with the same subcommand and options. That
+is the current planner entry point, not the deprecated direct `--layout`
+interface. See the [installation guide](../installation.html) for scopes,
+profiles, audits, and migration.
+
 ## Phase 0: Inventory & Drift Audit
 
 Before the six design phases, inspect existing `.agents/skills/`, `AGENTS.md`,
