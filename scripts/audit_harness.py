@@ -93,7 +93,7 @@ def _detect_runtimes(root: Path) -> tuple[RuntimeEvidence, ...]:
     evidence = tuple(
       path
       for path in RUNTIME_EVIDENCE[runtime]
-      if (root / path).exists()
+      if (root / path).is_dir()
     )
     if evidence:
       result.append(RuntimeEvidence(runtime, "supported", evidence))
