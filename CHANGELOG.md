@@ -2,6 +2,10 @@
 
 This repository uses checkpoint-based versioning for the meta-harness project history.
 
+## 0.8.3
+
+- Aligned the Phase 0 inventory output with the durable handoff contract by naming its producer, consumer, path, schema, and completion state.
+
 ## 0.8.2
 
 - Hardened the audit classification contract for migrations, skill-only updates, and stale native profiles.

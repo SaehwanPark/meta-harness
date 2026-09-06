@@ -36,6 +36,12 @@ stale_artifacts: []
 stale_profiles: []
 compatibility_risks: []
 recommended_action: ...
+handoff:
+  producer: phase-0-auditor
+  consumer: phase-1-domain-analyst
+  path: _workspace/00_contract_inventory.md
+  schema: phase-0 inventory contract
+  completion: audit-complete
 ~~~
 
 Resolve source-of-truth conflicts before proceeding; do not silently overwrite
