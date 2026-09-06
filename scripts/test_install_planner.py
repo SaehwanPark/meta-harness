@@ -103,6 +103,35 @@ def main() -> int:
     )
     assert_true(forced_conflict.has_conflicts, "--force must not overwrite unknown paths")
 
+    role_root = Path(tmp) / "role-profiles"
+    (role_root / "docs/harness/example/roles").mkdir(parents=True)
+    (role_root / "docs/harness/example/roles/test-investigator.md").write_text(
+      "# Test Investigator\n\n```yaml\n"
+      "role: test-investigator\n"
+      "responsibility: investigate failures safely\n"
+      "resources:\n"
+      "  reads: [src/**]\n"
+      "  writes: [tests/repro/**]\n"
+      "workspace:\n"
+      "  preference: isolated\n"
+      "model_policy: strong\n"
+      "completion:\n"
+      "  artifact: _workspace/test-result.md\n"
+      "```\n",
+      encoding="utf-8",
+    )
+    role_plan = build_install_plan(
+      InstallRequest("project", role_root, ("codex", "cursor"), native_profiles=True)
+    )
+    role_paths = {operation.destination.relative_to(role_root).as_posix() for operation in role_plan.operations}
+    assert_true(".codex/agents/test-investigator.toml" in role_paths, "role Codex profile missing")
+    assert_true(".cursor/agents/test-investigator.md" in role_paths, "role Cursor profile missing")
+    apply_install_plan(role_plan)
+    assert_true(
+      "tests/repro/**" in (role_root / ".cursor/agents/test-investigator.md").read_text(encoding="utf-8"),
+      "generated profile must preserve role write boundary",
+    )
+
     profile_root = Path(tmp) / "profiles"
     profile_root.mkdir()
     profiles = build_install_plan(

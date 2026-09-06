@@ -16,5 +16,5 @@ Keep this file short and repo-wide. Put conditional or bulky guidance in linked 
 ## How
 
 - When changing canonical paths, workflow guidance, or generated artifact contracts, update [README.md](README.md) and [docs/harness/README.md](docs/harness/README.md) in the same change.
-- Validate with `python3 scripts/validate_pages.py`, `python3 scripts/validate_skills.py`, `python3 scripts/validate_adapters.py`, `python3 scripts/test_install_harness.py`, `python3 scripts/test_install_planner.py`, `python3 scripts/test_installer_tui.py`, `python3 scripts/test_audit_harness.py`, and `python3 scripts/validate_codex_port.py`.
+- Validate with `python3 scripts/validate_pages.py`, `python3 scripts/validate_skills.py`, `python3 scripts/validate_adapters.py`, `python3 scripts/test_install_harness.py`, `python3 scripts/test_install_planner.py`, `python3 scripts/test_installer_tui.py`, `python3 scripts/test_profile_compilation.py`, `python3 scripts/test_audit_harness.py`, and `python3 scripts/validate_codex_port.py`.
 - For deeper authoring guidance, read [.agents/skills/harness/SKILL.md](.agents/skills/harness/SKILL.md) and [.agents/skills/harness/references/agents-md-guide.md](.agents/skills/harness/references/agents-md-guide.md).

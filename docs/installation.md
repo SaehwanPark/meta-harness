@@ -167,6 +167,8 @@ python3 scripts/validate_skills.py
 python3 scripts/validate_adapters.py
 python3 scripts/test_install_harness.py
 python3 scripts/test_install_planner.py
+python3 scripts/test_installer_tui.py
+python3 scripts/test_profile_compilation.py
 python3 scripts/test_audit_harness.py
 python3 scripts/validate_codex_port.py
 ```

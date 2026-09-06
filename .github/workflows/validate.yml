@@ -36,6 +36,9 @@ jobs:
       - name: Run installer TUI state tests
         run: python3 scripts/test_installer_tui.py
 
+      - name: Run runtime profile compilation tests
+        run: python3 scripts/test_profile_compilation.py
+
       - name: Run inventory and drift audit smoke tests
         run: python3 scripts/test_audit_harness.py
 

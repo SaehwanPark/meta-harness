@@ -2,6 +2,12 @@
 
 This repository uses checkpoint-based versioning for the meta-harness project history.
 
+## 0.8.0
+
+- Scope: complete the shared installer frontend and portable-role lowering path.
+- Added: keyboard-friendly TUI selection/preview/conflict flow over the same planner, semantic model-policy selection, and generated role profiles for Codex, Antigravity, and Cursor CLI/Agent.
+- Added: profile compilation tests, role-contract fixtures, rollback coverage, and release-gate validation for portable skills, adapters, TUI state, and rippability.
+
 ## 0.7.0
 
 - Scope: replaced layout-centric installation with an inspectable, idempotent planner and modern runtime selection CLI.

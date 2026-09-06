@@ -20,7 +20,7 @@ workflows, reusable specialist skills, and deterministic handoff artifacts.
 It is adapted from [the original Harness project](https://github.com/revfactory/harness)
 and distributed under the Apache 2.0 license.
 
-Current project version: `0.6.0`. Meta Harness actively supports Pi, Codex,
+Current project version: `0.8.0`. Meta Harness actively supports Pi, Codex,
 Antigravity, and Cursor CLI/Agent through one portable workflow model and
 runtime adapters. Generic Agent Skills use is best effort; legacy client
 layouts are unverified and deprecated. See the [changelog](CHANGELOG.md) for
@@ -58,7 +58,8 @@ Keep the handoffs deterministic and validate one normal and one failure flow.
 - portable skills under `.agents/skills/`;
 - durable team specs and role contracts under `docs/harness/`;
 - deterministic `_workspace/` handoffs when inspection or resumption matters;
-- a bootstrap installer with a portable layout and optional native mirrors;
+- a shared CLI/TUI installer planner with portable layout and optional native profiles;
+- audit, doctor, compile, and validation commands over inspectable plans;
 - removable runtime adapters for Pi, Codex, Antigravity, and Cursor CLI/Agent
   without forking the canonical skill;
 - explicit capability degradation and rippability rules for runtime profiles.
@@ -152,6 +153,8 @@ python3 scripts/validate_skills.py
 python3 scripts/validate_adapters.py
 python3 scripts/test_install_harness.py
 python3 scripts/test_install_planner.py
+python3 scripts/test_installer_tui.py
+python3 scripts/test_profile_compilation.py
 python3 scripts/test_audit_harness.py
 python3 scripts/validate_codex_port.py
 ~~~

@@ -22,6 +22,7 @@ try:
     ACTIVE_AGENTS,
     LEGACY_LAYOUTS,
     MODES,
+    MODEL_POLICIES,
     SCOPES,
     Action,
     InstallPlan,
@@ -39,6 +40,7 @@ except ModuleNotFoundError:  # pragma: no cover - supports direct package import
     ACTIVE_AGENTS,
     LEGACY_LAYOUTS,
     MODES,
+    MODEL_POLICIES,
     SCOPES,
     Action,
     InstallPlan,
@@ -52,7 +54,7 @@ except ModuleNotFoundError:  # pragma: no cover - supports direct package import
   )
 
 
-VERSION = "0.7.0"
+VERSION = "0.8.0"
 COMMANDS = ("install", "audit", "doctor", "compile", "validate")
 # Kept as a read-only compatibility alias for callers that imported the old
 # script constants before the planner refactor.
@@ -105,6 +107,12 @@ def _add_install_arguments(parser: argparse.ArgumentParser) -> None:
     choices=("auto", "on", "off"),
     default="auto",
     help="Declare optional Pi team integration preference",
+  )
+  parser.add_argument(
+    "--model-policy",
+    choices=MODEL_POLICIES,
+    default="inherit",
+    help="Semantic model policy for generated runtime profiles",
   )
   parser.add_argument(
     "--dry-run",
@@ -173,6 +181,10 @@ def build_parser() -> argparse.ArgumentParser:
   compile_parser.add_argument("--dry-run", action="store_true")
   compile_parser.add_argument("--force", action="store_true")
   compile_parser.add_argument("--mode", choices=MODES, default="copy")
+  compile_parser.add_argument("--role", action="append", help="Role brief path; repeat for multiple roles")
+  compile_parser.add_argument(
+    "--model-policy", choices=MODEL_POLICIES, default="inherit"
+  )
   compile_parser.add_argument(
     "--pi-safe-agent-team", choices=("auto", "on", "off"), default="auto"
   )
@@ -226,6 +238,7 @@ def _request_from_install_args(args: argparse.Namespace) -> InstallRequest:
     dry_run=args.dry_run,
     legacy_layout=args.layout,
     remove_legacy=args.remove_legacy,
+    model_policy=args.model_policy,
   )
 
 
@@ -333,6 +346,8 @@ def run_compile(args: argparse.Namespace) -> int:
       pi_safe_agent_team=args.pi_safe_agent_team,
       force=args.force,
       dry_run=args.dry_run,
+      roles=tuple(Path(role) for role in (args.role or ())),
+      model_policy=args.model_policy,
     )
     full_plan = build_install_plan(request)
     profile_operations = tuple(
