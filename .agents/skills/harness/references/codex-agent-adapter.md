@@ -1,62 +1,63 @@
-# Optional Codex Agent Adapter
+# Codex Agent Adapter
 
-Use this reference only when the target repository runs current Codex and native subagents materially improve the chosen portable Harness pattern. The portable workflow contract remains authoritative; this adapter maps that contract onto Codex execution without making Codex a dependency.
+Use this optional adapter to lower a portable Harness role onto current OpenAI Codex. The portable skill and runtime-neutral role contract remain authoritative; Codex-native profiles are generated execution material, not a second source of workflow semantics. This adapter may be removed without removing `.agents/skills/` or `_workspace/` artifacts.
 
-## Selection
+Read [`runtime-capabilities.md`](runtime-capabilities.md) before selecting a profile. Codex behavior varies with the installed release, invocation mode, and enabled native-agent features; do not claim a capability that the selected environment has not exposed.
 
-Keep work in the main agent when the task is small, tightly coupled, or write ownership cannot be separated. Delegate when work units are independent and at least one of these benefits is concrete:
+## Capability mapping
 
-- noisy exploration, tests, logs, or source material can stay out of the main context
-- several read-heavy angles can run independently
-- a narrow specialist instruction or tool policy improves a bounded result
-- isolated implementation branches can be reconciled by one integration owner
+- **Skills — `supported`**: keep reusable skills in `.agents/skills/`. A native Codex mirror may be generated for discovery when requested, but it must not become the canonical copy. Applicable `AGENTS.md` instructions remain part of the execution context.
+- **Roles and subagents — `supported` when enabled**: use built-in general-purpose/exploration agents for one-off work. Use a custom agent only when a stable role needs distinct instructions, tools, permissions, or model policy. Native definitions belong in the target repository's `.codex/agents/`; the inactive template at [`../templates/codex-agent.toml`](../templates/codex-agent.toml) is a starting point, not an installed agent.
+- **Write isolation — configuration-dependent**: native subagents do not make shared-checkout writes safe by themselves. Prefer separate worktrees/checkouts for independent mutable branches, then integrate through one owner. If isolation cannot be established, assign non-overlapping files or serialize the work.
+- **Communication — configuration-dependent/advisory**: use only messaging, task state, or background facilities actually provided by the selected Codex mode. Otherwise use parent-mediated summaries and deterministic `_workspace/` artifacts. Do not infer peer messaging or durable recovery from the existence of subagents.
+- **Model policy — `supported`/inherited**: map semantic policies (`inherit`, `fast`, `economy`, `balanced`, `strong`) to Codex's available model/reasoning controls. Leave model and reasoning settings inherited by default; pin them only for a measured repository need and keep the pin in the runtime profile.
 
-Use Codex's built-in general-purpose or exploration agents before creating a custom agent. Create a custom agent only when a stable, reusable execution profile needs distinct instructions, tools, permissions, or model policy. A reusable skill still owns domain knowledge and workflow; a custom agent owns runtime execution settings and may use that skill.
+## Selection and lowering
 
-## Read-Heavy Delegation
+Keep work in the main agent when it is small, tightly coupled, or cannot be safely isolated. Delegate only when specialization, context isolation, or parallel read-heavy work has a concrete benefit. Give each worker one independent question, a shared input snapshot, and an explicit output contract. Name one synthesis owner before spawning.
 
-- Give each worker one independent question, the same input snapshot, and an explicit output contract.
-- Ask for distilled evidence and conclusions instead of raw logs.
-- Name one parent or orchestrator as the synthesis owner.
-- Preserve branch artifacts only when later inspection, audit, resumption, or conflict resolution needs them.
+A portable role may declare:
 
-## Write Isolation and Ownership
+```yaml
+role: implementation-worker
+reads: [src/**]
+writes: [src/parser/**]
+workspace: isolated
+model_policy: balanced
+communication:
+  parent: required
+permissions:
+  spawn: false
+```
 
-- Assign non-overlapping files or components before parallel edits begin.
-- Use separate worktrees or checkouts when changes could touch the same paths or shared generated state.
-- Serialize writes when ownership cannot be separated safely.
-- Keep final integration, conflict resolution, and acceptance checks with one owner.
+A generated Codex profile should preserve those semantic fields in its instructions while adding only runtime settings:
 
-Native subagents do not make concurrent writes to a shared checkout safe by themselves.
+```toml
+name = "implementation-worker"
+description = "Implement the parser slice within the declared boundary."
+developer_instructions = """
+Use the portable implementation skill.
+Own only src/parser/**; report evidence and blockers to the parent.
+Do not delegate again.
+"""
+# Add model, reasoning, tools, and permissions only when justified.
+```
 
-Apply the same rule to tests and commands that share databases, snapshots, generated state, ports, services, devices, or other mutable resources. Parallelize them only when those resources are isolated or known to be concurrency-safe.
+Do not hand-edit a generated profile and then treat that change as canonical. Promote intentional behavior back to the portable role contract first.
 
-## Concurrency and Depth
+## Isolation, depth, and partial failure
 
-- Choose concurrency from the number of genuinely independent work units and available runtime capacity; do not pin a repository-wide value in a portable harness.
-- Keep one downstream delegation layer by default.
-- Allow deeper delegation only when the domain naturally decomposes, every layer has a stable output, and the team spec declares the depth and synthesis policy.
+- Assign non-overlapping files/components before parallel edits begin.
+- Isolate tests and commands that share databases, snapshots, generated state, ports, services, or devices.
+- Keep one downstream delegation layer by default. A deeper tree needs explicit domain justification, stable outputs at each layer, and a declared synthesis policy.
+- Define which worker failures are skippable before execution. A missing required branch, conflict, permission denial, or setup failure must remain visible in the final synthesis.
+- A blocked worker returns the failed action and remaining uncertainty; it is not silently marked complete.
 
-## Permissions
+## Adapter acceptance checklist
 
-Subagents normally inherit the parent task's effective permissions and available tools. Set the parent permission boundary before delegation. Use a narrower custom-agent sandbox only when the worker's job benefits from it, such as a read-only reviewer.
-
-Do not design a reusable workflow around approvals that cannot be surfaced in its intended interactive or non-interactive runtime. A blocked worker should return the failed action and remaining uncertainty to the parent.
-
-## Synthesis and Partial Failure
-
-Before spawning workers, define:
-
-- the synthesis owner and acceptance criteria
-- how duplicate or conflicting results are reconciled
-- whether partial results are useful
-- which worker failures may be skipped
-- which failures require retry, serialization, or user escalation
-
-The final response must disclose missing branches and unresolved conflicts. Do not let a successful synthesis hide incomplete worker coverage.
-
-## Custom Agent Template
-
-Start from [`../templates/codex-agent.toml`](../templates/codex-agent.toml) when a stable custom execution profile is justified. The template is intentionally inactive inside the Harness package. Copy and adapt it into a target repository's native Codex agent directory only after the repository chooses to depend on that behavior.
-
-Leave model and reasoning settings unspecified unless the target repository has measured reasons to pin them. Inherited runtime defaults keep the adapter easier to update as Codex improves.
+- **Skill discovery:** canonical `.agents/skills/` plus applicable `AGENTS.md`; an optional `.codex/skills/` mirror is generated only when selected.
+- **Role instantiation:** built-in subagents are preferred for one-off work; `.codex/agents/` custom profiles are optional generated material for stable roles.
+- **Writes/isolation:** use separate worktrees/checkouts where possible; otherwise explicit non-overlap and serialization. Native subagents alone are not enforcement.
+- **Communication/handoffs:** use native Codex messaging/background/task facilities only when present and verified; otherwise parent summaries and `_workspace/` durable records.
+- **Model selection:** translate semantic policy to available Codex model/reasoning controls; inherit by default.
+- **Unavailable capabilities:** mark the status, lower to an isolated or serialized plan, and disclose partial failure or unresolved coordination.
