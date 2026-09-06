@@ -22,6 +22,7 @@ Treat this as an optional first-party-quality enhancement, not a portable depend
 - parent/peer messages, clarification, and escalation;
 - durable mailbox and task-board state;
 - hierarchical resource ownership, mutable borrowing, and write fencing;
+- root write guard to prevent unowned repository mutations;
 - shared or isolated workspace modes;
 - explicit provider/model/thinking routing and capability restrictions;
 - lifecycle status, cancellation, journal, and recovery information.

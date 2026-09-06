@@ -389,4 +389,9 @@ Every generated harness should meet these checks:
 - `references/skill-writing-guide.md` for authoring specialist skills
 - `references/skill-testing-guide.md` for validation and iteration loops
 - `references/qa-agent-guide.md` for cross-boundary QA methodology
-- `references/codex-agent-adapter.md` for an optional, removable mapping to current Codex subagents and custom agents
+- `references/runtime-capabilities.md` for the semantic capability vocabulary and safe degradation order
+- `references/pi-agent-adapter.md` for optional Pi team lowering
+- `references/codex-agent-adapter.md` for optional Codex subagent and profile lowering
+- `references/antigravity-agent-adapter.md` for Antigravity lowering and fallbacks
+- `references/cursor-agent-adapter.md` for Cursor CLI/Agent lowering and fallbacks
+- `references/generic-agent-adapter.md` for the best-effort Agent Skills fallback

@@ -6,11 +6,11 @@ Read [`runtime-capabilities.md`](runtime-capabilities.md) before lowering a role
 
 ## Capability mapping
 
-- **Skills — `supported` when enabled**: keep reusable skills in `.agents/skills/` and apply the relevant project instruction files. Do not fork a Cursor-specific skill mirror. Use the documented Cursor skill discovery/configuration only as an adapter concern.
-- **Roles and subagents — `supported` when enabled**: a stable role may be represented by a `.cursor/agents/<role>.md` profile, while one-off work can remain in the root Agent session. The profile references portable skills and states its responsibility, inputs, outputs, quality bar, and write boundary; it must not duplicate domain methodology.
-- **Write isolation — configuration-dependent**: prefer an isolated worktree or copy for mutable workers. Foreground/background execution and context isolation do not, by themselves, fence writes in one checkout. If isolation is unavailable, use explicit non-overlapping ownership and serialize conflicting work.
-- **Communication — configuration-dependent/advisory**: use verified parent/child or background-result facilities when exposed by the selected Cursor mode. For peer messaging, durable task state, clarification, or escalation that is not available, use a parent-mediated summary and deterministic `_workspace/` handoff.
-- **Model policy — `supported` where model selection is exposed**: map `inherit`, `fast`, `economy`, `balanced`, and `strong` to Cursor's available model choices or tiers. Exact model names are optional runtime overrides and must not be required by the portable workflow.
+- **Skills — `supported`** when discovery is enabled; otherwise **`advisory`**. Keep reusable skills in `.agents/skills/` and apply the relevant project instruction files. Do not fork a Cursor-specific skill mirror.
+- **Roles and subagents — `supported_with_extension`** when native profiles/subagents are enabled; otherwise **`advisory`**. A stable role may use a `.cursor/agents/<role>.md` profile, while one-off work remains in the root Agent session.
+- **Write isolation — `advisory`** unless an isolated worktree or copy is configured. Foreground/background execution and context isolation do not fence writes in one checkout; without isolation, use explicit non-overlap and serialize conflicts.
+- **Communication — `advisory`** unless a native channel is verified and retained. For absent peer messaging, durable task state, clarification, or escalation, use a parent-mediated summary and deterministic `_workspace/` handoff.
+- **Model policy — `supported` or `inherit`** where model selection is exposed: map `inherit`, `fast`, `economy`, `balanced`, and `strong` to available choices or tiers. Exact model names are optional overrides and must not be required by the portable workflow.
 
 ## Role lowering
 

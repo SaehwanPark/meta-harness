@@ -47,20 +47,28 @@ scope when the client discovers shared skills from the user home directory.
 
 ## Select a layout
 
-`standard` installs only the portable shared tree. Select a native mirror
-when the client has a separate discovery convention:
+`standard` installs only the portable shared tree and is the safe default for
+all clients. The actively supported runtime policy is documented in the
+[compatibility matrix](compatibility/README.html): Pi, Codex, Antigravity, and
+Cursor CLI/Agent are first-class targets; generic Agent Skills use is best
+effort.
 
-| Layout | Adds | Follow-up |
+The current bootstrap keeps legacy layout flags for compatibility while the
+planner migration is completed:
+
+| Layout | Adds | Status |
 | --- | --- | --- |
-| `standard` | `.agents/skills/harness/` | none |
-| `codex` | `.codex/skills/harness/` alongside the shared tree | keeps custom agents inactive |
-| `forgecode` | `.forge/skills/harness/` alongside the shared tree | reserve `.forge/agents/` for native agents |
-| `droid` | `.factory/skills/harness/` alongside the shared tree | reserve `.factory/droids/` for native droids |
-| `openhands` | shared tree only | keep optional setup in `.openhands/` |
-| `aider` | shared tree only | add `AGENTS.md` to Aider's read list |
+| `standard` | `.agents/skills/harness/` | portable default |
+| `codex` | `.codex/skills/harness/` alongside the shared tree | deprecated compatibility alias |
+| `forgecode` | `.forge/skills/harness/` alongside the shared tree | unverified/deprecated |
+| `droid` | `.factory/skills/harness/` alongside the shared tree | unverified/deprecated |
+| `openhands` | shared tree only | unverified/deprecated |
+| `aider` | shared tree only | unverified/deprecated |
 
-See the [compatibility matrix](compatibility/README.html) for exact paths and
-client-specific notes.
+Legacy layouts do not upgrade a client's support tier. Do not remove existing
+runtime files automatically; use the audit/migration workflow when available.
+See the [runtime capability guide](architecture/runtime-capabilities.html)
+for safe lowering and client-specific notes.
 
 ## Verify and repeat safely
 

@@ -46,6 +46,7 @@ resources:
   enforced_ownership: false
   read_write_borrowing: false
   write_fencing: false
+  root_write_guard: false
 models:
   per_agent_model: false
   provider_selection: false
@@ -105,12 +106,12 @@ The actively supported adapters use this capability vocabulary as follows. Exact
 
 | Runtime | Portable skills | Native role profiles | Isolation / ownership | Communication | Model policy |
 | --- | --- | --- | --- | --- | --- |
-| Pi base | `supported` | `supported_with_extension` | advisory unless an appropriate backend is selected | advisory | `supported` where provider/model controls are exposed |
+| Pi base | `supported` | `supported_with_extension` (otherwise `advisory`) | `advisory` | `advisory` | `supported` |
 | Pi + `pi-safe-agent-team` | `supported` | `supported_with_extension` | `supported` for broker-enforced resources | `supported` | `supported` |
-| Codex | `supported` | `supported` when native agents are enabled | runtime/configuration-dependent; otherwise advisory | runtime/configuration-dependent | `supported` or inherited |
-| Antigravity | `supported` when Agent Skills discovery is enabled | `supported` when custom agents are enabled | runtime/configuration-dependent | runtime/configuration-dependent | runtime/configuration-dependent |
-| Cursor CLI / Agent | `supported` | `supported` when `.cursor/agents/` is enabled | isolated worktree/copy preferred; otherwise advisory | runtime/configuration-dependent | `supported` where model selection is exposed |
-| Generic Agent Skills consumer | `advisory` (implementation-dependent) | `unsupported` | `unsupported` | `unsupported` | `inherit` |
+| Codex | `supported` | `supported_with_extension` when native agents are enabled; otherwise `advisory` | `advisory` unless an isolated workspace is configured | `advisory` unless a native channel is verified | `supported` or `inherit` |
+| Antigravity | `supported` when discovery is enabled; otherwise `advisory` | `supported_with_extension` when custom agents are enabled; otherwise `advisory` | `advisory` unless an isolated workspace is configured | `advisory` unless a retained channel is verified | `advisory` or `inherit` |
+| Cursor CLI / Agent | `supported` | `supported_with_extension` when native profiles are enabled; otherwise `advisory` | `advisory` unless an isolated worktree/copy is configured | `advisory` unless a native channel is verified | `supported` or `inherit` |
+| Generic Agent Skills consumer | `advisory` | `unsupported` | `unsupported` | `unsupported` | `inherit` |
 
 The generic row is a portability fallback, not a first-class execution guarantee. Keep portable skills usable there, but use one root agent, explicit ownership, and serialized execution whenever a role would otherwise conflict.
 

@@ -7,10 +7,10 @@ Read [`runtime-capabilities.md`](runtime-capabilities.md) before selecting a pro
 ## Capability mapping
 
 - **Skills — `supported`**: keep reusable skills in `.agents/skills/`. A native Codex mirror may be generated for discovery when requested, but it must not become the canonical copy. Applicable `AGENTS.md` instructions remain part of the execution context.
-- **Roles and subagents — `supported` when enabled**: use built-in general-purpose/exploration agents for one-off work. Use a custom agent only when a stable role needs distinct instructions, tools, permissions, or model policy. Native definitions belong in the target repository's `.codex/agents/`; the inactive template at [`../templates/codex-agent.toml`](../templates/codex-agent.toml) is a starting point, not an installed agent.
-- **Write isolation — configuration-dependent**: native subagents do not make shared-checkout writes safe by themselves. Prefer separate worktrees/checkouts for independent mutable branches, then integrate through one owner. If isolation cannot be established, assign non-overlapping files or serialize the work.
-- **Communication — configuration-dependent/advisory**: use only messaging, task state, or background facilities actually provided by the selected Codex mode. Otherwise use parent-mediated summaries and deterministic `_workspace/` artifacts. Do not infer peer messaging or durable recovery from the existence of subagents.
-- **Model policy — `supported`/inherited**: map semantic policies (`inherit`, `fast`, `economy`, `balanced`, `strong`) to Codex's available model/reasoning controls. Leave model and reasoning settings inherited by default; pin them only for a measured repository need and keep the pin in the runtime profile.
+- **Roles and subagents — `supported_with_extension`** when native agents are enabled; otherwise `advisory`: use built-in general-purpose/exploration agents for one-off work and verify the selected mode before promising delegation.
+- **Write isolation — `advisory`** unless an isolated worktree or checkout is configured: native subagents do not make shared-checkout writes safe by themselves. If isolation is unavailable, assign non-overlapping files or serialize the work.
+- **Communication — `advisory`** unless a native channel is verified and retained: use parent-mediated summaries and deterministic `_workspace/` artifacts when messaging or task state is absent. Do not infer peer messaging or durable recovery from subagents.
+- **Model policy — `supported` or `inherit`**: map semantic policies (`inherit`, `fast`, `economy`, `balanced`, `strong`) to Codex's available model/reasoning controls. Leave settings inherited by default; pin them only in an optional runtime profile when justified.
 
 ## Selection and lowering
 

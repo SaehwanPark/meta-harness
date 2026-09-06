@@ -29,8 +29,9 @@ the checkpoint-based project history.
 ## Start here
 
 The [Meta Harness documentation portal](https://saehwanpark.github.io/meta-harness/)
-is the recommended entry point. It covers installation, the six-phase workflow,
-architecture patterns, prompt design, compatibility, and durable output specs.
+is the recommended entry point. It covers installation, the Phase 0 inventory
+and drift audit, the six execution phases, architecture patterns, prompt design,
+compatibility, and durable output specs.
 
 For a quick project install:
 
@@ -50,7 +51,7 @@ Keep the handoffs deterministic and validate one normal and one failure flow.
 
 ## What the repository contains
 
-- a six-phase workflow from domain analysis through validation;
+- a Phase 0 inventory and drift audit followed by six execution phases from domain analysis through validation;
 - six coordination patterns: Pipeline, Fan-out/Fan-in, Expert Pool,
   Producer-Reviewer, Supervisor, and Hierarchical Delegation;
 - portable skills under `.agents/skills/`;
@@ -61,10 +62,11 @@ Keep the handoffs deterministic and validate one normal and one failure flow.
   without forking the canonical skill;
 - explicit capability degradation and rippability rules for runtime profiles.
 
-## Six-phase workflow
+## Phase 0 audit plus six-phase workflow
 
 | Phase | Question it answers |
 | --- | --- |
+| Inventory and drift audit | What already exists, what is stale, and what operation is safe? |
 | Domain analysis | What is this project, task, and quality bar? |
 | Team architecture | What coordination shape earns its complexity? |
 | Role and artifact definition | Who owns each output and handoff? |
@@ -99,8 +101,11 @@ Antigravity, and Cursor CLI/Agent targets is in the
 best-effort only; ForgeCode, Droid, OpenHands, and Aider are retained as
 unverified, deprecated migration notes.
 
-The installer owns only the skill destinations. The target repository keeps
-ownership of its `AGENTS.md`, `README.md`, and documentation.
+The installer owns only explicitly planned skill/profile destinations. The
+target repository keeps ownership of its `AGENTS.md`, `README.md`, and
+documentation. Legacy layout flags remain compatibility aliases and are
+unverified/deprecated; use the active-runtime compatibility matrix when the
+new planner is available.
 
 ## Runtime support and architecture
 

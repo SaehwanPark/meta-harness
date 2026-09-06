@@ -6,11 +6,11 @@ Read [`runtime-capabilities.md`](runtime-capabilities.md) first. Antigravity cap
 
 ## Capability mapping
 
-- **Skills — `supported` when enabled**: discover the canonical `.agents/skills/` tree and applicable repository instruction files. Keep the skill there rather than maintaining an Antigravity-specific mirror. If a deployment does not discover Agent Skills, use its documented skill import/configuration as an adapter detail and preserve the portable files.
-- **Roles and subagents — `supported` when custom-agent/subagent execution is enabled**: instantiate a portable role through Antigravity's custom-agent or subagent configuration. The role's responsibility, inputs, outputs, quality bar, and acceptance criteria stay portable; runtime profile settings only add tools, permissions, workspace, and model routing.
-- **Write isolation — configuration-dependent**: prefer an isolated worktree or workspace copy for independent mutable roles. A subagent or asynchronous run is not evidence of write fencing. When isolation is unavailable, assign explicit non-overlapping paths and serialize conflicts.
-- **Communication — configuration-dependent**: use parent/child, peer, clarification, escalation, and background-result channels only when they are exposed and retained by the selected Antigravity mode. Otherwise the parent owns synthesis and workers return concise summaries or deterministic `_workspace/` artifacts.
-- **Model policy — configuration-dependent**: translate `inherit`, `fast`, `economy`, `balanced`, and `strong` to Antigravity's available model tiers or settings. Keep exact model names as optional overrides and do not make portable correctness depend on them.
+- **Skills — `supported`** when Agent Skills discovery is enabled; otherwise **`advisory`**. Discover the canonical `.agents/skills/` tree and applicable repository instruction files. If a deployment does not discover Agent Skills, use its documented import/configuration while preserving the portable files.
+- **Roles and subagents — `supported_with_extension`** when custom-agent/subagent execution is enabled; otherwise **`advisory`**. Instantiate portable roles through the selected runtime configuration and keep responsibility, inputs, outputs, quality bar, and acceptance criteria portable.
+- **Write isolation — `advisory`** unless an isolated worktree or workspace copy is configured. A subagent or asynchronous run is not evidence of write fencing; without isolation, assign non-overlapping paths and serialize conflicts.
+- **Communication — `advisory`** unless a retained native channel is verified. Use parent/child, peer, clarification, escalation, or background-result channels only when exposed; otherwise return summaries or deterministic `_workspace/` artifacts.
+- **Model policy — `advisory` or `inherit`**: translate `inherit`, `fast`, `economy`, `balanced`, and `strong` to available tiers/settings. Keep exact model names as optional overrides and do not make portable correctness depend on them.
 
 ## Lowering a portable role
 
