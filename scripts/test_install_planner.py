@@ -241,6 +241,31 @@ def main() -> int:
     env["USERPROFILE"] = str(user_home)
     user = run_cli("install", "--scope", "user", "--agent", "generic", env=env)
     assert_true((user_home / ".agents/skills/harness/SKILL.md").exists(), "user install did not honor injected home")
+    cli_role_root = Path(tmp) / "cli-role"
+    (cli_role_root / "docs/harness/demo/roles").mkdir(parents=True)
+    cli_role = cli_role_root / "docs/harness/demo/roles/worker.md"
+    cli_role.write_text(
+      "# Worker\n\n```yaml\nrole: worker\nresponsibility: run worker checks\nmodel_policy: balanced\n```\n",
+      encoding="utf-8",
+    )
+    run_cli(
+      "install",
+      "--scope",
+      "project",
+      "--target",
+      str(cli_role_root),
+      "--agent",
+      "codex",
+      "--native-profiles",
+      "--role",
+      str(cli_role),
+      "--non-interactive",
+    )
+    assert_true(
+      (cli_role_root / ".codex/agents/worker.toml").exists(),
+      "CLI install should compile an explicitly selected role",
+    )
+
     dry_root = Path(tmp) / "dry"
     dry_root.mkdir()
     dry = run_cli(

@@ -54,7 +54,7 @@ except ModuleNotFoundError:  # pragma: no cover - supports direct package import
   )
 
 
-VERSION = "0.8.0"
+VERSION = "0.8.1"
 COMMANDS = ("install", "audit", "doctor", "compile", "validate")
 # Kept as a read-only compatibility alias for callers that imported the old
 # script constants before the planner refactor.
@@ -113,6 +113,11 @@ def _add_install_arguments(parser: argparse.ArgumentParser) -> None:
     choices=MODEL_POLICIES,
     default="inherit",
     help="Semantic model policy for generated runtime profiles",
+  )
+  parser.add_argument(
+    "--role",
+    action="append",
+    help="Role brief path for native profile generation; repeat for multiple roles",
   )
   parser.add_argument(
     "--dry-run",
@@ -238,6 +243,7 @@ def _request_from_install_args(args: argparse.Namespace) -> InstallRequest:
     dry_run=args.dry_run,
     legacy_layout=args.layout,
     remove_legacy=args.remove_legacy,
+    roles=tuple(Path(role) for role in (args.role or ())),
     model_policy=args.model_policy,
   )
 
