@@ -646,9 +646,12 @@ def apply_install_plan(plan: InstallPlan) -> tuple[InstallOperation, ...]:
     )
     raise InstallerError(f"Install plan has conflicts: {joined}")
   applied: list[InstallOperation] = []
+  touched: list[Path] = []
   snapshots: list[tuple[Path, tuple[str, Path | str]]] = []
   try:
     for operation in plan.operations:
+      if operation.action in (Action.CREATE, Action.UPDATE, Action.REMOVE):
+        touched.append(operation.destination)
       if operation.action in (Action.KEEP, Action.SKIP):
         continue
       if operation.action in (Action.REMOVE, Action.UPDATE):
@@ -685,15 +688,15 @@ def apply_install_plan(plan: InstallPlan) -> tuple[InstallOperation, ...]:
           ) from error
       applied.append(operation)
   except Exception:
-    # Remove every newly written path first, then restore managed snapshots in
-    # reverse order. This is best-effort for unexpected filesystem failures but
-    # keeps deterministic preflight conflicts fully side-effect free.
-    for operation in reversed(applied):
-      if operation.action in (Action.CREATE, Action.UPDATE):
-        try:
-          _remove_path(operation.destination)
-        except OSError:
-          pass
+    # Remove every touched path first (including a CREATE that failed halfway),
+    # then restore managed snapshots in reverse order. This is best-effort for
+    # unexpected filesystem failures but keeps deterministic preflight conflicts
+    # fully side-effect free.
+    for path in reversed(touched):
+      try:
+        _remove_path(path)
+      except OSError:
+        pass
     for path, snapshot in reversed(snapshots):
       try:
         _restore_snapshot(path, snapshot)

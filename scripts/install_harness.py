@@ -54,6 +54,25 @@ except ModuleNotFoundError:  # pragma: no cover - supports direct package import
 
 VERSION = "0.7.0"
 COMMANDS = ("install", "audit", "doctor", "compile", "validate")
+# Kept as a read-only compatibility alias for callers that imported the old
+# script constants before the planner refactor.
+LAYOUTS = LEGACY_LAYOUTS
+
+
+def destination_specs(scope: str, layout: str) -> list[tuple[str, str]]:
+  """Return the legacy relative destinations used by the pre-v0.7 API."""
+  if scope not in SCOPES:
+    raise InstallerError(f"Unknown install scope: {scope}")
+  if layout not in LEGACY_LAYOUTS:
+    raise InstallerError(f"Unknown legacy layout: {layout}")
+  specs = [("shared", ".agents/skills/harness")]
+  if layout == "forgecode":
+    specs.append(("forgecode", ".forge/skills/harness" if scope == "project" else "forge/skills/harness"))
+  elif layout == "droid":
+    specs.append(("droid", ".factory/skills/harness"))
+  elif layout == "codex":
+    specs.append(("codex", ".codex/skills/harness"))
+  return specs
 
 
 def fail(message: str) -> int:

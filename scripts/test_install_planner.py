@@ -9,6 +9,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+import installer_core as core
 from installer_core import (
   Action,
   InstallRequest,
@@ -166,6 +167,40 @@ def main() -> int:
       )
       assert_true(parent_conflict.has_conflicts, "symlinked destination parent must be rejected")
       assert_true(not (outside / "skills").exists(), "parent symlink conflict must not mutate outside target")
+
+    rollback_root = Path(tmp) / "rollback"
+    rollback_root.mkdir()
+    rollback_plan = build_install_plan(
+      InstallRequest("project", rollback_root, ("generic",), legacy_layout="codex")
+    )
+    original_copytree = core.shutil.copytree
+    copy_count = 0
+
+    def fail_second_copy(*args, **kwargs):
+      nonlocal copy_count
+      copy_count += 1
+      if copy_count == 2:
+        raise OSError("simulated copy failure")
+      return original_copytree(*args, **kwargs)
+
+    core.shutil.copytree = fail_second_copy
+    try:
+      try:
+        apply_install_plan(rollback_plan)
+      except OSError:
+        pass
+      else:
+        raise AssertionError("simulated failure should abort the transaction")
+    finally:
+      core.shutil.copytree = original_copytree
+    assert_true(
+      not (rollback_root / ".agents/skills/harness").exists(),
+      "rollback should remove partial shared install",
+    )
+    assert_true(
+      not (rollback_root / ".codex/skills/harness").exists(),
+      "rollback should remove partial legacy mirror",
+    )
 
     overlap = build_install_plan(InstallRequest("project", ROOT, ("generic",)))
     assert_true(overlap.has_conflicts, "source/destination overlap must be rejected")
