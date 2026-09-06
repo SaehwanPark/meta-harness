@@ -47,6 +47,9 @@ Do not hand-edit a generated profile and then treat that change as canonical. Pr
 
 ## Isolation, depth, and partial failure
 
+The fallback path is parent-mediated summaries plus deterministic workspace
+artifacts when native coordination is unavailable.
+
 - Assign non-overlapping files/components before parallel edits begin.
 - Isolate tests and commands that share databases, snapshots, generated state, ports, services, or devices.
 - Keep one downstream delegation layer by default. A deeper tree needs explicit domain justification, stable outputs at each layer, and a declared synthesis policy.

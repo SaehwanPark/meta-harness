@@ -36,10 +36,11 @@ compatibility, and durable output specs.
 For a quick project install:
 
 ~~~shell
-python3 scripts/install_harness.py \
+python3 scripts/install_harness.py install \
   --scope project \
   --target /path/to/repo \
-  --layout standard
+  --agent generic \
+  --non-interactive
 ~~~
 
 Then ask for a goal-shaped workflow, for example:
@@ -82,30 +83,34 @@ Read the [workflow guide](docs/guides/workflow.md) and
 Install into a project:
 
 ~~~shell
-python3 scripts/install_harness.py \
+python3 scripts/install_harness.py install \
   --scope project \
   --target /path/to/repo \
-  --layout standard
+  --agent pi \
+  --agent cursor \
+  --non-interactive
 ~~~
 
 Install as a user-level shared skill:
 
 ~~~shell
-python3 scripts/install_harness.py --scope user --layout standard
+python3 scripts/install_harness.py install \
+  --scope user \
+  --agent generic \
+  --non-interactive
 ~~~
 
-Use the shared `standard` layout as the portable default. Runtime-specific
-installation and capability guidance for the actively supported Pi, Codex,
-Antigravity, and Cursor CLI/Agent targets is in the
-[compatibility matrix](docs/compatibility/README.md). Generic clients are
-best-effort only; ForgeCode, Droid, OpenHands, and Aider are retained as
-unverified, deprecated migration notes.
+`--agent` is repeatable. Runtime-specific installation and capability guidance
+for the actively supported Pi, Codex, Antigravity, and Cursor CLI/Agent targets
+is in the [compatibility matrix](docs/compatibility/README.md). Generic clients
+are best-effort only; ForgeCode, Droid, OpenHands, and Aider are retained as
+unverified, deprecated migration notes. Use `audit`, `doctor`, `compile`, and
+`validate` for inspectable lifecycle operations.
 
 The installer owns only explicitly planned skill/profile destinations. The
 target repository keeps ownership of its `AGENTS.md`, `README.md`, and
-documentation. Legacy layout flags remain compatibility aliases and are
-unverified/deprecated; use the active-runtime compatibility matrix when the
-new planner is available.
+documentation. Legacy `--layout` flags remain compatibility aliases and are
+unverified/deprecated; use `--agent` for new automation.
 
 ## Runtime support and architecture
 
@@ -143,14 +148,20 @@ Run the repository checks from the project root:
 
 ~~~shell
 python3 scripts/validate_pages.py
+python3 scripts/validate_skills.py
+python3 scripts/validate_adapters.py
 python3 scripts/test_install_harness.py
+python3 scripts/test_install_planner.py
+python3 scripts/test_audit_harness.py
 python3 scripts/validate_codex_port.py
 ~~~
 
-The first check protects the rendered Pages source and internal navigation.
-The installer smoke test exercises project/user scopes, layouts, dry runs,
-replacement, and symlink mode. The Codex-port validator protects canonical
-paths, required references, frontmatter guidance, and legacy-path exclusions.
+The Pages check protects rendered source and navigation. Portable-skill and
+adapter validators protect frontmatter, links, capability guidance, and
+fixtures. The installer tests cover project/user scopes, multi-runtime plans,
+legacy aliases, dry runs, idempotent updates, conflicts, profiles, and symlink
+mode. The Codex-port validator protects canonical paths, synchronized docs,
+and legacy-path exclusions.
 
 ## License
 

@@ -21,11 +21,21 @@ REQUIRED_FILES = (
 
 REQUIRED_LAYOUT_PATHS = (
   "/installation.html",
+  "/installation/cli.html",
+  "/installation/tui.html",
+  "/installation/migration.html",
   "/guides/workflow.html",
   "/guides/patterns.html",
   "/sample-prompts.html",
   "/compatibility/README.html",
+  "/compatibility/pi.html",
   "/compatibility/codex.html",
+  "/compatibility/antigravity.html",
+  "/compatibility/cursor.html",
+  "/compatibility/generic.html",
+  "/architecture/README.html",
+  "/architecture/role-contract.html",
+  "/architecture/runtime-capabilities.html",
   "/harness/README.html",
   "/harness/starter-research/README.html",
 )

@@ -1,132 +1,172 @@
 ---
 title: Installation
-description: Install the canonical Meta Harness skill into a project or user-level skills directory.
+description: Plan and install the canonical Meta Harness skill for one or more runtime targets.
 layout: default
 ---
 
 # Installation
 
-Meta Harness is distributed as a repository-owned skill tree. The bootstrap
-installer copies that tree into a project or into your user-level skills
-directory; it does not take ownership of the target project's documentation.
+The installer has one planning engine for CLI, TUI, audit, and profile
+compilation. It previews operations before mutation and never takes ownership of
+the target repository's `AGENTS.md`, `README.md`, or documentation.
 
-## Choose an install scope
+## Modern CLI
+
+Use the explicit `install` command for deterministic automation:
+
+```shell
+python3 scripts/install_harness.py install \
+  --scope project \
+  --target /path/to/repo \
+  --agent pi \
+  --agent cursor \
+  --non-interactive
+```
+
+`--agent` is repeatable. The actively supported targets are `pi`, `codex`,
+`antigravity`, `cursor`, and `generic`. All selections retain the shared
+`.agents/skills/harness/` source of truth. `generic` installs portable Agent
+Skills without promising runtime-specific workers, isolation, permissions, or
+model routing.
+
+Preview first:
+
+```shell
+python3 scripts/install_harness.py install \
+  --scope project --target /path/to/repo \
+  --agent codex --agent cursor \
+  --native-profiles --dry-run --non-interactive
+```
+
+The plan reports `CREATE`, `UPDATE`, `KEEP`, `SKIP`, `REMOVE`, and `CONFLICT`
+operations. A conflict is never silently overwritten. `--force` can replace a
+known managed Harness tree or generated profile, but it cannot overwrite an
+arbitrary user-owned path.
+
+## Scopes
 
 | Scope | Destination | Use it when… |
 | --- | --- | --- |
 | Project | `./.agents/skills/harness/` | one repository should carry its own Harness install |
 | User | `~/.agents/skills/harness/` | several repositories should share one install |
 
-The project scope is the safer default for a reproducible repository setup.
-The user scope is convenient when you maintain several projects with the same
-Harness version.
+For project scope, `--target` must name an existing directory. User scope uses
+the current home directory and rejects `--target`. Test homes can be injected
+with `META_HARNESS_HOME` (or `HOME`/`USERPROFILE`) without touching a real user
+installation.
 
-## Install into a project
+## Native profiles and compilation
 
-Run this command from the Meta Harness checkout:
+Native execution profiles are optional generated artifacts. Enable them during
+installation:
 
-~~~shell
-python3 scripts/install_harness.py \
-  --scope project \
-  --target /path/to/repo \
-  --layout standard
-~~~
+```shell
+python3 scripts/install_harness.py install \
+  --scope project --target /path/to/repo \
+  --agent codex --agent antigravity --agent cursor \
+  --native-profiles --non-interactive
+```
 
-The target directory must already exist. The installer creates the shared
-`.agents/skills/harness/` path and preserves the target's `AGENTS.md`,
-`README.md`, and documentation.
+Or compile profiles separately:
 
-## Install for your user account
+```shell
+python3 scripts/install_harness.py compile \
+  --scope project --target /path/to/repo \
+  --agent codex --agent cursor
+```
 
-~~~shell
-python3 scripts/install_harness.py --scope user --layout standard
-~~~
+Profiles remain removable adapters. Deleting native profile directories leaves
+the shared skill, portable role contracts, and `_workspace/` handoffs intact.
+Pi's optional `pi-safe-agent-team` integration is selected with
+`--pi-safe-agent-team on` but does not cause an invented native profile path.
 
-This writes to `~/.agents/skills/harness/` for the current user. Use this
-scope when the client discovers shared skills from the user home directory.
+## Audit and diagnostics
 
-## Select a layout
+Inspect an existing repository without mutation:
 
-`standard` installs only the portable shared tree and is the safe default for
-all clients. The actively supported runtime policy is documented in the
-[compatibility matrix](compatibility/README.html): Pi, Codex, Antigravity, and
-Cursor CLI/Agent are first-class targets; generic Agent Skills use is best
-effort.
+```shell
+python3 scripts/install_harness.py audit --target /path/to/repo
+```
 
-The current bootstrap keeps legacy layout flags for compatibility while the
-planner migration is completed:
+The audit reports `existing_skills`, `existing_roles`, `detected_runtimes`,
+`stale_artifacts`, `compatibility_risks`, `operation_classification`, and a
+`recommended_action`. Legacy artifacts receive an explicit keep/migrate/remove/
+ignore decision; audit itself is read-only.
 
-| Layout | Adds | Status |
-| --- | --- | --- |
-| `standard` | `.agents/skills/harness/` | portable default |
-| `codex` | `.codex/skills/harness/` alongside the shared tree | deprecated compatibility alias |
-| `forgecode` | `.forge/skills/harness/` alongside the shared tree | unverified/deprecated |
-| `droid` | `.factory/skills/harness/` alongside the shared tree | unverified/deprecated |
-| `openhands` | shared tree only | unverified/deprecated |
-| `aider` | shared tree only | unverified/deprecated |
+Check prerequisites:
 
-Legacy layouts do not upgrade a client's support tier. Do not remove existing
-runtime files automatically; use the audit/migration workflow when available.
-See the [runtime capability guide](architecture/runtime-capabilities.html)
-for safe lowering and client-specific notes.
+```shell
+python3 scripts/install_harness.py doctor --scope project --target /path/to/repo
+```
 
-## Verify and repeat safely
+## Interactive mode
 
-Preview a resolved install without changing any destination:
+On a real TTY, `meta-harness install` (or `--interactive`) opens the keyboard-
+friendly checkbox/radio installer. It selects scope, runtimes, optional Pi
+integration, native profiles, mode, and target, then previews the same
+`InstallPlan` used by the CLI. Use `--non-interactive` in CI or piped commands;
+non-TTY execution never attempts to render a TUI and instead requires explicit
+values.
 
-~~~shell
-python3 scripts/install_harness.py \
-  --scope project \
-  --target /path/to/repo \
-  --layout codex \
-  --dry-run
-~~~
+The [TUI guide](installation/tui.html) describes preview, conflict, repair, and
+small-terminal behavior.
 
-Re-running an install fails when a destination already exists. Use
-`--force` only after confirming the destination is the Harness tree you intend
-to replace:
+## Copy and symlink modes
 
-~~~shell
-python3 scripts/install_harness.py \
-  --scope project \
-  --target /path/to/repo \
-  --layout standard \
-  --force
-~~~
+Copy mode is the default and produces a standalone installation. During local
+Harness development, symlink mode can point a destination at this checkout:
 
-During local Harness development, `--mode symlink` can point a destination at
-this checkout so changes are visible immediately:
-
-~~~shell
-python3 scripts/install_harness.py \
-  --scope project \
-  --target /path/to/repo \
-  --layout standard \
-  --mode symlink
-~~~
+```shell
+python3 scripts/install_harness.py install \
+  --scope project --target /path/to/repo \
+  --agent generic --mode symlink --non-interactive
+```
 
 Use symlink mode only when the target intentionally depends on this working
-copy. Use the default copy mode for a standalone install.
+copy. If directory links are unavailable, the installer fails clearly and does
+not silently fall back to copy mode.
+
+## Deprecated compatibility aliases
+
+The old direct invocation and `--layout` names remain temporarily operational
+for migration. They are unverified/deprecated and do not grant first-class
+support:
+
+| Layout | Destination or behavior | Status |
+| --- | --- | --- |
+| `standard` | shared `.agents/skills/harness/` | portable compatibility alias |
+| `codex` | shared tree plus `.codex/skills/harness/` | deprecated compatibility alias |
+| `forgecode` | shared tree plus `.forge/skills/harness/` (or `~/forge/skills/harness/`) | unverified/deprecated |
+| `droid` | shared tree plus `.factory/skills/harness/` | unverified/deprecated |
+| `openhands` | shared tree; optional `.openhands/` setup remains user-owned | unverified/deprecated |
+| `aider` | shared tree; follow up with `.aider.conf.yml` `read: AGENTS.md` | unverified/deprecated |
+
+For example, this old form remains accepted but emits a deprecation warning:
+
+```shell
+python3 scripts/install_harness.py \
+  --scope project --target /path/to/repo --layout codex
+```
+
+Do not remove unknown legacy files automatically. Use the audit report and an
+explicit install plan with `--remove-legacy` only for recognized Harness
+mirrors. See the [migration guide](installation/migration.html).
+
+## Repository ownership and validation
 
 The installer does not create or update the target repo's `AGENTS.md`,
-`README.md`, or docs. The [AGENTS Authoring Guide](https://github.com/SaehwanPark/meta-harness/blob/main/.agents/skills/harness/references/agents-md-guide.md)
-explains how to add durable target-repository guidance intentionally.
+`README.md`, or docs. `AGENTS.md` stays repo-owned; use the
+[AGENTS Authoring Guide](https://github.com/SaehwanPark/meta-harness/blob/main/.agents/skills/harness/references/agents-md-guide.md)
+for intentional durable guidance.
 
-> [!TIP]
-> If you are unsure which client path to use, start with `standard`. The
-> shared `.agents/skills/harness/` tree is the portable source; native mirrors
-> are optional discovery conveniences.
+Run the checks from the Meta Harness root:
 
-## Validate the repository
-
-Run the same checks used by continuous integration from the Meta Harness root:
-
-~~~shell
+```shell
+python3 scripts/validate_pages.py
+python3 scripts/validate_skills.py
+python3 scripts/validate_adapters.py
 python3 scripts/test_install_harness.py
+python3 scripts/test_install_planner.py
+python3 scripts/test_audit_harness.py
 python3 scripts/validate_codex_port.py
-~~~
-
-## Next step
-
-After installation, use a prompt that names the goal, output, and constraint.
-The [prompt library](sample-prompts.html) includes small starting points.
+```

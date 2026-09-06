@@ -28,10 +28,11 @@ Install the shared skill into a project, then ask for the smallest reusable
 workflow that meets your need:
 
 ~~~shell
-python3 scripts/install_harness.py \
+python3 scripts/install_harness.py install \
   --scope project \
   --target /path/to/repo \
-  --layout standard
+  --agent generic \
+  --non-interactive
 ~~~
 
 The installer creates `.agents/skills/harness/` and leaves the target
@@ -112,8 +113,8 @@ The core design is intentionally small:
   </li>
 </ol>
 
-Read the detailed [six-phase workflow guide](guides/workflow.html) for phase
-outputs and stop conditions.
+Read the detailed [Phase 0 audit and six-phase workflow guide](guides/workflow.html)
+for phase outputs and stop conditions.
 
 ## Choose the coordination shape
 
