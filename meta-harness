@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Meta Harness root executable launcher
+set -euo pipefail
+
+# Resolve symlinks so the script finds the repository root even if symlinked
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+ROOT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+# Find Python 3
+PYTHON=""
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON="python3"
+elif command -v python >/dev/null 2>&1; then
+  if python -c "import sys; sys.exit(0 if sys.version_info >= (3, 8) else 1)" >/dev/null 2>&1; then
+    PYTHON="python"
+  fi
+fi
+
+if [ -z "$PYTHON" ]; then
+  echo "Error: Python 3.8 or newer is required to run meta-harness, but was not found on PATH." >&2
+  echo "Please install Python 3 and make sure it is available on your PATH." >&2
+  exit 1
+fi
+
+exec "$PYTHON" "$ROOT_DIR/scripts/install_harness.py" "$@"

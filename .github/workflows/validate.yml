@@ -42,5 +42,8 @@ jobs:
       - name: Run inventory and drift audit smoke tests
         run: python3 scripts/test_audit_harness.py
 
+      - name: Run CLI launchers and installer scripts tests
+        run: python3 scripts/test_cli_launchers.py
+
       - name: Run repository validator
         run: python3 scripts/validate_codex_port.py

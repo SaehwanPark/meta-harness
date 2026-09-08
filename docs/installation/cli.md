@@ -12,8 +12,11 @@ plan; filesystem mutation happens only when the plan has no conflicts and
 dry-run is not selected.
 
 When running directly from a source checkout without the CLI on `PATH`, replace
-`meta-harness` with `python scripts/install_harness.py`. Both forms use the same
-modern planner; the deprecated direct `--layout` form is for migration only.
+`meta-harness` with `./meta-harness` (macOS/Linux), `.\meta-harness` (Windows),
+or `python scripts/install_harness.py`. To install `meta-harness` to your user
+`PATH`, run `./install.sh` (macOS/Linux) or `.\install.ps1` (Windows PowerShell).
+Both forms use the same modern planner; the deprecated direct `--layout` form is
+for migration only.
 
 ## Install one or more runtimes
 
