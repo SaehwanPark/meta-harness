@@ -4,6 +4,10 @@ This repository uses checkpoint-based versioning for the meta-harness project hi
 
 ## Unreleased
 
+- Added automated installer scripts (`install.sh` for macOS/Linux and `install.ps1` for Windows PowerShell) supporting one-line remote install (`curl ... | bash`, `irm ... | iex`) and local clone install.
+- Added executable root CLI launchers (`meta-harness`, `meta-harness.cmd`, `meta-harness.ps1`) so `meta-harness` is immediately executable upon cloning.
+- Documented clear step-by-step installation instructions for macOS, Linux, and Windows PowerShell across README and documentation pages.
+- Added test coverage for CLI launchers and installer scripts.
 - Prefer the installed `meta-harness` CLI in user-facing installation docs while documenting the source-checkout planner fallback and keeping legacy layout examples migration-only.
 
 ## 0.8.4

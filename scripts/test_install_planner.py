@@ -58,7 +58,8 @@ def main() -> int:
   )
 
   with tempfile.TemporaryDirectory(prefix="meta-harness-planner-") as tmp:
-    root = Path(tmp) / "project"
+    tmp_dir = Path(tmp).resolve()
+    root = tmp_dir / "project"
     root.mkdir()
 
     request = InstallRequest("project", root, ("cursor", "pi", "cursor"))
@@ -81,7 +82,7 @@ def main() -> int:
     assert_true(actions(stale) == [Action.UPDATE], "stale managed install should update")
     apply_install_plan(stale)
 
-    unknown_root = Path(tmp) / "unknown"
+    unknown_root = tmp_dir / "unknown"
     unknown_root.mkdir()
     unknown_destination = unknown_root / ".agents/skills/harness"
     unknown_destination.mkdir(parents=True)
@@ -103,7 +104,7 @@ def main() -> int:
     )
     assert_true(forced_conflict.has_conflicts, "--force must not overwrite unknown paths")
 
-    role_root = Path(tmp) / "role-profiles"
+    role_root = tmp_dir / "role-profiles"
     (role_root / "docs/harness/example/roles").mkdir(parents=True)
     (role_root / "docs/harness/example/roles/test-investigator.md").write_text(
       "# Test Investigator\n\n```yaml\n"
@@ -132,7 +133,7 @@ def main() -> int:
       "generated profile must preserve role write boundary",
     )
 
-    profile_root = Path(tmp) / "profiles"
+    profile_root = tmp_dir / "profiles"
     profile_root.mkdir()
     profiles = build_install_plan(
       InstallRequest(
@@ -164,7 +165,7 @@ def main() -> int:
       "native profile reinstall should be idempotent",
     )
 
-    legacy_root = Path(tmp) / "legacy"
+    legacy_root = tmp_dir / "legacy"
     legacy_root.mkdir()
     legacy_request = InstallRequest("project", legacy_root, ("generic",), legacy_layout="codex")
     legacy_plan = build_install_plan(legacy_request)
@@ -182,7 +183,7 @@ def main() -> int:
     assert_true((legacy_root / ".agents/skills/harness").exists(), "portable skill must survive rippability removal")
     assert_true(not (legacy_root / ".codex/skills/harness").exists(), "legacy mirror should be removed")
 
-    symlink_root = Path(tmp) / "symlink"
+    symlink_root = tmp_dir / "symlink"
     symlink_root.mkdir()
     try:
       symlink_request = InstallRequest("project", symlink_root, ("generic",), mode="symlink")
@@ -194,9 +195,9 @@ def main() -> int:
       if isinstance(error, InstallerError) and "symlink mode" not in str(error):
         raise
 
-    parent_link_root = Path(tmp) / "parent-link"
+    parent_link_root = tmp_dir / "parent-link"
     parent_link_root.mkdir()
-    outside = Path(tmp) / "outside"
+    outside = tmp_dir / "outside"
     outside.mkdir()
     try:
       (parent_link_root / ".agents").symlink_to(outside, target_is_directory=True)
@@ -209,7 +210,7 @@ def main() -> int:
       assert_true(parent_conflict.has_conflicts, "symlinked destination parent must be rejected")
       assert_true(not (outside / "skills").exists(), "parent symlink conflict must not mutate outside target")
 
-    rollback_root = Path(tmp) / "rollback"
+    rollback_root = tmp_dir / "rollback"
     rollback_root.mkdir()
     rollback_plan = build_install_plan(
       InstallRequest("project", rollback_root, ("generic",), legacy_layout="codex")
@@ -246,14 +247,14 @@ def main() -> int:
     overlap = build_install_plan(InstallRequest("project", ROOT, ("generic",)))
     assert_true(overlap.has_conflicts, "source/destination overlap must be rejected")
 
-    user_home = Path(tmp) / "home"
+    user_home = tmp_dir / "home"
     user_home.mkdir()
     env = os.environ.copy()
     env["HOME"] = str(user_home)
     env["USERPROFILE"] = str(user_home)
     user = run_cli("install", "--scope", "user", "--agent", "generic", env=env)
     assert_true((user_home / ".agents/skills/harness/SKILL.md").exists(), "user install did not honor injected home")
-    compile_empty = Path(tmp) / "compile-empty"
+    compile_empty = tmp_dir / "compile-empty"
     compile_empty.mkdir()
     compile_error = run_cli(
       "compile",
@@ -271,7 +272,7 @@ def main() -> int:
       "compile should require the canonical target skill",
     )
 
-    cli_role_root = Path(tmp) / "cli-role"
+    cli_role_root = tmp_dir / "cli-role"
     (cli_role_root / "docs/harness/demo/roles").mkdir(parents=True)
     cli_role = cli_role_root / "docs/harness/demo/roles/worker.md"
     cli_role.write_text(
@@ -296,7 +297,7 @@ def main() -> int:
       "CLI install should compile an explicitly selected role",
     )
 
-    dry_root = Path(tmp) / "dry"
+    dry_root = tmp_dir / "dry"
     dry_root.mkdir()
     dry = run_cli(
       "install",

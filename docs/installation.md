@@ -10,6 +10,43 @@ The installer has one planning engine for CLI, TUI, audit, and profile
 compilation. It previews operations before mutation and never takes ownership of
 the target repository's `AGENTS.md`, `README.md`, or documentation.
 
+## Installing the CLI
+
+To make `meta-harness` immediately executable system-wide, use the automated installer:
+
+### Automated installation
+
+**macOS / Linux**:
+
+```shell
+curl -fsSL https://raw.githubusercontent.com/SaehwanPark/meta-harness/main/install.sh | bash
+```
+
+**Windows (PowerShell)**:
+
+```powershell
+irm https://raw.githubusercontent.com/SaehwanPark/meta-harness/main/install.ps1 | iex
+```
+
+The script verifies Python 3.8+, installs the executable launcher, and configures your user `PATH`.
+
+### From a cloned repository
+
+When working from a local clone of this repository:
+
+```shell
+git clone https://github.com/SaehwanPark/meta-harness.git
+cd meta-harness
+
+# Install the meta-harness command to your user PATH:
+./install.sh        # macOS / Linux
+.\install.ps1       # Windows PowerShell
+
+# Or run directly from within the checkout:
+./meta-harness      # macOS / Linux
+.\meta-harness      # Windows
+```
+
 ## Modern CLI
 
 The preferred command is the installed `meta-harness` CLI. Use the explicit

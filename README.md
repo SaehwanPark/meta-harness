@@ -44,6 +44,7 @@ meta-harness install \
 ~~~
 
 When running directly from a source checkout without the CLI on `PATH`, use
+`./meta-harness` (macOS/Linux), `.\meta-harness` (Windows), or
 `python scripts/install_harness.py` with the same subcommand and options. This
 is the current planner entry point, not the deprecated `--layout` interface.
 
@@ -84,6 +85,41 @@ Read the [workflow guide](docs/guides/workflow.md) and
 [pattern guide](docs/guides/patterns.md) for the operational details.
 
 ## Installation
+
+### Installing the `meta-harness` CLI
+
+Install the `meta-harness` executable onto your system:
+
+**macOS / Linux**:
+
+~~~shell
+curl -fsSL https://raw.githubusercontent.com/SaehwanPark/meta-harness/main/install.sh | bash
+~~~
+
+**Windows (PowerShell)**:
+
+~~~powershell
+irm https://raw.githubusercontent.com/SaehwanPark/meta-harness/main/install.ps1 | iex
+~~~
+
+The installer verifies Python 3.8+, installs the executable launcher, and ensures it is available on your `PATH`.
+
+**From a cloned repository**:
+
+~~~shell
+git clone https://github.com/SaehwanPark/meta-harness.git
+cd meta-harness
+
+# Install to user PATH (~/.local/bin on Unix, user PATH on Windows):
+./install.sh        # macOS / Linux
+.\install.ps1       # Windows PowerShell
+
+# Or run directly from the repo root:
+./meta-harness      # macOS / Linux
+.\meta-harness      # Windows
+~~~
+
+### Installing Harness into target projects
 
 Install into a project:
 
