@@ -4,6 +4,9 @@ This repository uses checkpoint-based versioning for the meta-harness project hi
 
 ## Unreleased
 
+- Simplified the deployable Harness skill and templates so reusable workflows default to minimal instructions and add durable coordination only when needed.
+- Compiled specialist profiles now use the portable role and its declared skills. The default Harness profile still routes to the design skill.
+
 - Added automated installer scripts (`install.sh` for macOS/Linux and `install.ps1` for Windows PowerShell) supporting one-line remote install (`curl ... | bash`, `irm ... | iex`) and local clone install.
 - Added executable root CLI launchers (`meta-harness`, `meta-harness.cmd`, `meta-harness.ps1`) so `meta-harness` is immediately executable upon cloning.
 - Documented clear step-by-step installation instructions for macOS, Linux, and Windows PowerShell across README and documentation pages.

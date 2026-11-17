@@ -23,8 +23,8 @@ create a second source of truth.
 
 ## What is portable
 
-The six-phase workflow, role semantics, deterministic handoffs, and validation
-prompts are portable Markdown guidance. A generic client may be able to read
+Workflow design, role semantics, durable handoffs, and validation guidance use
+portable Markdown. A generic client may be able to read
 `AGENTS.md` and skills, but Meta Harness does not guarantee worker spawning,
 recursive delegation, messaging, ownership enforcement, workspace isolation,
 permission controls, model routing, lifecycle tracking, or crash recovery.
