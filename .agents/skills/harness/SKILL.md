@@ -5,7 +5,7 @@ description: Design, review, or simplify a repository's reusable agent skills, t
 
 # Harness
 
-Start with the outcome, intended users, constraints, and acceptance checks. Inspect existing guidance, skills, and workflow contracts where the change could affect them. Reuse their canonical paths and preserve existing consumers. Resolve conflicting instructions where possible and ask only when a material decision remains.
+Start with the outcome, intended users, constraints, and acceptance checks. Inspect existing guidance, skills, and workflow contracts where the change could affect them. Reuse their canonical paths and preserve existing consumers. Make reasonable, reversible assumptions and resolve conflicting instructions where possible. Ask when a material decision remains.
 
 ## Choose what to build
 

@@ -24,7 +24,7 @@ description: Update the published API schema after a public endpoint changes.
 Use the route definitions and request/response types as the source of truth.
 Run `make openapi` and review the resulting `docs/api/openapi.yaml` diff.
 Check changed paths, required fields, and error responses against the route tests.
-For breaking changes, follow [the API migration policy](references/migrations.md).
+For breaking changes, follow the API migration policy in `references/migrations.md`.
 ```
 
-Keep only the content the target repository actually needs. The example command and migration link stand for project-specific resources that must exist before shipping.
+Keep only the content the target repository actually needs. The example command and migration reference stand for project-specific resources that must exist before shipping.
