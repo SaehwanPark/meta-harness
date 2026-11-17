@@ -48,7 +48,7 @@ except ModuleNotFoundError:  # pragma: no cover
 class TuiState:
   scope: str = "project"
   target: str = "."
-  agents: tuple[str, ...] = ("pi",)
+  agents: tuple[str, ...] = ("codex",)
   mode: str = "copy"
   native_profiles: bool = True
   pi_safe_agent_team: str = "auto"
@@ -187,11 +187,13 @@ def run_tui(
     target = "."
     if scope == "project":
       target = _ask(output_stream, input_stream, "Target directory (.): ", ".")
+    agent_options = " ".join(f"{index}={agent}" for index, agent in enumerate(ACTIVE_AGENTS, 1))
+    default_agents = ",".join(state.agents)
     agent_value = _ask(
       output_stream,
       input_stream,
-      "Agents (numbers 1=pi 2=codex 3=antigravity 4=cursor 5=generic): ",
-      "1",
+      f"Agents [{agent_options}] ({default_agents}): ",
+      default_agents,
     )
     agents = _select_agents(agent_value)
     team = _ask(output_stream, input_stream, "Pi team integration [auto/on/off] (auto): ", "auto").casefold()
