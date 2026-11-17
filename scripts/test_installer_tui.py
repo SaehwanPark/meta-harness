@@ -50,9 +50,10 @@ def main() -> int:
     assert_true(not (target / ".agents").exists(), "TUI dry-run must not mutate target")
 
     default_output = TtyBuffer()
-    default_input = TtyBuffer(f"project\n{target}\n\nauto\ny\ninherit\ncopy\nd\n")
+    default_input = TtyBuffer(f"project\n{target}\n\ny\ninherit\ncopy\nd\n")
     assert_true(run_tui(input_stream=default_input, output_stream=default_output) == 0, "default dry-run failed")
     assert_true(".codex/agents/meta-harness.toml" in default_output.getvalue(), "blank runtime choice should plan a Codex profile")
+    assert_true("Optional Pi subagents" not in default_output.getvalue(), "Codex should skip the Pi prompt")
 
     invalid_target = Path(tmp) / "invalid-action"
     invalid_target.mkdir()

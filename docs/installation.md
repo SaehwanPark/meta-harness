@@ -130,8 +130,13 @@ meta-harness compile \
 
 Profiles remain removable adapters. Deleting native profile directories leaves
 the shared skill, portable role contracts, and `_workspace/` handoffs intact.
-Pi's optional `pi-safe-agent-team` integration is selected with
-`--pi-safe-agent-team on` but does not cause an invented native profile path.
+For Pi, the default `--pi-subagents auto` reports an existing subagent
+extension when detected, or suggests `pi install npm:pi-subagents` when
+there is no candidate. A configured package without local installation
+evidence is flagged for verification in Pi. `off` skips discovery. `on`
+and the older `--pi-safe-agent-team` flag are accepted for compatibility.
+Pi can use the shared skill in the root session with no extension. The
+installer leaves Pi packages and settings under the user's control.
 
 ## Audit and diagnostics
 
@@ -156,8 +161,8 @@ meta-harness doctor --scope project --target /path/to/repo
 ## Interactive mode
 
 On a real TTY, `meta-harness install` (or `--interactive`) opens the keyboard-
-friendly checkbox/radio installer. It selects scope, runtimes, optional Pi
-integration, native profiles, mode, and target, then previews the same
+friendly installer with Codex as the initial runtime. It prompts for subagent
+extension guidance only when Pi is selected, then previews the same
 `InstallPlan` used by the CLI. Use `--non-interactive` in CI or piped commands;
 non-TTY execution never attempts to render a TUI and instead requires explicit
 values.

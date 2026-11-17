@@ -50,6 +50,76 @@ def run_cli(*args: str, env: dict[str, str] | None = None, expect: int = 0):
   return result
 
 
+def test_pi_subagent_selection(tmp_dir: Path) -> None:
+  root = tmp_dir / "pi-project"
+  project_pi = root / ".pi"
+  project_pi.mkdir(parents=True)
+  user_pi = tmp_dir / "pi-user"
+  user_pi.mkdir()
+  env = {**os.environ, "PI_CODING_AGENT_DIR": str(user_pi)}
+  command = ("install", "--scope", "project", "--target", str(root), "--agent", "pi", "--dry-run")
+  recommendation = "pi install npm:pi-subagents"
+
+  missing = run_cli(*command, env=env).stdout
+  assert_true(recommendation in missing and "root Pi session" in missing, "missing extension needs recommendation and fallback")
+
+  user_settings = user_pi / "settings.json"
+  user_settings.write_text(json.dumps({"packages": ["npm:pi-subagents@1.2.3"]}), encoding="utf-8")
+  configured = run_cli(*command, env=env).stdout
+  assert_true("configured: npm:pi-subagents@1.2.3" in configured, "uninstalled configuration should be identified")
+  assert_true("extension detected:" not in configured, "configuration alone does not prove installation")
+
+  alternative = project_pi / "extensions" / "subagent" / "index.ts"
+  alternative.parent.mkdir(parents=True)
+  alternative.touch()
+  existing = run_cli(*command, env=env).stdout
+  assert_true("extension detected: 'extensions/subagent'" in existing, "installed local extension should take precedence")
+  assert_true(recommendation not in existing, "existing extension should suppress duplicate install advice")
+
+  package = user_pi / "npm/node_modules/pi-subagents/package.json"
+  package.parent.mkdir(parents=True)
+  package.write_text("{}", encoding="utf-8")
+  preferred = run_cli(*command, env=env).stdout
+  assert_true("extension detected: npm:pi-subagents@1.2.3" in preferred, "use the preferred package when both options are installed")
+
+  project_settings = project_pi / "settings.json"
+  project_settings.write_text(
+    json.dumps({"packages": [{"source": "npm:pi-subagents", "extensions": []}]}),
+    encoding="utf-8",
+  )
+  disabled = run_cli(*command, env=env).stdout
+  assert_true("extension detected: 'extensions/subagent'" in disabled, "disabled project package must not win")
+
+  scoped = project_pi / "npm/node_modules/@example/pi-better-subagents/package.json"
+  scoped.parent.mkdir(parents=True)
+  scoped.write_text("{}", encoding="utf-8")
+  project_settings.write_text(
+    json.dumps({"packages": [
+      {"source": "npm:pi-subagents", "extensions": []},
+      {"source": "npm:@example/pi-better-subagents@2.0.0"},
+    ]}),
+    encoding="utf-8",
+  )
+  alternative_package = run_cli(*command, env=env).stdout
+  assert_true("extension detected: npm:@example/pi-better-subagents@2.0.0" in alternative_package, "recognize configured scoped packages")
+
+  for flag in ("--pi-subagents", "--pi-safe-agent-team"):
+    off = run_cli(*command, flag, "off", env=env).stdout
+    assert_true("off for this plan" in off and "extension detected:" not in off, "off should skip discovery")
+
+  user_settings.write_text("{invalid", encoding="utf-8")
+  project_settings.write_text("{invalid", encoding="utf-8")
+  fallback = run_cli(*command, env=env).stdout
+  assert_true("extension detected: 'extensions/subagent'" in fallback, "malformed settings should not prevent filesystem discovery")
+  assert_true(not (root / ".agents").exists(), "preview must not install files")
+
+  run_cli(*command[:-1], env=env)
+  assert_true(alternative.is_file(), "install should preserve existing Pi extensions")
+  assert_true(project_settings.read_text(encoding="utf-8") == "{invalid", "install must not edit Pi settings")
+  adapter = root / ".agents/skills/harness/references/pi-agent-adapter.md"
+  assert_true(adapter.is_file(), "Pi guidance should ship with the skill")
+
+
 def main() -> int:
   assert_true(
     normalize_agents(("cursor", "pi", "cursor", "generic"))
@@ -61,6 +131,7 @@ def main() -> int:
     tmp_dir = Path(tmp).resolve()
     root = tmp_dir / "project"
     root.mkdir()
+    test_pi_subagent_selection(tmp_dir)
 
     request = InstallRequest("project", root, ("cursor", "pi", "cursor"))
     first = build_install_plan(request)

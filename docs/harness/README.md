@@ -31,7 +31,9 @@ Begin each `SKILL.md` with YAML frontmatter containing `name` and `description`.
 Use a short, specific description for discovery. In the body, state the goal
 and include the inputs, constraints, outputs, and checks that need to be
 explicit. Keep conditional details in linked references. Add steps when their
-order matters.
+order matters. Runtime-specific delegation belongs in a removable adapter.
+For Pi, use the subagent tools available in the target session and keep the
+generated skill usable in a root session without an extension.
 
 ## Team and role contracts
 

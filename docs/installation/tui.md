@@ -14,10 +14,9 @@ CLI; it does not contain a second filesystem mutation engine.
 
 1. Choose **Project** or **User** scope with the scope radio controls.
 2. Enter an existing project target when project scope is selected.
-3. Toggle first-class runtime checkboxes: Pi, Codex, Antigravity, and Cursor
-   CLI/Agent; select Generic Agent Skills separately for best-effort mode.
-4. Choose the optional Pi safe-agent-team integration, native profile
-   generation, semantic model policy, and Copy/Symlink mode.
+3. Select one or more runtimes. Press Enter to use Codex.
+4. If you select Pi, choose whether to include subagent extension guidance.
+   Then choose native profile generation, model policy, and Copy/Symlink mode.
 5. Review the plan preview before applying it.
 
 The dependency-free frontend accepts all selections from the keyboard: enter
