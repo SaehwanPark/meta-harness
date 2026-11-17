@@ -617,8 +617,8 @@ def _profile_content(
   if role.source is None and role.name == "meta-harness":
     lines.append("Use the Harness skill for reusable workflow design.")
   if role.source is not None and role.source.is_relative_to(root):
-    path = _inline_text(role.source.relative_to(root).as_posix())
-    lines.append(f"Follow the role contract at {path}.")
+    path = role.source.relative_to(root).as_posix()
+    lines.append(f"Follow the role contract at {path!r}.")
   if role.skills:
     lines.append("Role skills: " + ", ".join(_inline_text(skill) for skill in role.skills))
   if role.reads:
