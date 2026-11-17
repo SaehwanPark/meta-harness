@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.8.4"
+VERSION = "0.9.0"
 
 
 def assert_true(condition: bool, message: str) -> None:
