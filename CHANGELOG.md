@@ -2,7 +2,11 @@
 
 This repository uses checkpoint-based versioning for the meta-harness project history.
 
-## Unreleased
+## 0.9.0
+
+- Defaulted the interactive installer to Codex and limited Pi subagent prompts to Pi installs.
+- Added read-only Pi subagent discovery. The installer reuses detected extensions and suggests `npm:pi-subagents` when it finds no candidate.
+- Updated the deployed Pi adapter and generated-skill guidance so workflows can run in a single Pi session when delegation is unavailable.
 
 - Simplified the deployable Harness skill and templates so reusable workflows default to minimal instructions and add durable coordination only when needed.
 - Compiled specialist profiles now use the portable role and its declared skills. The default Harness profile still routes to the design skill.
