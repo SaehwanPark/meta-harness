@@ -95,7 +95,7 @@ def main() -> int:
       "updated profiles did not converge to an idempotent plan",
     )
     default_profile = _profile_content("codex", root, RoleDefinition("meta-harness"))
-    assert_true("Use the Harness skill" in default_profile, "default Harness role lost discovery")
+    assert_true("Use the Harness skill at .agents/skills/harness/SKILL.md" in default_profile, "default Harness role lost discovery")
     assert_true("Model policy:" not in default_profile, "profile repeats inherited model defaults")
     # Values from a role brief must not be able to break generated profile syntax.
     unsafe_role = RoleDefinition("unsafe", responsibility='quote """ and null\x00')
