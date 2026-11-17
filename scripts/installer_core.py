@@ -813,21 +813,23 @@ def _pi_subagent_note(request: InstallRequest, root: Path) -> str:
   if request.pi_safe_agent_team == "off":
     return "Pi subagent integration is off for this plan. Use the shared skill in the root Pi session."
   agent_dir = os.environ.get("PI_CODING_AGENT_DIR")
-  directories = [Path(agent_dir).expanduser() if agent_dir else user_home() / ".pi" / "agent"]
+  user_directory = _pi_local_path(Path.cwd(), agent_dir) if agent_dir else None
+  directories = [user_directory or user_home() / ".pi" / "agent"]
   if request.scope == "project":
     directories.append(root / ".pi")
-  candidates = {
-    identity: (label, installed)
-    for directory in directories
-    for identity, label, installed in _pi_subagent_candidates(directory)
-  }
-  preferred = candidates.get(DEFAULT_PI_SUBAGENTS)
-  detected = preferred if preferred and preferred[1] else next(
-    ((label, installed) for label, installed in candidates.values() if installed), None
-  )
+  candidates: dict[str, tuple[str, bool]] = {}
+  for directory in directories:
+    try:
+      for identity, label, installed in _pi_subagent_candidates(directory):
+        candidates[identity] = (label, installed)
+    except OSError:
+      # An unreadable Pi directory must not block installing the portable skill.
+      continue
+  installed_labels = {identity: label for identity, (label, installed) in candidates.items() if installed}
+  detected = installed_labels.get(DEFAULT_PI_SUBAGENTS) or next(iter(installed_labels.values()), None)
   if detected:
-    return f"Pi subagent extension detected: {detected[0]}. Reuse it if its tools are available in your Pi session."
-  configured = next((label for label, installed in candidates.values() if label), None)
+    return f"Pi subagent extension detected: {detected}. Reuse it if its tools are available in your Pi session."
+  configured = next((label for label, _ in candidates.values()), None)
   if configured:
     return f"Pi subagent extension configured: {configured}. Check installation and enablement in Pi. The shared skill works in the root Pi session."
   return (

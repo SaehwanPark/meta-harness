@@ -103,6 +103,16 @@ def test_pi_subagent_selection(tmp_dir: Path) -> None:
   alternative_package = run_cli(*command, env=env).stdout
   assert_true("extension detected: npm:@example/pi-better-subagents@2.0.0" in alternative_package, "recognize configured scoped packages")
 
+  git_package = project_pi / "git/github.com/example/pi-safe-agent-team/package.json"
+  git_package.parent.mkdir(parents=True)
+  git_package.write_text("{}", encoding="utf-8")
+  git_source = "git:github.com/example/pi-safe-agent-team@v1"
+  project_settings.write_text(
+    json.dumps({"packages": [{"source": "npm:pi-subagents", "extensions": []}, git_source]}),
+    encoding="utf-8",
+  )
+  assert_true(f"extension detected: {git_source}" in run_cli(*command, env=env).stdout, "recognize an installed Git package")
+
   for flag in ("--pi-subagents", "--pi-safe-agent-team"):
     off = run_cli(*command, flag, "off", env=env).stdout
     assert_true("off for this plan" in off and "extension detected:" not in off, "off should skip discovery")
@@ -117,7 +127,8 @@ def test_pi_subagent_selection(tmp_dir: Path) -> None:
   assert_true(alternative.is_file(), "install should preserve existing Pi extensions")
   assert_true(project_settings.read_text(encoding="utf-8") == "{invalid", "install must not edit Pi settings")
   adapter = root / ".agents/skills/harness/references/pi-agent-adapter.md"
-  assert_true(adapter.is_file(), "Pi guidance should ship with the skill")
+  guidance = adapter.read_text(encoding="utf-8")
+  assert_true(recommendation in guidance and "root-session" in guidance, "Pi guidance should ship with the skill")
 
 
 def main() -> int:
