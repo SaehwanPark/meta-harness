@@ -48,7 +48,7 @@ except ModuleNotFoundError:  # pragma: no cover
 class TuiState:
   scope: str = "project"
   target: str = "."
-  agents: tuple[str, ...] = ("pi",)
+  agents: tuple[str, ...] = ("codex",)
   mode: str = "copy"
   native_profiles: bool = True
   pi_safe_agent_team: str = "auto"
@@ -108,7 +108,12 @@ def render_main_screen(state: TuiState, compact: bool = False) -> str:
       "Portable compatibility (best effort)",
       f"  {_checkbox('generic' in state.agents)} generic Agent Skills only",
       "",
-      f"  {_checkbox(state.pi_safe_agent_team != 'off')} Use pi-safe-agent-team when available",
+    ]
+  )
+  if "pi" in state.agents:
+    lines.append(f"  Pi subagent integration: {state.pi_safe_agent_team}")
+  lines.extend(
+    [
       f"  {_checkbox(state.native_profiles)} Generate native execution profiles",
       f"  Model policy: {state.model_policy}",
       f"  (*) Copy    {'( ) Symlink' if state.mode == 'copy' else '(*) Symlink'}",
@@ -187,16 +192,22 @@ def run_tui(
     target = "."
     if scope == "project":
       target = _ask(output_stream, input_stream, "Target directory (.): ", ".")
+    agent_options = " ".join(f"{index}={agent}" for index, agent in enumerate(ACTIVE_AGENTS, 1))
+    default_agents = ",".join(state.agents)
     agent_value = _ask(
       output_stream,
       input_stream,
-      "Agents (numbers 1=pi 2=codex 3=antigravity 4=cursor 5=generic): ",
-      "1",
+      f"Agents [{agent_options}] ({default_agents}): ",
+      default_agents,
     )
     agents = _select_agents(agent_value)
-    team = _ask(output_stream, input_stream, "Pi team integration [auto/on/off] (auto): ", "auto").casefold()
-    if team not in ("auto", "on", "off"):
-      raise InstallerError("Pi team integration must be auto, on, or off")
+    pi_subagents = state.pi_safe_agent_team
+    if "pi" in agents:
+      pi_subagents = _ask(
+        output_stream, input_stream, "Optional Pi subagents [auto/on/off] (auto): ", pi_subagents
+      ).casefold()
+      if pi_subagents not in ("auto", "on", "off"):
+        raise InstallerError("Pi subagent integration must be auto, on, or off")
     profiles = _ask(output_stream, input_stream, "Generate native profiles [Y/n]: ", "y").casefold() not in (
       "n",
       "no",
@@ -218,7 +229,7 @@ def run_tui(
       agents=agents,
       mode=mode,
       native_profiles=profiles,
-      pi_safe_agent_team=team,
+      pi_safe_agent_team=pi_subagents,
       model_policy=model_policy,
     )
     request = state.to_request(source)

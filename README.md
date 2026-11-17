@@ -116,6 +116,12 @@ cd meta-harness
 
 ### Installing Harness into target projects
 
+Run `meta-harness install` in a terminal to open the interactive installer.
+Press Enter at the runtime prompt to select Codex. If you select Pi, the
+preview highlights a detected subagent extension or recommends
+`pi install npm:pi-subagents` when it finds no candidate. Pi can use the shared
+skill in a single session without an extension.
+
 Install into a project:
 
 ~~~shell

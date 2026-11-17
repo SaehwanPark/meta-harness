@@ -82,6 +82,17 @@ def fail(message: str) -> int:
   return 1
 
 
+def _add_pi_subagent_argument(parser: argparse.ArgumentParser) -> None:
+  parser.add_argument(
+    "--pi-subagents",
+    "--pi-safe-agent-team",
+    dest="pi_safe_agent_team",
+    choices=("auto", "on", "off"),
+    default="auto",
+    help="Detect optional Pi subagent extensions or skip detection with off",
+  )
+
+
 def _add_install_arguments(parser: argparse.ArgumentParser) -> None:
   parser.add_argument("--scope", choices=SCOPES, help="Installation scope")
   parser.add_argument("--target", help="Project root for project scope")
@@ -102,12 +113,7 @@ def _add_install_arguments(parser: argparse.ArgumentParser) -> None:
     action="store_true",
     help="Generate optional runtime-native execution profiles",
   )
-  parser.add_argument(
-    "--pi-safe-agent-team",
-    choices=("auto", "on", "off"),
-    default="auto",
-    help="Declare optional Pi team integration preference",
-  )
+  _add_pi_subagent_argument(parser)
   parser.add_argument(
     "--model-policy",
     choices=MODEL_POLICIES,
@@ -190,9 +196,7 @@ def build_parser() -> argparse.ArgumentParser:
   compile_parser.add_argument(
     "--model-policy", choices=MODEL_POLICIES, default="inherit"
   )
-  compile_parser.add_argument(
-    "--pi-safe-agent-team", choices=("auto", "on", "off"), default="auto"
-  )
+  _add_pi_subagent_argument(compile_parser)
 
   validate = subparsers.add_parser("validate", help="Validate portable skills and adapter fixtures")
   validate.add_argument("--target", default=None)

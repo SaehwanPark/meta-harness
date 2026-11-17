@@ -15,7 +15,7 @@ feature is identical in every configuration.
 
 | Runtime | Status | Skill path | Native execution material | Typical capabilities |
 | --- | --- | --- | --- | --- |
-| [Pi](pi.html) | **First-class** | `.agents/skills/harness/` | Optional Pi extension; no required mirror | Skills; model/provider routing; workers and rich coordination with `pi-safe-agent-team` |
+| [Pi](pi.html) | **First-class** | `.agents/skills/harness/` | Optional Pi extension; no required mirror | Skills; model/provider routing; workers and coordination through an optional subagent extension |
 | [Codex](codex.html) | **First-class** | `.agents/skills/harness/` or `~/.agents/skills/harness/` | Optional `.codex/agents/` | Skills; custom agents; runtime-dependent isolation, messaging, and persistence |
 | [Antigravity](antigravity.html) | **First-class** | `.agents/skills/harness/` | Optional runtime-native agent profiles | Skills; subagents and model/tool controls where enabled by the runtime |
 | [Cursor CLI / Agent](cursor.html) | **First-class** | `.agents/skills/harness/` | Optional `.cursor/agents/` | Skills; native profiles; runtime-dependent background execution and isolation |

@@ -17,6 +17,7 @@ import sys
 import tempfile
 from dataclasses import asdict, dataclass, field
 from enum import Enum
+from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
@@ -29,6 +30,11 @@ MODES = ("copy", "symlink")
 SCOPES = ("project", "user")
 MODEL_POLICIES = ("inherit", "fast", "economy", "balanced", "strong")
 ROLE_NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+DEFAULT_PI_SUBAGENTS = "npm:pi-subagents"
+PI_SUBAGENT_NAME_RE = re.compile(r"(?:^|[-_.])(?:sub[-_]?agents?|safe-agent-team)(?:$|[-_.])", re.IGNORECASE)
+PI_NPM_SOURCE_RE = re.compile(r"npm:((?:@\w[\w.-]*/)?\w[\w.-]*)(?:@[^\s]+)?", re.ASCII)
+PI_GIT_SOURCE_RE = re.compile(r"(?:git:(?:https://)?|https://)([\w.-]+(?:/[\w.-]+){2,})(?:@[^\s]+)?", re.ASCII)
+PI_EXTENSION_SUFFIXES = (".ts", ".js")
 
 
 class Action(str, Enum):
@@ -59,7 +65,7 @@ RUNTIME_SPECS: Mapping[str, RuntimeSpec] = {
     "Pi",
     None,
     ("skills", "model-routing", "optional-team-extension"),
-    ("pi-safe-agent-team is optional and has no portable filesystem dependency",),
+    ("Pi subagent extensions are optional",),
   ),
   "codex": RuntimeSpec(
     "codex",
@@ -711,6 +717,127 @@ def _legacy_warnings(layout: str | None) -> list[str]:
   ]
 
 
+def _pi_json_object(path: Path) -> dict:
+  try:
+    data = json.loads(path.read_text(encoding="utf-8-sig"))
+  except (OSError, ValueError, RecursionError):
+    return {}
+  return data if isinstance(data, dict) else {}
+
+
+def _pi_local_extension(path: Path) -> bool:
+  if path.is_file():
+    return path.suffix in PI_EXTENSION_SUFFIXES
+  manifest = _pi_json_object(path / "package.json").get("pi")
+  return (
+    isinstance(manifest, dict) and bool(manifest.get("extensions"))
+  ) or any((path / f"index{suffix}").is_file() for suffix in PI_EXTENSION_SUFFIXES)
+
+
+def _pi_local_path(directory: Path, entry: str) -> Path | None:
+  try:
+    return directory / Path(entry).expanduser()
+  except RuntimeError:
+    return None
+
+
+def _pi_subagent_candidates(directory: Path) -> Iterable[tuple[str, str, bool]]:
+  """Yield candidate identity, display name, and local installation evidence."""
+  settings = _pi_json_object(directory / "settings.json")
+  packages = settings.get("packages")
+  for package in packages if isinstance(packages, list) else ():
+    source = package.get("source") if isinstance(package, dict) else package
+    if not isinstance(source, str) or not source.isprintable():
+      continue
+    if isinstance(package, dict) and package.get("autoload") is False:
+      continue
+    enabled = not isinstance(package, dict) or package.get("extensions") != []
+    npm = PI_NPM_SOURCE_RE.fullmatch(source)
+    git = PI_GIT_SOURCE_RE.fullmatch(source)
+    if npm:
+      name = npm[1]
+      identity = f"npm:{name}"
+      path = directory / "npm" / "node_modules" / name
+    elif git:
+      repo = git[1]
+      if repo.endswith(".git"):
+        repo = repo[:-4]
+      if set(repo.split("/")) & {".", ".."}:
+        continue
+      name = repo.rsplit("/", 1)[-1]
+      identity = f"git:{repo}"
+      path = directory / "git" / repo
+    else:
+      if source.startswith(("npm:", "git:")):
+        continue
+      path = _pi_local_path(directory, source)
+      if path is None:
+        continue
+      name = path.name
+      identity = str(path)
+    if PI_SUBAGENT_NAME_RE.search(name.rsplit("/", 1)[-1]):
+      if npm or git:
+        installed = (path / "package.json").is_file()
+      else:
+        installed = _pi_local_extension(path) or (path / "extensions").is_dir()
+      yield identity, source, installed and enabled
+
+  extensions = settings.get("extensions")
+  entries = [entry for entry in extensions if isinstance(entry, str) and entry.isprintable()] if isinstance(extensions, list) else []
+  try:
+    discovered = sorted((directory / "extensions").iterdir())
+  except OSError:
+    discovered = []
+  paths = [(path, path.relative_to(directory).as_posix()) for path in discovered if not path.name.startswith(".")]
+  for entry in entries:
+    if not entry.startswith(("+", "-", "!")):
+      path = _pi_local_path(directory, entry)
+      if path is not None:
+        paths.append((path, entry))
+  for path, label in paths:
+    name = path.stem if path.suffix in PI_EXTENSION_SUFFIXES else path.name
+    if not PI_SUBAGENT_NAME_RE.search(name) or not _pi_local_extension(path):
+      continue
+    enabled = True
+    for pattern in entries:
+      if pattern.startswith(("+", "-", "!")) and (
+        label == pattern[1:] or path.as_posix() == pattern[1:]
+        or pattern.startswith("!") and fnmatchcase(label, pattern[1:])
+      ):
+        enabled = pattern.startswith("+")
+    if enabled:
+      yield str(path), repr(label), True
+
+
+def _pi_subagent_note(request: InstallRequest, root: Path) -> str:
+  if request.pi_safe_agent_team == "off":
+    return "Pi subagent integration is off for this plan. Use the shared skill in the root Pi session."
+  agent_dir = os.environ.get("PI_CODING_AGENT_DIR")
+  user_directory = _pi_local_path(Path.cwd(), agent_dir) if agent_dir else None
+  directories = [user_directory or user_home() / ".pi" / "agent"]
+  if request.scope == "project":
+    directories.append(root / ".pi")
+  candidates: dict[str, tuple[str, bool]] = {}
+  for directory in directories:
+    try:
+      for identity, label, installed in _pi_subagent_candidates(directory):
+        candidates[identity] = (label, installed)
+    except OSError:
+      # An unreadable Pi directory must not block installing the portable skill.
+      continue
+  installed_labels = {identity: label for identity, (label, installed) in candidates.items() if installed}
+  detected = installed_labels.get(DEFAULT_PI_SUBAGENTS) or next(iter(installed_labels.values()), None)
+  if detected:
+    return f"Pi subagent extension detected: {detected}. Reuse it if its tools are available in your Pi session."
+  configured = next((label for label, _ in candidates.values()), None)
+  if configured:
+    return f"Pi subagent extension configured: {configured}. Check installation and enablement in Pi. The shared skill works in the root Pi session."
+  return (
+    f"No Pi subagent extension detected. To add optional delegation, run `pi install {DEFAULT_PI_SUBAGENTS}`. "
+    "The shared skill works in the root Pi session."
+  )
+
+
 def post_install_notes(request: InstallRequest, root: Path) -> list[str]:
   notes = [
     "AGENTS.md stays repo-owned. Create or revise it intentionally only when the target repository needs durable repo-wide guidance.",
@@ -721,9 +848,7 @@ def post_install_notes(request: InstallRequest, root: Path) -> list[str]:
       "Generic mode installs portable Agent Skills only; runtime discovery, orchestration, permissions, and model routing remain unvalidated."
     )
   if "pi" in request.agents:
-    notes.append(
-      "Pi uses the shared skill. pi-safe-agent-team is optional; without it, serialize conflicting writes or use isolated workspaces."
-    )
+    notes.append(_pi_subagent_note(request, root))
   if "codex" in request.agents:
     notes.append(
       "Codex uses the shared skill; native profiles are generated only with --native-profiles and remain removable."
@@ -799,9 +924,7 @@ def build_install_plan(request: InstallRequest) -> InstallPlan:
     for agent in request.agents:
       spec = RUNTIME_SPECS[agent]
       if spec.native_profile_dir is None:
-        if agent == "pi" and request.pi_safe_agent_team == "on":
-          warnings.append("Pi safe-agent-team is an external optional integration; no native profile was written.")
-        elif agent == "generic":
+        if agent == "generic":
           warnings.append("Generic mode has no native profile format; portable skills remain canonical.")
         continue
       for role in roles:

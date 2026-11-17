@@ -20,6 +20,7 @@ def assert_true(condition: bool, message: str) -> None:
 
 
 def main() -> int:
+  assert_true(TuiState().agents == ("codex",), "Codex should be the initial runtime")
   state = TuiState(scope="project", target=".", agents=("cursor", "pi"))
   request = state.to_request()
   assert_true(request.agents == ("pi", "cursor"), "TUI request should use core normalization")
@@ -47,6 +48,12 @@ def main() -> int:
     assert_true("Installation plan preview" in output_stream.getvalue(), "TUI should preview before action")
     assert_true("Dry run only; no changes made." in output_stream.getvalue(), "TUI dry-run confirmation missing")
     assert_true(not (target / ".agents").exists(), "TUI dry-run must not mutate target")
+
+    default_output = TtyBuffer()
+    default_input = TtyBuffer(f"project\n{target}\n\ny\ninherit\ncopy\nd\n")
+    assert_true(run_tui(input_stream=default_input, output_stream=default_output) == 0, "default dry-run failed")
+    assert_true(".codex/agents/meta-harness.toml" in default_output.getvalue(), "blank runtime choice should plan a Codex profile")
+    assert_true("Optional Pi subagents" not in default_output.getvalue(), "Codex should skip the Pi prompt")
 
     invalid_target = Path(tmp) / "invalid-action"
     invalid_target.mkdir()
