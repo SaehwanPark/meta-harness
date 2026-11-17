@@ -89,5 +89,5 @@ phase that needs it.
 | a changing backlog | [Supervisor](#supervisor) |
 | a naturally layered goal | [Hierarchical Delegation](#hierarchical-delegation) |
 
-Read the [workflow guide](workflow.html) for the phase contract and the
+Read the [workflow guide](workflow.html) for design and validation guidance and the
 [output specifications](../harness/README.html) for durable artifact shapes.

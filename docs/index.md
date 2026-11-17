@@ -67,10 +67,6 @@ project's ownership.
 <div class="stat-grid">
   <div class="stat">
     <div class="stat-value">6</div>
-    <div class="stat-label">execution phases after the Phase 0 audit</div>
-  </div>
-  <div class="stat">
-    <div class="stat-value">6</div>
     <div class="stat-label">coordination patterns</div>
   </div>
   <div class="stat">
@@ -92,34 +88,14 @@ The core design is intentionally small:
 - validation checks structure, behavior, and failure paths before the workflow
   is treated as reusable.
 
-## Phase 0 audit plus the six-phase path
+## Design and check the workflow
 
-<ol class="phase-list">
-  <li>
-    <div><strong>Inventory and drift audit</strong><span>Inspect existing skills, roles, profiles, adapters, conflicts, and stale artifacts before mutation.</span></div>
-  </li>
-  <li>
-    <div><strong>Domain analysis</strong><span>Inspect the project, task types, constraints, and existing guidance.</span></div>
-  </li>
-  <li>
-    <div><strong>Team architecture design</strong><span>Select the smallest coordination pattern that preserves quality.</span></div>
-  </li>
-  <li>
-    <div><strong>Role and artifact definition</strong><span>Name responsibilities, write ownership, inputs, outputs, and failure policy.</span></div>
-  </li>
-  <li>
-    <div><strong>Skill generation</strong><span>Write portable skills with clear selection boundaries and progressive disclosure.</span></div>
-  </li>
-  <li>
-    <div><strong>Integration and orchestration</strong><span>Connect phases through concise summaries or durable `_workspace/` handoffs.</span></div>
-  </li>
-  <li>
-    <div><strong>Validation and testing</strong><span>Run normal and failure scenarios, then simplify anything that does not earn its weight.</span></div>
-  </li>
-</ol>
+Start with the goal and inspect existing guidance. Build one skill for
+reusable behavior and add explicit coordination when the work needs it.
+Check a representative run, including any failure that could change the result.
 
-Read the detailed [Phase 0 audit and six-phase workflow guide](guides/workflow.html)
-for phase outputs and stop conditions.
+Read the [workflow guide](guides/workflow.html) for when to add roles, handoffs,
+or optional runtime profiles.
 
 ## Choose the coordination shape
 
@@ -143,7 +119,7 @@ for the reusable skill and its contracts:
 
 | Surface | Purpose |
 | --- | --- |
-| `.agents/skills/harness/SKILL.md` | canonical Phase 0 audit, six-phase workflow, and portable defaults |
+| `.agents/skills/harness/SKILL.md` | canonical design skill and links to conditional guidance |
 | `docs/harness/` | durable team-spec and role-artifact contracts |
 | `_workspace/` | deterministic intermediate handoffs when inspection or resumption matters |
 | `scripts/` | installer and repository validation |

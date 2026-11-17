@@ -1,45 +1,22 @@
 ---
 title: Starter Research Team Spec
-description: A compact team topology and failure policy for a repository-specific research brief.
+description: A resumable research workflow with one evidence handoff and one synthesis owner.
 layout: default
 ---
 
 # Starter Research Team Spec
 
-## Goal
+Answer a repository-specific question with a short cited report. The collector
+scopes the question and gathers evidence. The [research lead](roles/research-lead.html)
+owns synthesis and acceptance. One agent can perform both responsibilities when
+collection and synthesis fit in a single session.
 
-Produce a short cited research brief for one repository-specific question using deterministic handoff files and one final synthesis owner.
+| Producer | Consumer | Path | Contents |
+| --- | --- | --- | --- |
+| Collector | Research lead | `_workspace/01_source_findings.md` | Question, source-backed claims, unresolved gaps, and ready, partial, or blocked state |
+| Research lead | Requester | `_workspace/final/report.md` | Answer, supporting citations, and limits of coverage |
 
-## Roles
-
-| Role | Responsibility | Writes |
-| --- | --- | --- |
-| `research-lead` | scopes the question, checks source quality, and owns final synthesis | `_workspace/final/report.md` |
-| `source-research` | gathers evidence from approved sources and normalizes citations | `_workspace/01_source_findings.md` |
-
-## Workflow
-
-### Phase 1: Scope
-
-- Capture the request and success criteria in `_workspace/00_input/request-summary.md`.
-- Name the required source types and any exclusions before research starts.
-
-### Phase 2: Evidence Collection
-
-- Gather findings into `_workspace/01_source_findings.md`.
-- Keep each finding tied to one source and one claim.
-
-### Phase 3: Synthesis
-
-- Read the request summary and findings artifact.
-- Write `_workspace/final/report.md` with a short answer, supporting evidence, and open questions.
-
-## Failure Policy
-
-- If the request scope is ambiguous, stop after Phase 1 and record the missing decision in the request summary.
-- If evidence quality is weak, preserve the findings artifact and mark the final report as incomplete rather than inventing coverage.
-
-## Validation
-
-- Every phase writes exactly one named artifact.
-- The final report cites the findings artifact and states any unresolved gaps.
+Use the findings file to resume across sessions. If a required source is
+missing, record the attempted lookup and the conclusion it affects. The lead
+can synthesize supported conclusions and flag incomplete coverage. Check
+reported claims against the findings and their original sources.

@@ -31,10 +31,7 @@ repository's `_workspace/` naming contract.
 
 ## Failure semantics
 
-Every delegated workflow must account for spawn failure, unavailable tools or
-models, permission denial, workspace setup failure, communication failure,
-resource conflicts, partial worker failure, and missing synthesis branches.
-
-A missing runtime feature is a visible compatibility result, not a silent
-weakening of correctness. Serialize conflicting work or stop with an
-actionable explanation.
+Describe failures that can change acceptance, such as a missing review
+branch or unavailable access to an evidence source. Preserve partial outputs
+and keep missing results visible in synthesis. Use a direct or serialized
+fallback when it preserves the required permissions and guarantees.

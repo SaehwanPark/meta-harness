@@ -29,9 +29,8 @@ the checkpoint-based project history.
 ## Start here
 
 The [Meta Harness documentation portal](https://saehwanpark.github.io/meta-harness/)
-is the recommended entry point. It covers installation, the Phase 0 inventory
-and drift audit, the six execution phases, architecture patterns, prompt design,
-compatibility, and durable output specs.
+covers installation, workflow design, coordination patterns, and runtime
+compatibility.
 
 For a quick project install, use the installed `meta-harness` CLI:
 
@@ -51,13 +50,14 @@ is the current planner entry point, not the deprecated `--layout` interface.
 Then ask for a goal-shaped workflow, for example:
 
 ~~~text
-Design a reusable research harness for this repository.
-Keep the handoffs deterministic and validate one normal and one failure flow.
+Design a reusable research workflow for this repository.
+Evidence collection and synthesis may happen in separate sessions.
+Keep the handoff small and show how the lead handles missing sources.
 ~~~
 
 ## What the repository contains
 
-- a Phase 0 inventory and drift audit followed by six execution phases from domain analysis through validation;
+- a deployable design skill with references for specific authoring, review, and runtime decisions;
 - six coordination patterns: Pipeline, Fan-out/Fan-in, Expert Pool,
   Producer-Reviewer, Supervisor, and Hierarchical Delegation;
 - portable skills under `.agents/skills/`;
@@ -69,20 +69,15 @@ Keep the handoffs deterministic and validate one normal and one failure flow.
   without forking the canonical skill;
 - explicit capability degradation and rippability rules for runtime profiles.
 
-## Phase 0 audit plus six-phase workflow
+## Workflow design
 
-| Phase | Question it answers |
-| --- | --- |
-| Inventory and drift audit | What already exists, what is stale, and what operation is safe? |
-| Domain analysis | What is this project, task, and quality bar? |
-| Team architecture | What coordination shape earns its complexity? |
-| Role and artifact definition | Who owns each output and handoff? |
-| Skill generation | What reusable behavior belongs in a skill? |
-| Integration and orchestration | How does information move between phases? |
-| Validation and testing | Does the workflow work, fail clearly, and stay maintainable? |
+Inspect the target repository and start with the smallest reusable artifact.
+One skill is often enough. Add roles, a team spec, or durable handoffs when
+the workflow needs them. Use the repository's existing checks to verify the
+result and exercise any failure path that affects acceptance.
 
 Read the [workflow guide](docs/guides/workflow.md) and
-[pattern guide](docs/guides/patterns.md) for the operational details.
+[pattern guide](docs/guides/patterns.md) for design options.
 
 ## Installation
 
@@ -179,9 +174,9 @@ behavior are explicit.
 
 Read the AGENTS Authoring Guide
 (`.agents/skills/harness/references/agents-md-guide.md`) when a target repository
-needs durable repo-wide rules. Keep temporary model-specific recovery logic in
-a rippable harness layer. Every generated skill starts with YAML frontmatter
-and declares its `name` and `description`.
+needs durable repo-wide rules. Keep model settings and temporary recovery
+logic in a rippable harness layer. Compiled specialist profiles point to
+repository-local role contracts and any skills declared by the role.
 
 ## Validation
 

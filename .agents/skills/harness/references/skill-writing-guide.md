@@ -1,243 +1,30 @@
 # Skill Writing Guide
 
-This guide explains how to write portable specialist skills that are easy to select, easy to maintain, and cheap to load.
+Capture behavior people will reuse. First check whether an existing skill or tool already covers it. Keep rules that apply across the repository in `AGENTS.md`, and coordination between roles in the team spec.
 
-## 1. Start with YAML Frontmatter
+## Write for selection and execution
 
-Every generated `SKILL.md` should begin with YAML frontmatter before the markdown heading.
+- Use a kebab-case directory name and matching YAML `name`. Make `description` short and specific to the request that should trigger the skill. Try a similar request that should route elsewhere.
+- Put the outcome and essential constraints up front. Include prerequisite inputs, output shapes, checks, and examples where they prevent a real mistake. Explain non-obvious rules briefly so the model can adapt to edge cases.
+- Let the model choose its process within those boundaries. Prescribe order when a dependency, irreversible action, or quality gate requires it. Favor repo-specific conventions and evidence over generic planning, retry, or reporting scripts written in prose.
+- Keep one canonical copy of each instruction. Link conditional guidance directly from the decision it informs. Keep references self-contained where possible, and use headings to make long references easy to scan.
+- Bundle a script when deterministic work repeats and the script is cheaper and more reliable than reconstructing it. State its prerequisites, invocation, and success signal. Use the repository's existing tools first.
+- Give durable outputs stable names only when people or tools depend on them. Use existing repository formats and tests when they fit.
 
-Required fields:
-
-- `name`: stable, repository-friendly skill name
-- `description`: one-line selection summary that tells the runtime when the skill helps
-
-Pattern:
-
-```markdown
----
-name: api-docs
-description: Generate API documentation from an existing codebase with endpoint inventory, examples, and schema notes.
----
-
-# API Docs
-```
-
-Put the markdown body immediately after the closing `---`. Do not bury frontmatter inside a reference file or below the first heading.
-
-## 2. Start with Selection Clarity
-
-Every generated skill should make two things obvious at the top:
-
-- when the skill should be used
-- what inputs the skill needs to do useful work
-
-That pair replaces vague trigger logic. If a reader cannot tell where the skill applies, the skill boundary is not ready.
-
-### Good Pattern
+## Example
 
 ```markdown
 ---
-name: api-docs
-description: Generate API documentation from an existing codebase with endpoint inventory, examples, and schema notes.
+name: openapi-sync
+description: Update the published API schema after a public endpoint changes.
 ---
 
-# API Docs
+# OpenAPI Sync
 
-## When to Use
-- use this skill for API documentation generation from an existing codebase
-- use it when the request needs endpoint inventory, usage examples, and schema notes
-- do not use it for product marketing copy or high-level architecture review
-
-## Required Inputs
-- repository or API source files
-- desired output format
-- audience and depth
+Use the route definitions and request/response types as the source of truth.
+Run `make openapi` and review the resulting `docs/api/openapi.yaml` diff.
+Check changed paths, required fields, and error responses against the route tests.
+For breaking changes, follow the API migration policy in `references/migrations.md`.
 ```
 
-### Weak Pattern
-
-```markdown
-This skill helps with documentation.
-```
-
-Too broad, no boundary, no input contract.
-
-## 3. Keep the Main Skill Lean
-
-The main `SKILL.md` should contain:
-
-- frontmatter with `name` and `description`
-- purpose
-- selection boundary
-- input contract
-- workflow
-- output contract
-- validation notes
-
-Move bulky domain detail into `references/`. A good rule of thumb is that a fresh reader should understand the skill's decision boundary in under a minute.
-
-## 4. Write Why-First Instructions
-
-Explain the reason behind non-obvious rules.
-
-### Weak
-
-```markdown
-Always compare the API shape to the UI types.
-```
-
-### Better
-
-```markdown
-Compare the API shape to the UI types because boundary mismatches often pass local checks while failing in integration. Reading both sides prevents false confidence from isolated validation.
-```
-
-Reason-first guidance survives edge cases better than flat commands.
-
-## 5. Define an Output Contract
-
-If the output structure matters, say so explicitly.
-
-```markdown
-## Outputs
-- `docs/api/endpoints.md` with endpoint list and auth notes
-- `docs/api/examples.md` with request and response examples
-- `_workspace/qa_api_gaps.md` for missing information discovered during validation
-```
-
-Use deterministic names. Another person should be able to predict the artifact names without rereading the whole skill.
-
-## 6. Use Examples Instead of Long Explanations
-
-Examples compress meaning.
-
-```markdown
-## Example Review Statuses
-- `pass`: no blocking issues; output is ready
-- `fix`: targeted issues; revision is cheaper than regeneration
-- `redo`: the output is directionally wrong and should be regenerated
-```
-
-Use examples where the format or decision boundary is easier to show than to describe.
-
-## 7. Progressive Disclosure
-
-Use `references/` when the skill needs depth without turning the main file into a wall of text.
-
-### Pattern 1: Domain Split
-
-```text
-data-docs/
-├── SKILL.md
-└── references/
-    ├── finance.md
-    ├── sales.md
-    └── product.md
-```
-
-### Pattern 2: Conditional Detail
-
-```markdown
-## Validation
-For schema diffs, use the standard checks in `references/schema-validation.md`.
-For migration backfills, read `references/backfill-playbook.md` before writing steps.
-```
-
-### Pattern 3: Large Reference File Structure
-
-If a reference file grows large, add a table of contents near the top and split clearly by topic.
-
-## 8. Bundle Scripts Only for Repeated, Deterministic Work
-
-Add a helper script when it removes repeated setup or repeated manual validation.
-
-Good candidates:
-
-- a structure validator used on every iteration
-- a deterministic report normalizer
-- a schema comparison helper
-
-Bad candidates:
-
-- one-off experiments
-- scripts that encode policy that belongs in the skill text
-- scripts that only hide unclear workflow design
-
-## 9. Recommended Section Order
-
-Most specialist skills work well with this order:
-
-```markdown
----
-name: skill-name
-description: One-line summary of when the skill should be selected.
----
-
-# Skill Name
-
-## When to Use
-## Required Inputs
-## Workflow
-## Outputs
-## Validation
-## References
-```
-
-Add domain-specific sections only when they prevent a predictable mistake.
-
-## 10. Data Schema Standards
-
-When a skill participates in evaluation, use stable schemas for test metadata and grading results.
-
-### `eval_metadata.json`
-
-```json
-{
-  "eval_id": 0,
-  "eval_name": "descriptive-name-here",
-  "prompt": "User task prompt",
-  "assertions": [
-    "The artifact contains X",
-    "A file with Y format is created"
-  ]
-}
-```
-
-### `grading.json`
-
-```json
-{
-  "expectations": [
-    {
-      "text": "The artifact includes a migration table",
-      "passed": true,
-      "evidence": "Found in section 3"
-    }
-  ],
-  "summary": {
-    "passed": 1,
-    "failed": 0,
-    "total": 1,
-    "pass_rate": 1.0
-  }
-}
-```
-
-### `timing.json`
-
-```json
-{
-  "duration_ms": 23332,
-  "total_duration_seconds": 23.3,
-  "notes": "Optional timing capture for comparison runs"
-}
-```
-
-## 11. What Not to Include
-
-Remove content that does not change decisions:
-
-- generic background knowledge the model already knows
-- exhaustive prose that can be replaced by a short example
-- platform-specific assumptions that do not belong to the repository
-- duplicate instructions already enforced by `AGENTS.md` or the orchestrator spec
+Keep only the content the target repository actually needs. The example command and migration reference stand for project-specific resources that must exist before shipping.

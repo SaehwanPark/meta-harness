@@ -12,6 +12,9 @@ except ModuleNotFoundError:  # Python 3.10 compatibility
   tomllib = None
 
 
+from validate_skills import validate_skills
+
+
 ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_FILES = [
@@ -54,18 +57,6 @@ REQUIRED_FILES = [
   ROOT / "scripts/validate_skills.py",
   ROOT / "scripts/validate_adapters.py",
   ROOT / "scripts/validate_codex_port.py",
-]
-
-MAIN_SKILL_HEADINGS = [
-  "## when to use",
-  "## required inputs",
-  "## generated artifacts",
-  "## portable defaults",
-  "## phase 0: inventory & drift audit",
-  "## phases 1–6 workflow",
-  "## architecture selection",
-  "## validation expectations",
-  "## reference pointers",
 ]
 
 PATTERN_NAMES = [
@@ -130,38 +121,6 @@ REPO_AGENTS_REQUIRED_TOKENS = [
   "python3 scripts/test_install_harness.py",
   "python3 scripts/validate_codex_port.py",
   "rippable",
-]
-
-MAIN_SKILL_REQUIRED_TOKENS = [
-  "highest-leverage repo guide",
-  "what / why / how",
-  "rippable",
-  "references/agents-md-guide.md",
-  "portable concepts",
-  "role contract",
-  "phase 0",
-  "handoff classes",
-  "semantic model policy",
-  "safe degradation",
-  "require yaml frontmatter in every generated `skill.md`",
-  "start every generated `skill.md` with yaml frontmatter containing at least `name` and `description`",
-]
-
-AGENTS_REFERENCE_REQUIRED_TOKENS = [
-  "highest-leverage repo guide",
-  "what to include",
-  "what to leave out",
-  "progressive disclosure",
-  "human-written",
-  "rippable harness note",
-  "compact template",
-]
-
-SKILL_WRITING_GUIDE_REQUIRED_TOKENS = [
-  "every generated `skill.md` should begin with yaml frontmatter",
-  "`name`: stable, repository-friendly skill name",
-  "`description`: one-line selection summary",
-  "do not bury frontmatter",
 ]
 
 ROOT_DOC_EXPECTATIONS = {
@@ -251,38 +210,6 @@ def iter_root_docs_markdown() -> list[Path]:
   return sorted(markdown_paths)
 
 
-def parse_frontmatter(
-  path: Path, text: str, failures: list[str]
-) -> tuple[dict[str, str], str]:
-  lines = text.splitlines()
-  if not lines or lines[0].strip() != "---":
-    fail(f"Main skill is missing YAML frontmatter: {path.relative_to(ROOT)}", failures)
-    return {}, text
-
-  closing = None
-  for index, line in enumerate(lines[1:], start=1):
-    if line.strip() == "---":
-      closing = index
-      break
-
-  if closing is None:
-    fail(f"Main skill frontmatter is not closed: {path.relative_to(ROOT)}", failures)
-    return {}, text
-
-  data: dict[str, str] = {}
-  for line in lines[1:closing]:
-    stripped = line.strip()
-    if not stripped or stripped.startswith("#"):
-      continue
-    if ":" not in stripped:
-      fail(f"Main skill frontmatter contains an invalid line: {line}", failures)
-      continue
-    key, value = stripped.split(":", 1)
-    data[key.strip()] = value.strip().strip('"').strip("'")
-
-  return data, "\n".join(lines[closing + 1 :])
-
-
 def check_required_files(failures: list[str]) -> None:
   for path in REQUIRED_FILES:
     if not path.exists():
@@ -338,33 +265,6 @@ def check_root_docs_markdown(failures: list[str]) -> None:
       )
 
 
-def check_main_skill(failures: list[str]) -> None:
-  path = ROOT / ".agents/skills/harness/SKILL.md"
-  text = read_text(path)
-  frontmatter, body = parse_frontmatter(path, text, failures)
-  for required_field in ("name", "description"):
-    if not frontmatter.get(required_field):
-      fail(f"Main skill frontmatter is missing '{required_field}'", failures)
-
-  lowered = body.casefold()
-
-  for heading in MAIN_SKILL_HEADINGS:
-    if heading not in lowered:
-      fail(f"Main skill is missing heading: {heading}", failures)
-
-  for token in MAIN_SKILL_REQUIRED_TOKENS:
-    if token not in lowered:
-      fail(f"Main skill is missing updated guidance token: {token}", failures)
-
-  for phase in range(1, 7):
-    if f"phase {phase}:" not in lowered:
-      fail(f"Main skill is missing explicit Phase {phase}", failures)
-
-  for ref in re.findall(r"references/[a-z0-9-]+\.md", text):
-    if not (path.parent / ref).exists():
-      fail(f"Main skill references missing file: {ref}", failures)
-
-
 def check_pattern_reference(failures: list[str]) -> None:
   path = ROOT / ".agents/skills/harness/references/agent-design-patterns.md"
   text = read_text(path).casefold()
@@ -372,32 +272,6 @@ def check_pattern_reference(failures: list[str]) -> None:
   for pattern in PATTERN_NAMES:
     if pattern not in text:
       fail(f"Pattern reference is missing pattern name: {pattern}", failures)
-
-  required_subsections = [
-    "### when it fits",
-    "### when it does not fit",
-    "### minimum generated artifacts",
-    "### recommended portable implementation style",
-  ]
-  for subsection in required_subsections:
-    count = text.count(subsection)
-    if count < 6:
-      fail(
-        f"Pattern reference should contain at least 6 occurrences of '{subsection}' but found {count}",
-        failures,
-      )
-
-  for token in ("rippable harness rule", "explicit handoffs", "removable"):
-    if token not in text:
-      fail(f"Pattern reference is missing updated guidance token: {token}", failures)
-
-
-def check_orchestrator_reference(failures: list[str]) -> None:
-  path = ROOT / ".agents/skills/harness/references/orchestrator-template.md"
-  text = read_text(path).casefold()
-  for token in ("removable model-specific logic", "deletion trigger"):
-    if token not in text:
-      fail(f"Orchestrator template is missing updated guidance token: {token}", failures)
 
 
 def check_autonomous_reference(failures: list[str]) -> None:
@@ -417,42 +291,12 @@ def check_autonomous_reference(failures: list[str]) -> None:
       fail(f"Autonomous experimentation reference is missing: {token}", failures)
 
 
-def check_codex_adapter(failures: list[str]) -> None:
-  path = ROOT / ".agents/skills/harness/references/codex-agent-adapter.md"
-  text = read_text(path).casefold()
-  required_headings = [
-    "## capability mapping",
-    "## selection and lowering",
-    "## isolation, depth, and partial failure",
-    "## adapter acceptance checklist",
-  ]
-  for heading in required_headings:
-    if heading not in text:
-      fail(f"Codex adapter is missing heading: {heading}", failures)
-
-  required_terms = (
-    "skills —",
-    "roles and subagents",
-    "write isolation",
-    "communication",
-    "model policy",
-    "unavailable capabilities",
-  )
-  for term in required_terms:
-    if term not in text:
-      fail(f"Codex adapter is missing capability guidance: {term}", failures)
-
-
 def check_runtime_contract(failures: list[str]) -> None:
   capabilities_path = ROOT / ".agents/skills/harness/references/runtime-capabilities.md"
   capabilities = read_text(capabilities_path).casefold()
   for status in CAPABILITY_STATUSES:
     if not re.search(rf"\b{re.escape(status)}\b", capabilities):
       fail(f"Runtime capability reference is missing status vocabulary: {status}", failures)
-  for token in ("capability lowering", "handoff classes", "runtime profiles", "rippability"):
-    if token not in capabilities:
-      fail(f"Runtime capability reference is missing contract guidance: {token}", failures)
-
   for runtime in FIRST_CLASS_RUNTIME_ADAPTERS:
     path = ROOT / f".agents/skills/harness/references/{runtime}-agent-adapter.md"
     text = read_text(path).casefold()
@@ -510,30 +354,6 @@ def check_codex_agent_template(failures: list[str]) -> None:
       fail(f"Codex agent template must inherit optional setting: {key}", failures)
 
 
-def check_portable_core_boundary(failures: list[str]) -> None:
-  path = ROOT / ".agents/skills/harness/SKILL.md"
-  runtime_paths = (".codex/", ".cursor/", ".antigravity/", ".pi/")
-  operational_terms = re.compile(
-    r"\b(must|required|canonical|install(?:ed)?|discover(?:y)?|source of truth|only)\b",
-    re.IGNORECASE,
-  )
-  exception_terms = re.compile(r"\b(remov|delet|rippab|optional)\w*\b", re.IGNORECASE)
-  lines = read_text(path).splitlines()
-  for index, line in enumerate(lines):
-    if not any(token in line.casefold() for token in runtime_paths):
-      continue
-    # Rippability sections may name removable output paths as examples. A
-    # portable skill becomes runtime-coupled only when it asks users to use a
-    # native path as an operational requirement or source of truth. Include
-    # nearby lines so a heading or continuation can state the exception.
-    context = "\n".join(lines[max(0, index - 2) : min(len(lines), index + 3)])
-    if operational_terms.search(line) and not exception_terms.search(context):
-      fail(
-        f"Portable main skill contains an operational runtime path at line {index + 1}: {line.strip()}",
-        failures,
-      )
-
-
 def check_for_banned_tokens(failures: list[str]) -> None:
   root = ROOT / ".agents/skills/harness"
   for path in sorted(root.rglob("*")):
@@ -561,22 +381,6 @@ def check_repo_agents(failures: list[str]) -> None:
   for token in REPO_AGENTS_REQUIRED_TOKENS:
     if token not in lowered:
       fail(f"AGENTS.md is missing required repo guidance: {token}", failures)
-
-
-def check_agents_reference(failures: list[str]) -> None:
-  path = ROOT / ".agents/skills/harness/references/agents-md-guide.md"
-  text = read_text(path).casefold()
-  for token in AGENTS_REFERENCE_REQUIRED_TOKENS:
-    if token not in text:
-      fail(f"AGENTS guide is missing updated guidance token: {token}", failures)
-
-
-def check_skill_writing_guide(failures: list[str]) -> None:
-  path = ROOT / ".agents/skills/harness/references/skill-writing-guide.md"
-  text = read_text(path).casefold()
-  for token in SKILL_WRITING_GUIDE_REQUIRED_TOKENS:
-    if token not in text:
-      fail(f"Skill writing guide is missing updated guidance token: {token}", failures)
 
 
 def check_root_doc_expectations(failures: list[str]) -> None:
@@ -653,19 +457,14 @@ def main() -> int:
       print(f"FAIL: {failure}")
     return 1
 
+  failures.extend(validate_skills(ROOT).errors)
   check_root_docs_markdown(failures)
   check_repo_agents(failures)
-  check_agents_reference(failures)
-  check_skill_writing_guide(failures)
   check_root_doc_expectations(failures)
-  check_main_skill(failures)
   check_pattern_reference(failures)
-  check_orchestrator_reference(failures)
   check_autonomous_reference(failures)
-  check_codex_adapter(failures)
   check_runtime_contract(failures)
   check_codex_agent_template(failures)
-  check_portable_core_boundary(failures)
   check_for_banned_tokens(failures)
   check_installation_doc(failures)
   check_compatibility_docs(failures)
