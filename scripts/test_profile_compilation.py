@@ -35,6 +35,7 @@ def main() -> int:
       "# Reviewer\n\n```yaml\n"
       "role: reviewer\n"
       "responsibility: review generated output\n"
+      "skills: [output-review]\n"
       "resources:\n"
       "  reads: [src/**]\n"
       "  writes: []\n"
@@ -76,6 +77,15 @@ def main() -> int:
       assert_true(parsed["name"] == "reviewer", "Codex profile name missing")
       assert_true("src/**" in parsed["developer_instructions"], "Codex read boundary missing")
       assert_true("Model policy: strong" in parsed["developer_instructions"], "role model policy missing")
+    for profile in (codex, cursor, antigravity):
+      content = profile.read_text(encoding="utf-8")
+      assert_true("docs/harness/demo/roles/reviewer.md" in content, "portable role path missing")
+      assert_true("Role skills: output-review" in content, "role skill missing")
+      assert_true("harness/SKILL.md" not in content, "specialist loads the Harness design skill")
+      assert_true(str(root) not in content, "profile embeds a machine-local path")
+    default_profile = _profile_content("codex", root, RoleDefinition("meta-harness"))
+    assert_true("Use the Harness skill" in default_profile, "default Harness role lost discovery")
+    assert_true("Model policy:" not in default_profile, "profile repeats inherited model defaults")
     # Values from a role brief must not be able to break generated profile syntax.
     unsafe_role = RoleDefinition("unsafe", responsibility='quote """ and null\x00')
     unsafe_profile = _profile_content("codex", root, unsafe_role)
